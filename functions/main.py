@@ -7,17 +7,25 @@ load_dotenv()
 # IMPORT YOUR API KEY BEFORE EXECUTING FROM VENV OR JUST TYPE IT BELOW
 
 API_KEY = os.getenv('API_KEY')
+
+
 # API_KEY = "YOUR_API_KEY"  - uncomment this if you're not using venv
 
-url = "https://aerodatabox.p.rapidapi.com/airports/iata/LIS"
 
-querystring = {"withTime":"true"}
+# Functions that are called by the GUI
+def airport_status(airport_code):
+	"""
+	:param airport_code: ICAO code of the airport
+	:return:
+	"""
+	url = f"https://aerodatabox.p.rapidapi.com/airports/iata/{airport_code}"
 
-headers = {
-	"X-RapidAPI-Key": API_KEY,
-	"X-RapidAPI-Host": "aerodatabox.p.rapidapi.com"
-}
+	querystring = {"withTime": "true"}
 
-response = requests.request("GET", url, headers=headers, params=querystring)
+	headers = {
+		"X-RapidAPI-Key": API_KEY,
+		"X-RapidAPI-Host": "aerodatabox.p.rapidapi.com"
+	}
 
-print(response.text)
+	response = requests.request("GET", url, headers=headers, params=querystring)
+	return response.text
