@@ -11,6 +11,10 @@ API_KEY = os.getenv('API_KEY')
 
 # API_KEY = "YOUR_API_KEY"  - uncomment this if you're not using venv
 
+headers = {
+		"X-RapidAPI-Key": API_KEY,
+		"X-RapidAPI-Host": "aerodatabox.p.rapidapi.com"
+	}
 
 # Functions that are called by the GUI
 def airport_status(airport_code):
@@ -21,11 +25,14 @@ def airport_status(airport_code):
 	url = f"https://aerodatabox.p.rapidapi.com/airports/iata/{airport_code}"
 
 	querystring = {"withTime": "true"}
-
-	headers = {
-		"X-RapidAPI-Key": API_KEY,
-		"X-RapidAPI-Host": "aerodatabox.p.rapidapi.com"
-	}
-
 	response = requests.request("GET", url, headers=headers, params=querystring)
-	return response.text
+	# Extract the IATA code from the JSON response
+	json = response.json()
+
+	iata_code = json["iata"]
+	full_name = json["fullName"]
+
+	text = f"IATA Code: {iata_code}" \
+		   f"\nFull Airport Name: {full_name}"
+
+	return text
