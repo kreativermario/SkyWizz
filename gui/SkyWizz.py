@@ -4,44 +4,83 @@ from functions.main import airport_status
 
 class SkyWizz:
     def __init__(self, master):
+        self.search_airport = None
+        self.content_frame = None
+        self.title_label = None
+        self.content_label = None
+
         self.master = master
-        master.title("SkyWizz")
+        self.master.title("SkyWizz")
+
+
+        self.show_main_menu()
+
+    def show_main_menu(self):
+        """
+        Shows main menu with buttons
+        :return:
+        """
+        if self.content_frame is not None:
+            # Remove old frame and create a new frame
+            self.content_frame.destroy()
+
+        # Create a frame for the content
+        self.content_frame = tk.Frame(self.master)
+        self.content_frame.grid(row=4, column=0, columnspan=2)
 
         # Creates the title label
-        self.title_label = tk.Label(master, text="SkyWizz", font=("Montserrat", 20))
-        self.title_label.pack()
+        self.title_label = tk.Label(self.content_frame, text="SkyWizz", font=("Montserrat", 20))
+        self.title_label.grid(row=0, column=0, columnspan=2)
 
-        # Creates a label for the flight number
-        self.flight_label = tk.Label(master, text="Flight Number:")
-        self.flight_label.pack()
-
-        # Create an entry field for the flight number
-        self.flight_entry = tk.Entry(master)
-        self.flight_entry.pack()
-
-        # Creates a label for the departure airport
-        self.depart_label = tk.Label(master, text="Departure Airport:")
-        self.depart_label.pack()
-
-        # Creates an entry field for the departure airport ICAO code
-        self.depart_entry = tk.Entry(master)
-        self.depart_entry.pack()
-
-        # Creates a label for the arrival airport
-        self.arrive_label = tk.Label(master, text="Arrival Airport:")
-        self.arrive_label.pack()
-
-        # Create an entry field for the arrival airport ICAO code
-        self.arrive_entry = tk.Entry(master)
-        self.arrive_entry.pack()
+        # Create a label for the content
+        self.content_label = tk.Label(self.content_frame, text="Welcome to SkyWizz!")
+        self.content_label.grid(row=1, column=0, columnspan=2)
 
         # Create a button widget for submitting search
-        self.submit_button = tk.Button(master, text="Submit", command=self.show_airport_status)
-        self.submit_button.pack()
+        search_airport_button = tk.Button(self.content_frame, text="Search by Airport Code",
+                                               command=self.search_airport_window)
+        search_airport_button.grid(row=2, column=0)
 
-    def show_airport_status(self):
+        # # Create a menu bar
+        # self.menu_bar = tk.Menu(master)
+        #
+        # # Create a file menu with options
+        # self.options_menu = tk.Menu(self.menu_bar, tearoff=0)
+        # self.options_menu.add_command(label="Search by Airport Code", command=self.search_airport)
+        # self.options_menu.add_cascade(label="Menu", menu=self.options_menu)
+        #
+        # master.config(menu=self.menu_bar)
+
+    def search_airport_window(self):
+        """
+        Search airport window
+        :return:
+        """
+        # Remove old frame and create a new frame
+        self.content_frame.destroy()
+        self.content_frame = tk.Frame(self.master)
+        self.content_frame.grid(row=4, column=0, columnspan=2)
+
+        # Create a label for the departure airport
+        depart_label = tk.Label(self.content_frame, text="Departure Airport:")
+        depart_label.grid(row=0, column=0)
+
+        # Creates an entry field for the departure airport ICAO code
+        depart_entry = tk.Entry(self.content_frame)
+        depart_entry.grid(row=0, column=1)
+
+        # Create a button widget for submitting search
+        submit_button = tk.Button(self.content_frame, text="Submit",
+                                       command=lambda: self.show_airport_status(depart_entry))
+        submit_button.grid(row=1, column=0, columnspan=2)
+
+        # Create a button widget to go back to the main menu
+        back_button = tk.Button(self.content_frame, text="Back", command=self.show_main_menu)
+        back_button.grid(row=2, column=0, columnspan=2)
+
+    def show_airport_status(self, depart_entry):
         # Get the departure airport code from the depart_entry field
-        airport_code = self.depart_entry.get()
+        airport_code = depart_entry.get()
         airport_status_text = ""
         try:
 
