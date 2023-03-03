@@ -34,11 +34,22 @@ def airport_status(airport_code, code_type):
 	# Extract JSON
 	try:
 		json = response.json()
+		icao_code = json["icao"]
 		iata_code = json["iata"]
 		full_name = json["fullName"]
+		country_code = json["country"]["code"]
+		country_name = json["country"]["name"]
+		timezone = json["timeZone"]
 	except (KeyError, json.JSONDecodeError):
 		raise Exception("API response did not contain any data")
 
-	text = f"IATA Code: {iata_code}\nFull Airport Name: {full_name}"
+	text = f"Full Airport Name: {full_name}\n" \
+		   f"Country Code: {country_code}\n" \
+		   f"Country Name: {country_name}\n" \
+		   f"IATA Code: {iata_code}\n" \
+		   f"ICAO Code: {icao_code}\n" \
+		   f"Timezone: {timezone}"
 
 	return text
+
+

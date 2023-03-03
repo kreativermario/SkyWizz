@@ -1,5 +1,11 @@
 import tkinter as tk
-from functions.main import airport_status
+import sys
+import os
+from functions.airport_functions import airport_status
+
+# Add parent directory to Python path
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), '..'))
+sys.path.append(parent_dir)
 
 
 class SkyWizz:
@@ -11,7 +17,6 @@ class SkyWizz:
 
         self.master = master
         self.master.title("SkyWizz")
-
 
         self.show_main_menu()
 
