@@ -42,9 +42,22 @@ class SkyWizz:
     def show_airport_status(self):
         # Get the departure airport code from the depart_entry field
         airport_code = self.depart_entry.get()
+        airport_status_text = ""
+        try:
 
-        # Call the airport_status function to get the airport status
-        airport_status_text = airport_status(airport_code)
+            # If it is IATA Code
+            if len(airport_code) == 3:
+                airport_status_text = airport_status(airport_code, "iata")
+            # If it is ICAO Code
+            elif len(airport_code) == 4:
+                airport_status_text = airport_status(airport_code, "icao")
+            else:
+                airport_status_text = "Not a valid airport code format, please try using 3-4 characters\n" \
+                                      "ICAO - 4 characters -> LPPT" \
+                                      "\nIATA - 3 characters -> LIS"
+        except Exception as e:
+            # Handle the exception by displaying an error message
+            airport_status_text = f"Error fetching data: {str(e)}"
 
         # Create a new popup window
         popup = tk.Toplevel(self.master)

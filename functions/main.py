@@ -17,22 +17,28 @@ headers = {
 	}
 
 # Functions that are called by the GUI
-def airport_status(airport_code):
+def airport_status(airport_code, code_type):
 	"""
 	:param airport_code: ICAO code of the airport
 	:return:
 	"""
-	url = f"https://aerodatabox.p.rapidapi.com/airports/iata/{airport_code}"
+	url = f"https://aerodatabox.p.rapidapi.com/airports/{code_type}/{airport_code}"
 
 	querystring = {"withTime": "true"}
 	response = requests.request("GET", url, headers=headers, params=querystring)
-	# Extract the IATA code from the JSON response
-	json = response.json()
 
-	iata_code = json["iata"]
-	full_name = json["fullName"]
+	# Check if the API response was sucessful
+	if response.status_code != 200:
+		raise Exception(f"API fetch failed! Status code: {response.status_code}")
 
-	text = f"IATA Code: {iata_code}" \
-		   f"\nFull Airport Name: {full_name}"
+	# Extract JSON
+	try:
+		json = response.json()
+		iata_code = json["iata"]
+		full_name = json["fullName"]
+	except (KeyError, json.JSONDecodeError):
+		raise Exception("API response did not contain any data")
+
+	text = f"IATA Code: {iata_code}\nFull Airport Name: {full_name}"
 
 	return text
