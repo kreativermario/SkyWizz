@@ -53,3 +53,25 @@ def airport_status(airport_code, code_type):
 	return text
 
 
+def check_airport_code(airport_code):
+	# If it is IATA Code
+	if len(airport_code) == 3:
+		return "iata"
+	# If it is ICAO Code
+	elif len(airport_code) == 4:
+		return "icao"
+	else:
+		return None
+
+def distance_between_airports(airport1=None, airport2=None):
+	if airport1 is None or airport2 is None:
+		raise Exception("Airports can not be empty!")
+
+	airport1 = check_airport_code(airport1)
+	airport2 = check_airport_code(airport2)
+
+	if airport1 is None or airport2 is None:
+		raise Exception("Airports are not ICAO or IATA code")
+
+	#url = f"https://aerodatabox.p.rapidapi.com/airports/{code_type}/{airport1}/distance-time/{airport2}"
+
