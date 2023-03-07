@@ -21,9 +21,6 @@ A commit message should have the following format:
 
 <type>(<scope>): <subject>
 
-<body>
-<footer>
-```
 type: The type of change being made (e.g. feat, fix, docs, style, refactor, test, chore).
 scope (optional): The scope of the change (e.g. filename, module, package, etc.).
 subject: A brief description of the change.
@@ -52,7 +49,5 @@ We use PEP 8 guidelines for Python code style. Please ensure your code follows t
   
 If you find any issues or bugs with the project, please open a new issue in the GitHub issue tracker. 
 Please provide as much detail as possible about the issue, including steps to reproduce it.
-  </footer>
-  </body>
   
   
