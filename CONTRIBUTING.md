@@ -19,7 +19,7 @@ We use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) fo
 
 A commit message should have the following format:
 
-<type>(<scope>): <subject>
+type(scope): subject
 
 type: The type of change being made (e.g. feat, fix, docs, style, refactor, test, chore).
 scope (optional): The scope of the change (e.g. filename, module, package, etc.).
