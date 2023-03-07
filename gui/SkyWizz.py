@@ -1,7 +1,8 @@
 import tkinter as tk
 import sys
 import os
-from functions.airport_functions import get_airport_info, check_airport_code, distance_between_airports
+from functions.airport_functions import get_airport_info, check_airport_code, \
+    distance_between_airports
 
 # Add parent directory to Python path
 parent_dir = os.path.abspath(os.path.join(os.getcwd(), '..'))
@@ -11,7 +12,8 @@ sys.path.append(parent_dir)
 class SkyWizz:
     def __init__(self, master):
         """
-        Constructor method that initializes the GUI and creates a container that is updated for each sub-menu
+        Constructor method that initializes the GUI and creates a container
+        that is updated for each sub-menu
         :param master: Tkinter Window
         """
         self.search_airport = None
@@ -20,11 +22,11 @@ class SkyWizz:
         self.content_label = None
 
         self.master = master
-        self.master.title("SkyWizz")
+        self.master.title('SkyWizz')
 
         # Create a frame to contain all the widgets
         self.container = tk.Frame(self.master)
-        self.container.pack(fill="both", expand=True)
+        self.container.pack(fill='both', expand=True)
 
         self.show_main_menu()
 
@@ -42,21 +44,26 @@ class SkyWizz:
         self.content_frame.pack(padx=20, pady=20)
 
         # Creates the title label
-        self.title_label = tk.Label(self.content_frame, text="SkyWizz", font=("Montserrat", 20))
+        self.title_label = tk.Label(self.content_frame, text='SkyWizz',
+                                    font=('Montserrat', 20))
         self.title_label.pack()
 
         # Create a label for the content
-        self.content_label = tk.Label(self.content_frame, text="Welcome to SkyWizz!")
+        self.content_label = tk.Label(self.content_frame,
+                                      text='Welcome to SkyWizz!')
         self.content_label.pack(pady=10)
 
         # Create a button widget
-        search_airport_button = tk.Button(self.content_frame, text="Get Airport Info by Code",
-                                               command=self.show_airport_info)
+        search_airport_button = tk.Button(self.content_frame,
+                                          text='Get Airport Info by Code',
+                                          command=self.show_airport_info)
         search_airport_button.pack(pady=10)
 
         # Create a button widget for submitting search
-        distance_between_airports_button = tk.Button(self.content_frame, text="Distance between airports",
-                                          command=self.show_distance_between_airports)
+        distance_between_airports_button = tk.Button(
+            self.content_frame,
+            text='Distance between airports',
+            command=self.show_distance_between_airports)
         distance_between_airports_button.pack(pady=10)
 
         # # Create a menu bar
@@ -64,14 +71,16 @@ class SkyWizz:
         #
         # # Create a file menu with options
         # self.options_menu = tk.Menu(self.menu_bar, tearoff=0)
-        # self.options_menu.add_command(label="Search by Airport Code", command=self.search_airport)
-        # self.options_menu.add_cascade(label="Menu", menu=self.options_menu)
+        # self.options_menu.add_command(label='Search by Airport Code',
+        # command=self.search_airport)
+        # self.options_menu.add_cascade(label='Menu', menu=self.options_menu)
         #
         # master.config(menu=self.menu_bar)
 
     def show_distance_between_airports(self):
         """
-        GUI Window that updates to show the submit form to get distance info between two airports
+        GUI Window that updates to show the submit form to get distance
+        info between two airports
         :return:
         """
         # Remove old frame and create a new frame
@@ -80,7 +89,7 @@ class SkyWizz:
         self.content_frame.pack(padx=20, pady=20)
 
         # Create a label for the first airport
-        airport1_label = tk.Label(self.content_frame, text="1st Airport: ")
+        airport1_label = tk.Label(self.content_frame, text='1st Airport: ')
         airport1_label.pack()
 
         # Creates an entry field for the first airport
@@ -88,7 +97,7 @@ class SkyWizz:
         airport1_label_entry.pack()
 
         # Create a label for the second airport
-        airport2_label = tk.Label(self.content_frame, text="2nd Airport: ")
+        airport2_label = tk.Label(self.content_frame, text='2nd Airport: ')
         airport2_label.pack()
 
         # Creates an entry field for the second airport
@@ -96,13 +105,16 @@ class SkyWizz:
         airport2_label_entry.pack()
 
         # Create a button widget for submitting search
-        submit_button = tk.Button(self.content_frame, text="Submit",
-                                  command=lambda: self.get_distance_between_airports(airport1_label_entry,
-                                                                                        airport2_label_entry))
+        submit_button = tk.Button(self.content_frame, text='Submit',
+                                  command=lambda:
+                                  self.get_distance_between_airports(
+                                      airport1_label_entry,
+                                      airport2_label_entry))
         submit_button.pack()
 
         # Create a button widget to go back to the main menu
-        back_button = tk.Button(self.content_frame, text="Back", command=self.show_main_menu)
+        back_button = tk.Button(self.content_frame, text='Back',
+                                command=self.show_main_menu)
         back_button.pack()
 
     def show_airport_info(self):
@@ -116,7 +128,7 @@ class SkyWizz:
         self.content_frame.pack(padx=20, pady=20)
 
         # Create a label for the departure airport
-        depart_label = tk.Label(self.content_frame, text="Departure Airport:")
+        depart_label = tk.Label(self.content_frame, text='Departure Airport:')
         depart_label.pack()
 
         # Creates an entry field for the departure airport ICAO code
@@ -124,17 +136,20 @@ class SkyWizz:
         airport_entry.pack()
 
         # Create a button widget for submitting search
-        submit_button = tk.Button(self.content_frame, text="Submit",
-                                       command=lambda: self.get_airport_info(airport_entry))
+        submit_button = tk.Button(self.content_frame, text='Submit',
+                                  command=lambda:
+                                  self.get_airport_info(airport_entry))
         submit_button.pack()
 
         # Create a button widget to go back to the main menu
-        back_button = tk.Button(self.content_frame, text="Back", command=self.show_main_menu)
+        back_button = tk.Button(self.content_frame, text='Back',
+                                command=self.show_main_menu)
         back_button.pack()
 
     def get_airport_info(self, airport_entry):
         """
-        Function that treats the data input by the user from the show_airport_info GUI
+        Function that treats the data input by the user from the
+        show_airport_info GUI
         :param airport_entry: Data input that is the airport code
         :return:
         """
@@ -144,27 +159,30 @@ class SkyWizz:
         try:
             checked_airport_code = check_airport_code(airport_code)
             if checked_airport_code is None:
-                airport_info_text = "Not a valid airport code format, please try using 3-4 characters\n" \
-			   "ICAO - 4 characters -> LPPT" \
-			   "\nIATA - 3 characters -> LIS"
+                airport_info_text = 'Not a valid airport code format, ' \
+                                    'please try using 3-4 characters\n' \
+                                    'ICAO - 4 characters -> LPPT' \
+                                    '\nIATA - 3 characters -> LIS'
             else:
-                airport_info_text = get_airport_info(airport_code, checked_airport_code)
+                airport_info_text = get_airport_info(airport_code,
+                                                     checked_airport_code)
         except Exception as e:
             # Handle the exception by displaying an error message
-            airport_info_text = f"Error fetching data: {str(e)}"
+            airport_info_text = f'Error fetching data: {str(e)}'
 
         # Create a new popup window
         popup = tk.Toplevel(self.master)
 
         # Create a text widget to display the airport status
-        status_text = tk.Text(popup, wrap=tk.WORD, font=("Montserrat", 12))
+        status_text = tk.Text(popup, wrap=tk.WORD, font=('Montserrat', 12))
         status_text.insert(tk.END, airport_info_text)
         status_text.config(state=tk.DISABLED)
         status_text.pack(fill=tk.BOTH, expand=True)
 
     def get_distance_between_airports(self, depart_entry, arrival_entry):
         """
-        Function that treats the data input by the user from the show_distance_between_airports GUI
+        Function that treats the data input by the user from the
+        show_distance_between_airports GUI
         :param depart_entry: Departure airport code
         :param arrival_entry: Arrival airport code
         :return:
@@ -174,25 +192,31 @@ class SkyWizz:
         arrival_airport_code = arrival_entry.get()
         distance_text = ""
         try:
-            checked_depart_airport_code = check_airport_code(depart_airport_code)
-            checked_arrival_airport_code = check_airport_code(arrival_airport_code)
+            checked_depart_airport_code = check_airport_code(
+                depart_airport_code)
+            checked_arrival_airport_code = check_airport_code(
+                arrival_airport_code)
+
             # Checks if airport codes are valid - ICAO or IATA
-            if checked_depart_airport_code is None or checked_arrival_airport_code is None:
-                distance_text = "Not a valid airport code format, please try using 3-4 characters\n" \
-                                      "ICAO - 4 characters -> LPPT" \
-                                      "\nIATA - 3 characters -> LIS"
+            if checked_depart_airport_code is None \
+                    or checked_arrival_airport_code is None:
+                distance_text = 'Not a valid airport code format, ' \
+                                'please try using 3-4 characters\n' \
+                                'ICAO - 4 characters -> LPPT' \
+                                '\nIATA - 3 characters -> LIS'
             # Airport codes are valid. Call API
             else:
-                distance_text = distance_between_airports(depart_airport_code, arrival_airport_code)
+                distance_text = distance_between_airports(depart_airport_code,
+                                                          arrival_airport_code)
         except Exception as e:
             # Handle the exception by displaying an error message
-            distance_text = f"Error fetching data: {str(e)}"
+            distance_text = f'Error fetching data: {str(e)}'
 
         # Create a new popup window
         popup = tk.Toplevel(self.master)
 
         # Create a text widget to display the airport status
-        status_text = tk.Text(popup, wrap=tk.WORD, font=("Montserrat", 12))
+        status_text = tk.Text(popup, wrap=tk.WORD, font=('Montserrat', 12))
         status_text.insert(tk.END, distance_text)
         status_text.config(state=tk.DISABLED)
         status_text.pack(fill=tk.BOTH, expand=True)
