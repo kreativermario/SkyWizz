@@ -23,11 +23,13 @@ A commit message should have the following format:
 
 <body>
 <footer>
+```
 type: The type of change being made (e.g. feat, fix, docs, style, refactor, test, chore).
 scope (optional): The scope of the change (e.g. filename, module, package, etc.).
 subject: A brief description of the change.
 body (optional): A more detailed description of the change.
 footer (optional): A section for any related issue numbers or breaking changes.
+
   
 Here are some examples:
 
