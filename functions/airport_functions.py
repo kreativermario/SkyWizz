@@ -65,7 +65,7 @@ def get_airport_info(airport_code, code_type):
     return text
 
 
-def check_airport_code(airport_code):
+def get_airport_code_type(airport_code):
     # If it is IATA Code
     if len(airport_code) == 3:
         return 'iata'
@@ -89,8 +89,8 @@ def distance_between_airports(airport1=None, airport2=None):
     if airport1 is None or airport2 is None:
         raise Exception('Airports can not be empty!')
     else:
-        code_type1 = check_airport_code(airport1)
-        code_type2 = check_airport_code(airport2)
+        code_type1 = get_airport_code_type(airport1)
+        code_type2 = get_airport_code_type(airport2)
 
     if code_type1 is None or code_type2 is None:
         raise Exception('Airports are not ICAO or IATA code')

@@ -1,7 +1,7 @@
 import tkinter as tk
 import sys
 import os
-from functions.airport_functions import get_airport_info, check_airport_code, \
+from functions.airport_functions import get_airport_info, get_airport_code_type, \
     distance_between_airports
 
 # Add parent directory to Python path
@@ -157,7 +157,7 @@ class SkyWizz:
         airport_code = airport_entry.get()
         airport_info_text = ""
         try:
-            checked_airport_code = check_airport_code(airport_code)
+            checked_airport_code = get_airport_code_type(airport_code)
             if checked_airport_code is None:
                 airport_info_text = 'Not a valid airport code format, ' \
                                     'please try using 3-4 characters\n' \
@@ -192,9 +192,9 @@ class SkyWizz:
         arrival_airport_code = arrival_entry.get()
         distance_text = ""
         try:
-            checked_depart_airport_code = check_airport_code(
+            checked_depart_airport_code = get_airport_code_type(
                 depart_airport_code)
-            checked_arrival_airport_code = check_airport_code(
+            checked_arrival_airport_code = get_airport_code_type(
                 arrival_airport_code)
 
             # Checks if airport codes are valid - ICAO or IATA
