@@ -2,6 +2,7 @@ import tkinter as tk
 from src.utils.airport_functions import distance_between_airports, get_airport_info
 from src.utils.utils import get_airport_code_type
 
+
 class SkyWizz:
     def __init__(self, master):
         """
@@ -144,6 +145,7 @@ class SkyWizz:
         Function that treats the data input by the user from the
         show_airport_info GUI
         :param airport_entry: Data input that is the airport code
+        :type: airport_entry: str
         :return:
         """
         # Get the departure airport code from the airport_entry field

@@ -10,11 +10,17 @@ def check_request_status(response):
 
 
 def get_airport_code_type(airport_code):
+    """
+    Function that returns which airport code type
+    :param airport_code: Airport set of code
+    :return: code: type of airport code
+    :rtype: code: str
+    """
+    code = None
     # If it is IATA Code
     if len(airport_code) == 3:
-        return 'iata'
+        code = 'iata'
     # If it is ICAO Code
     elif len(airport_code) == 4:
-        return 'icao'
-    else:
-        return None
+        code = 'icao'
+    return code

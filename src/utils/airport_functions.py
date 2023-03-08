@@ -4,7 +4,6 @@ import os
 from dotenv import load_dotenv
 from src.utils.utils import get_airport_code_type, check_request_status
 
-
 load_dotenv()
 
 # IMPORT YOUR API KEY BEFORE EXECUTING FROM VENV OR JUST TYPE IT BELOW
@@ -21,8 +20,12 @@ headers = {
 
 def get_airport_info(airport_code, code_type):
     """
-    :param airport_code: ICAO code of the airport
-    :return:
+    :param airport_code: Airport code (ICAO or IATA)
+    :type airport_code: str
+    :param code_type: Airport Code Type
+    :type code_type: str
+    :return: text: API response info
+    :rtype: text: str
     """
     url = f'https://aerodatabox.p.rapidapi.com/airports/' \
           f'{code_type}/{airport_code}'
@@ -61,9 +64,12 @@ def distance_between_airports(airport1=None, airport2=None):
     Function that returns the distance in time between two airports
     :param airport1: First airport argument that must be either ICAO or
                                                                 IATA code
+    :type: airport1: str
     :param airport2: Second airport argument that must be either ICAO or
                                                                 IATA code
-    :return:
+    :type: airport2: str
+    :return: text : API Response info
+    :rtype: text: str
     """
     # check if arguments are empty or not
     if airport1 is None or airport2 is None:
