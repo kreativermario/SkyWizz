@@ -26,7 +26,7 @@ The project uses the following dependencies:
 1. Clone the repository:
 
   ```bash
-  git clone https://github.com/yourusername/SkyWizz.git
+  git clone https://github.com/kreativermario/SkyWizz.git
   ```
 
 2. Install the dependencies:
@@ -42,11 +42,11 @@ The project uses the following dependencies:
 
 4. Run the application
   ```bash
-  python skywizz.py
+  python main.py
   ```
   or
   ```bash
-  python3 skywizz.py
+  python3 main.py
   ```
   
 ## Contributions
