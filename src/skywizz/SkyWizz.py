@@ -1,13 +1,6 @@
 import tkinter as tk
-import sys
-import os
-from functions.airport_functions import get_airport_info, get_airport_code_type, \
-    distance_between_airports
-
-# Add parent directory to Python path
-parent_dir = os.path.abspath(os.path.join(os.getcwd(), '..'))
-sys.path.append(parent_dir)
-
+from src.utils.airport_functions import distance_between_airports, get_airport_info
+from src.utils.utils import get_airport_code_type
 
 class SkyWizz:
     def __init__(self, master):
@@ -222,8 +215,8 @@ class SkyWizz:
         status_text.pack(fill=tk.BOTH, expand=True)
 
 
-if __name__ == '__main__':
-    # Creates the main window
-    window = tk.Tk()
-    sky_wizz = SkyWizz(window)
-    window.mainloop()
+# if __name__ == '__main__':
+#     # Creates the main window
+#     window = tk.Tk()
+#     sky_wizz = SkyWizz(window)
+#     window.mainloop()

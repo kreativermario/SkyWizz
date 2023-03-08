@@ -2,6 +2,8 @@ import json
 import requests
 import os
 from dotenv import load_dotenv
+from src.utils.utils import get_airport_code_type, check_request_status
+
 
 load_dotenv()
 
@@ -15,17 +17,6 @@ headers = {
     'X-RapidAPI-Key': API_KEY,
     'X-RapidAPI-Host': 'aerodatabox.p.rapidapi.com'
 }
-
-
-def check_request_status(response):
-    """
-    Function that checks the API response status code
-    :param response: API Response
-    :return: Raises exceptions if the API request fails
-    """
-    if response.status_code != 200:
-        raise Exception(f'API fetch failed! Status code: '
-                        f'{response.status_code}')
 
 
 def get_airport_info(airport_code, code_type):
@@ -63,17 +54,6 @@ def get_airport_info(airport_code, code_type):
            f'Timezone: {timezone}'
 
     return text
-
-
-def get_airport_code_type(airport_code):
-    # If it is IATA Code
-    if len(airport_code) == 3:
-        return 'iata'
-    # If it is ICAO Code
-    elif len(airport_code) == 4:
-        return 'icao'
-    else:
-        return None
 
 
 def distance_between_airports(airport1=None, airport2=None):
