@@ -8,25 +8,29 @@ load_dotenv()
 
 # IMPORT YOUR API KEY BEFORE EXECUTING FROM VENV OR JUST TYPE IT BELOW
 
-API_KEY = os.getenv('API_KEY')
+RAPID_API_KEY = os.getenv('RAPID_API_KEY')
 
-# API_KEY = 'YOUR_API_KEY'  - uncomment this if you're not using venv
+# FLIGHT_API_KEY = 'YOUR_API_KEY'  - uncomment this if you're not using venv
 
 headers = {
-    'X-RapidAPI-Key': API_KEY,
+    'X-RapidAPI-Key': RAPID_API_KEY,
     'X-RapidAPI-Host': 'aerodatabox.p.rapidapi.com'
 }
 
 
-def get_airport_info(airport_code, code_type):
+def get_airport_info(airport_code):
     """
     :param airport_code: Airport code (ICAO or IATA)
     :type airport_code: str
-    :param code_type: Airport Code Type
-    :type code_type: str
     :return: text: API response info
     :rtype: text: str
     """
+    code_type = get_airport_code_type(airport_code)
+
+    if code_type is None:
+        raise Exception("Airport code is not valid! Try using IATA or "
+                        "ICAO code format")
+
     url = f'https://aerodatabox.p.rapidapi.com/airports/' \
           f'{code_type}/{airport_code}'
 
@@ -93,13 +97,13 @@ def distance_between_airports(airport1=None, airport2=None):
 
     # Extract JSON
     try:
-        json = response.json()
-        icao_airport_1 = json['from']['icao']
-        icao_airport_2 = json['to']['icao']
-        name_airport_1 = json['from']['name']
-        name_airport_2 = json['to']['name']
-        distance_km = round(json['greatCircleDistance']['km'], 2)
-        distance_time = json['approxFlightTime']
+        data = response.json()
+        icao_airport_1 = data['from']['icao']
+        icao_airport_2 = data['to']['icao']
+        name_airport_1 = data['from']['name']
+        name_airport_2 = data['to']['name']
+        distance_km = round(data['greatCircleDistance']['km'], 2)
+        distance_time = data['approxFlightTime']
     except (KeyError, json.JSONDecodeError):
         raise Exception('API response did not contain any data')
 
@@ -120,3 +124,18 @@ def distance_between_airports(airport1=None, airport2=None):
            f' ------------------- \n' \
            f'{distance_time}'
     return text
+
+# def get_airport_delays(airport_code, code_type):
+#     """
+#     Function that returns delay statistics of a given airport
+#     :param airport_code: Airport code (ICAO or IATA)
+#     :type airport_code: str
+#     :param code_type: Airport code type
+#     :type code_type: str
+#     :return:
+#     """
+#
+#     url = "https://aerodatabox.p.rapidapi.com/airports/icao/EGLL/delays/2022-06-03T12:00/2022-06-04T00:00"
+#
+#     checked_airport_code = get_airport_code_type(airport_code)
+#
