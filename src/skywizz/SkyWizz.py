@@ -1,13 +1,6 @@
 import tkinter as tk
-import sys
-import os
-from functions.airport_functions import get_airport_info, check_airport_code, \
-    distance_between_airports
-
-# Add parent directory to Python path
-parent_dir = os.path.abspath(os.path.join(os.getcwd(), '..'))
-sys.path.append(parent_dir)
-
+from src.utils.airport_functions import distance_between_airports, get_airport_info
+from src.utils.utils import get_airport_code_type
 
 class SkyWizz:
     def __init__(self, master):
@@ -157,7 +150,7 @@ class SkyWizz:
         airport_code = airport_entry.get()
         airport_info_text = ""
         try:
-            checked_airport_code = check_airport_code(airport_code)
+            checked_airport_code = get_airport_code_type(airport_code)
             if checked_airport_code is None:
                 airport_info_text = 'Not a valid airport code format, ' \
                                     'please try using 3-4 characters\n' \
@@ -192,9 +185,9 @@ class SkyWizz:
         arrival_airport_code = arrival_entry.get()
         distance_text = ""
         try:
-            checked_depart_airport_code = check_airport_code(
+            checked_depart_airport_code = get_airport_code_type(
                 depart_airport_code)
-            checked_arrival_airport_code = check_airport_code(
+            checked_arrival_airport_code = get_airport_code_type(
                 arrival_airport_code)
 
             # Checks if airport codes are valid - ICAO or IATA
@@ -222,8 +215,8 @@ class SkyWizz:
         status_text.pack(fill=tk.BOTH, expand=True)
 
 
-if __name__ == '__main__':
-    # Creates the main window
-    window = tk.Tk()
-    sky_wizz = SkyWizz(window)
-    window.mainloop()
+# if __name__ == '__main__':
+#     # Creates the main window
+#     window = tk.Tk()
+#     sky_wizz = SkyWizz(window)
+#     window.mainloop()
