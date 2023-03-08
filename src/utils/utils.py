@@ -24,3 +24,15 @@ def get_airport_code_type(airport_code):
     elif len(airport_code) == 4:
         code = 'icao'
     return code
+
+
+def validate_airport_code(airport_code):
+    """
+    Functions that validades airport code
+    :param airport_code: The airport code
+    :type airport_code: str
+    :return:
+    """
+    if airport_code is None:
+        raise Exception("Airport code is not valid! Try using IATA or "
+                        "ICAO code format")

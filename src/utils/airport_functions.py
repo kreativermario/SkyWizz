@@ -2,7 +2,8 @@ import json
 import requests
 import os
 from dotenv import load_dotenv
-from src.utils.utils import get_airport_code_type, check_request_status
+from src.utils.utils import get_airport_code_type, check_request_status\
+    ,validate_airport_code
 
 load_dotenv()
 
@@ -27,9 +28,7 @@ def get_airport_info(airport_code):
     """
     code_type = get_airport_code_type(airport_code)
 
-    if code_type is None:
-        raise Exception("Airport code is not valid! Try using IATA or "
-                        "ICAO code format")
+    validate_airport_code(code_type)
 
     url = f'https://aerodatabox.p.rapidapi.com/airports/' \
           f'{code_type}/{airport_code}'
@@ -81,7 +80,6 @@ def distance_between_airports(airport1=None, airport2=None):
     else:
         code_type1 = get_airport_code_type(airport1)
         code_type2 = get_airport_code_type(airport2)
-
     if code_type1 is None or code_type2 is None:
         raise Exception('Airports are not ICAO or IATA code')
     elif code_type1 != code_type2:
@@ -125,17 +123,3 @@ def distance_between_airports(airport1=None, airport2=None):
            f'{distance_time}'
     return text
 
-# def get_airport_delays(airport_code, code_type):
-#     """
-#     Function that returns delay statistics of a given airport
-#     :param airport_code: Airport code (ICAO or IATA)
-#     :type airport_code: str
-#     :param code_type: Airport code type
-#     :type code_type: str
-#     :return:
-#     """
-#
-#     url = "https://aerodatabox.p.rapidapi.com/airports/icao/EGLL/delays/2022-06-03T12:00/2022-06-04T00:00"
-#
-#     checked_airport_code = get_airport_code_type(airport_code)
-#

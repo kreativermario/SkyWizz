@@ -139,35 +139,6 @@ class SkyWizz:
                                 command=self.show_main_menu)
         back_button.pack()
 
-    def airport_delays_info_window(self):
-        """
-        GUI window that updates to show the delays statistics of an airport
-        :return:
-        """
-        # Remove old frame and create a new frame
-        self.content_frame.destroy()
-        self.content_frame = tk.Frame(self.container)
-        self.content_frame.pack(padx=20, pady=20)
-
-        # Create a label for the departure airport
-        depart_label = tk.Label(self.content_frame, text='Departure Airport:')
-        depart_label.pack()
-
-        # Creates an entry field for the departure airport ICAO code
-        airport_entry = tk.Entry(self.content_frame)
-        airport_entry.pack()
-
-        # Create a button widget for submitting search
-        submit_button = tk.Button(self.content_frame, text='Submit',
-                                  command=lambda:
-                                  self.get_airport_info(airport_entry))
-        submit_button.pack()
-
-        # Create a button widget to go back to the main menu
-        back_button = tk.Button(self.content_frame, text='Back',
-                                command=self.show_main_menu)
-        back_button.pack()
-
     def get_airport_info(self, airport_entry):
         """
         Function that treats the data input by the user from the
