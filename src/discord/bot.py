@@ -16,20 +16,20 @@ class SkyWizzBot(commands.Bot):
 
     async def load_cogs(self):
         # Load the extensions when the bot starts up
-        print("Loading cogs...")
+        print('Loading cogs...')
         for filename in os.listdir('cogs'):
-            if filename.endswith('.py') and filename != "__init__.py":
-                print(f"Loading extension: {filename}" )
+            if filename.endswith('.py') and filename != '__init__.py':
+                print(f'Loading extension: {filename}' )
                 await bot.load_extension(f'cogs.{filename[:-3]}')
 
     async def on_ready(self):
         print(f'Logged in as {self.user}')
         await self.load_cogs()
-        print("Finished loading cogs!")
+        print('Finished loading cogs!')
 
-        print("Guilds:")
+        print('Guilds:')
         for guild in self.guilds:
-            print(f"- {guild.name} ({guild.id})")
+            print(f'- {guild.name} ({guild.id})')
 
     async def on_message(self, message):
         if message.author.bot:
