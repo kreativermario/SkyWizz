@@ -21,6 +21,7 @@ headers = {
 
 def get_airport_info(airport_code):
     """
+    Returns airport information by calling API
     :param airport_code: Airport code (ICAO or IATA)
     :type airport_code: str
     :return: text: API response info
