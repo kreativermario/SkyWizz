@@ -1,6 +1,6 @@
 import tkinter as tk
 from src.utils.airport_functions import distance_between_airports, get_airport_info
-from src.utils.utils import get_airport_code_type
+
 
 class SkyWizz:
     def __init__(self, master):
@@ -49,14 +49,14 @@ class SkyWizz:
         # Create a button widget
         search_airport_button = tk.Button(self.content_frame,
                                           text='Get Airport Info by Code',
-                                          command=self.show_airport_info)
+                                          command=self.airport_info_window)
         search_airport_button.pack(pady=10)
 
         # Create a button widget for submitting search
         distance_between_airports_button = tk.Button(
             self.content_frame,
             text='Distance between airports',
-            command=self.show_distance_between_airports)
+            command=self.distance_airports_window)
         distance_between_airports_button.pack(pady=10)
 
         # # Create a menu bar
@@ -70,7 +70,7 @@ class SkyWizz:
         #
         # master.config(menu=self.menu_bar)
 
-    def show_distance_between_airports(self):
+    def distance_airports_window(self):
         """
         GUI Window that updates to show the submit form to get distance
         info between two airports
@@ -110,7 +110,7 @@ class SkyWizz:
                                 command=self.show_main_menu)
         back_button.pack()
 
-    def show_airport_info(self):
+    def airport_info_window(self):
         """
         GUI window that updates to show the
         :return:
@@ -142,23 +142,16 @@ class SkyWizz:
     def get_airport_info(self, airport_entry):
         """
         Function that treats the data input by the user from the
-        show_airport_info GUI
+        airport_info_window GUI
         :param airport_entry: Data input that is the airport code
+        :type: airport_entry: str
         :return:
         """
         # Get the departure airport code from the airport_entry field
         airport_code = airport_entry.get()
         airport_info_text = ""
         try:
-            checked_airport_code = get_airport_code_type(airport_code)
-            if checked_airport_code is None:
-                airport_info_text = 'Not a valid airport code format, ' \
-                                    'please try using 3-4 characters\n' \
-                                    'ICAO - 4 characters -> LPPT' \
-                                    '\nIATA - 3 characters -> LIS'
-            else:
-                airport_info_text = get_airport_info(airport_code,
-                                                     checked_airport_code)
+            airport_info_text = get_airport_info(airport_code)
         except Exception as e:
             # Handle the exception by displaying an error message
             airport_info_text = f'Error fetching data: {str(e)}'
@@ -175,7 +168,7 @@ class SkyWizz:
     def get_distance_between_airports(self, depart_entry, arrival_entry):
         """
         Function that treats the data input by the user from the
-        show_distance_between_airports GUI
+        distance_airports_window GUI
         :param depart_entry: Departure airport code
         :param arrival_entry: Arrival airport code
         :return:
@@ -185,22 +178,9 @@ class SkyWizz:
         arrival_airport_code = arrival_entry.get()
         distance_text = ""
         try:
-            checked_depart_airport_code = get_airport_code_type(
-                depart_airport_code)
-            checked_arrival_airport_code = get_airport_code_type(
-                arrival_airport_code)
-
-            # Checks if airport codes are valid - ICAO or IATA
-            if checked_depart_airport_code is None \
-                    or checked_arrival_airport_code is None:
-                distance_text = 'Not a valid airport code format, ' \
-                                'please try using 3-4 characters\n' \
-                                'ICAO - 4 characters -> LPPT' \
-                                '\nIATA - 3 characters -> LIS'
-            # Airport codes are valid. Call API
-            else:
-                distance_text = distance_between_airports(depart_airport_code,
-                                                          arrival_airport_code)
+            # Call API
+            distance_text = distance_between_airports(depart_airport_code,
+                                                      arrival_airport_code)
         except Exception as e:
             # Handle the exception by displaying an error message
             distance_text = f'Error fetching data: {str(e)}'
@@ -213,7 +193,6 @@ class SkyWizz:
         status_text.insert(tk.END, distance_text)
         status_text.config(state=tk.DISABLED)
         status_text.pack(fill=tk.BOTH, expand=True)
-
 
 # if __name__ == '__main__':
 #     # Creates the main window
