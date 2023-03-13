@@ -106,21 +106,11 @@ def distance_between_airports(airport1=None, airport2=None):
     except (KeyError, json.JSONDecodeError):
         raise Exception('API response did not contain any data')
 
-    text = f'------------------- ' \
-           f'CALCULATED DISTANCE BETWEEN ' \
-           f'-------------------\n ' \
-           f'------------------- ' \
-           f'AIRPORTS' \
-           f' ------------------- \n' \
+    text = f'Calculated distance between:\n' \
            f'{icao_airport_1} - {name_airport_1}\n' \
-           f'{icao_airport_2} - {name_airport_2} is:\n' \
-           f'------------------- ' \
-           f'DISTANCE IN KM ' \
-           f'------------------- \n' \
-           f'{distance_km} \n' \
-           f'------------------- ' \
-           f'APPROXIMATE FLIGHT TIME' \
-           f' ------------------- \n' \
-           f'{distance_time}'
+           f'{icao_airport_2} - {name_airport_2}\n' \
+           f'Distance in KM: {distance_km} \n' \
+           f'Approximate flight time: {distance_time}h'
+
     return text
 
