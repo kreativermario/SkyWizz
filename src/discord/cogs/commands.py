@@ -33,13 +33,12 @@ class CommandsCog(commands.Cog):
 
         embed = discord.Embed(
             title='Sum Result',
-            description=text,
+            description=f'{ctx.author.mention} {text}',
             color=color
         )
         embed.set_footer(text='Powered by SkyWizz')
 
         await ctx.send(embed=embed)
-
 
     @commands.command(name='search', aliases=['s'])
     async def get_airport_info(self, ctx):

@@ -1,3 +1,4 @@
 .env
 .idea
 .log
+/src/discord/discord.log
