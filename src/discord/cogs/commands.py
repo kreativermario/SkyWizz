@@ -15,6 +15,32 @@ class CommandsCog(commands.Cog):
         print('Received ping!')
         await ctx.send('Pong!')
 
+    @commands.command(name='sum_numbers', aliases=['somar'])
+    async def sum_numbers(self, ctx, *args):
+        valid_numbers = []
+        color = discord.Color.blue()
+        for arg in args:
+            try:
+                num = float(arg)
+                valid_numbers.append(num)
+            except ValueError:
+                pass
+
+        if not valid_numbers:
+            text = 'No valid numbers provided!'
+        else:
+            text = str(sum(valid_numbers))
+
+        embed = discord.Embed(
+            title='Sum Result',
+            description=text,
+            color=color
+        )
+        embed.set_footer(text='Powered by SkyWizz')
+
+        await ctx.send(embed=embed)
+
+
     @commands.command(name='search', aliases=['s'])
     async def get_airport_info(self, ctx):
         # Get the second word of the message, which should be the airport code
