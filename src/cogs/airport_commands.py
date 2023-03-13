@@ -1,14 +1,11 @@
 import discord
 from discord.ext import commands
-from src.utils.airport_functions import get_airport_info, \
-    distance_between_airports
-
+from .utils.airport_functions import distance_between_airports, get_airport_info
 
 class AirportsCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        print(bot.command_prefix)
 
     @commands.command(name='ping', aliases=['pong'])
     async def ping(self, ctx):
