@@ -1,11 +1,15 @@
 import discord
 import os
+import sys
 import logging
 from discord.ext import commands
 from dotenv import load_dotenv
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
+print(os.path.abspath(os.path.dirname(__file__)))
 
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+
+#handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 load_dotenv()
 
@@ -39,5 +43,7 @@ class SkyWizzBot(commands.Bot):
 
 intents = discord.Intents.all()
 bot = SkyWizzBot(command_prefix='!', intents=intents)
-bot.run(os.getenv('DISCORD_TOKEN'), log_handler=handler,
+bot.run(os.getenv('DISCORD_TOKEN'),
         log_level=logging.DEBUG)
+#bot.run(os.getenv('DISCORD_TOKEN'), log_handler=handler,
+        #log_level=logging.DEBUG)

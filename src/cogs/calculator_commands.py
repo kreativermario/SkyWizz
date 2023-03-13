@@ -1,8 +1,5 @@
 import discord
 from discord.ext import commands
-from src.utils.airport_functions import get_airport_info, \
-    distance_between_airports
-
 
 class CalculatorCogs(commands.Cog):
 

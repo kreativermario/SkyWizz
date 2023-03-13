@@ -2,8 +2,9 @@ import json
 import requests
 import os
 from dotenv import load_dotenv
-from src.utils.utils import get_airport_code_type, check_request_status\
-    ,validate_airport_code
+from .utility_functions import get_airport_code_type, check_request_status\
+    , validate_airport_code
+
 
 load_dotenv()
 
