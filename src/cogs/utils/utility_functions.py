@@ -36,3 +36,27 @@ def validate_airport_code(airport_code):
     if airport_code is None:
         raise Exception("Airport code is not valid! Try using IATA or "
                         "ICAO code format")
+
+
+def product(nums):
+    """
+    Product function
+    :param nums:
+    :return:
+    """
+    result = 1
+    for num in nums:
+        result *= num
+    return result
+
+
+def subtract(nums):
+    """
+    Subtract function
+    :param nums:
+    :return:
+    """
+    result = nums[0]
+    for num in nums[1:]:
+        result -= num
+    return result

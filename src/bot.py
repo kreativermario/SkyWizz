@@ -9,14 +9,15 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 print(os.path.abspath(os.path.dirname(__file__)))
 
 
-#handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 load_dotenv()
 
 
 class SkyWizzBot(commands.Bot):
     def __init__(self, command_prefix, intents):
-        super().__init__(command_prefix=command_prefix, intents=intents)
+        super().__init__(command_prefix=command_prefix, intents=intents,
+                         help_command=None)
 
     async def load_cogs(self):
         # Load the extensions when the bot starts up
@@ -43,7 +44,7 @@ class SkyWizzBot(commands.Bot):
 
 intents = discord.Intents.all()
 bot = SkyWizzBot(command_prefix='!', intents=intents)
-bot.run(os.getenv('DISCORD_TOKEN'),
-        log_level=logging.DEBUG)
+bot.run(os.getenv('DISCORD_TOKEN'))
+#        log_level=logging.DEBUG)
 #bot.run(os.getenv('DISCORD_TOKEN'), log_handler=handler,
-        #log_level=logging.DEBUG)
+#        log_level=logging.DEBUG)
