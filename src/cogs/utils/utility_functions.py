@@ -1,3 +1,8 @@
+from PIL import Image, ImageDraw, ImageFont
+from io import BytesIO
+import textwrap
+
+
 def check_request_status(response):
     """
     Function that checks the API response status code
@@ -36,3 +41,54 @@ def validate_airport_code(airport_code):
     if airport_code is None:
         raise Exception("Airport code is not valid! Try using IATA or "
                         "ICAO code format")
+
+
+def product(nums):
+    """
+    Product function
+    :param nums:
+    :return:
+    """
+    result = 1
+    for num in nums:
+        result *= num
+    return result
+
+
+def subtract(nums):
+    """
+    Subtract function
+    :param nums:
+    :return:
+    """
+    result = nums[0]
+    for num in nums[1:]:
+        result -= num
+    return result
+
+
+def caption_image(image_file, caption, font="impact.ttf"):
+    img = Image.open(image_file)
+    draw = ImageDraw.Draw(img)
+
+    font_size = int(img.width / 8)
+    font = ImageFont.truetype("impact.ttf", font_size)
+
+    caption = textwrap.fill(text=caption, width=img.width / (font_size / 2))
+
+    caption_w, caption_h = draw.textsize(caption, font=font)
+
+    draw.text(((img.width - caption_w) / 2, (img.height - caption_h) / 8),  # position
+              caption,  # text
+              (255, 255, 255),  # color
+              font=font,  # font
+              stroke_width=2,  # text outline width
+              stroke_fill=(0, 0, 0))  # text outline color
+
+    with BytesIO() as img_bytes:
+        img.save(img_bytes, format=img.format)
+        content = img_bytes.getvalue()
+
+    return content
+
+
