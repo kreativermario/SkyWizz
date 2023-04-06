@@ -7,11 +7,6 @@ class AirportsCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='ping', aliases=['pong'])
-    async def ping(self, ctx):
-        print('Received ping!')
-        await ctx.send('Pong!')
-
     @commands.command(name='search', aliases=['s'])
     async def get_airport_info(self, ctx):
         # Get the second word of the message, which should be the airport code
