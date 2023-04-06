@@ -7,13 +7,13 @@ class AirportsCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.hidden = False
         self. __cog_name__ = "Airport Commands"
 
     @commands.command(name='search', aliases=['s'])
     async def get_airport_info(self, ctx):
         """
         Command that returns information about an airport
-        (accepts ICAO/IATA codes)
         """
         # Get the second word of the message, which should be the airport code
         # If no airport code is given, it will set airport_code to ''

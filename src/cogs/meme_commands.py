@@ -14,6 +14,7 @@ class MemeCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.hidden = False
         self.__cog_name__ = "Meme Commands"
 
     @commands.command(name="caption")

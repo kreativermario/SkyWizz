@@ -7,6 +7,7 @@ class CalculatorCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.hidden = False
         self.__cog_name__ = "Calculator Commands"
         print(bot.command_prefix)
 

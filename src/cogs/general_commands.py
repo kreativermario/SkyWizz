@@ -6,6 +6,7 @@ class GeneralCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.hidden = False
         self.__cog_name__ = "General Commands"
 
     @commands.command(name='ping', aliases=['pong'])

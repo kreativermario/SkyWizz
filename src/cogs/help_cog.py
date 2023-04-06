@@ -6,39 +6,39 @@ class Help(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.hidden = False
         self.__cog_name__ =  "Help"
 
-    @commands.command(name="help")
+    @commands.command(name='help', aliases=['h'])
     async def help_command(self, ctx, *args):
         if not args:
-            # No arguments provided, show general help
-            help_embed = discord.Embed(
-                title="Help",
-                description=f"List of available commands:",
-                color=discord.Color.blue()
-            )
-
-            # Group commands by cog name
-            command_groups = {}
-            for command in self.bot.commands:
-                cog_name = command.cog.__cog_name__
-                if cog_name not in command_groups:
-                    command_groups[cog_name] = []
-                command_groups[cog_name].append(command)
-
-            # Add command fields to embed for each cog
-            for cog_name, cog_commands in command_groups.items():
-                command_list = [f"`{self.bot.command_prefix}{c.name}` - {c.short_doc}" for c in cog_commands if
-                                c.enabled]
-                if command_list:
-                    help_embed.add_field(
-                        name=cog_name,
-                        value="\n".join(command_list),
-                        inline=False
-                    )
-
-            help_embed.set_footer(text="Powered by SkyWizz")
-            await ctx.send(embed=help_embed)
+            # No args, show default help message
+            prefix = self.bot.command_prefix
+            embed = discord.Embed(title='Command List', color=0x00ff00)
+            for cog in self.bot.cogs.values():
+                # Filter out hidden cogs
+                if not cog.hidden:
+                    cog_commands = [cmd for cmd in cog.get_commands() if not cmd.hidden]
+                    if cog_commands:
+                        command_list = [f"`{prefix}{cmd.name}`" + (
+                            f" (aliases: {' | '.join(cmd.aliases)})" if cmd.aliases else "") + f"\n{cmd.help}" for cmd
+                                        in cog_commands]
+                        embed.add_field(name=cog.__cog_name__, value='\n'.join(command_list), inline=False)
+        else:
+            # Arg given, try to show detailed command help
+            command = self.bot.get_command(args[0])
+            if not command:
+                await ctx.send(f"No command found for '{args[0]}'")
+                return
+            prefix = self.bot.command_prefix
+            embed = discord.Embed(title=f"{command.name.capitalize()} Command Help", description=command.help,
+                                  color=0x00ff00)
+            if command.aliases:
+                embed.add_field(name='Aliases', value=' | '.join(command.aliases), inline=False)
+            if command.usage:
+                embed.add_field(name='Usage', value=f"{prefix}{command.name} {command.usage}", inline=False)
+        embed.set_footer(text="Powered by SkyWizz")
+        await ctx.send(embed=embed)
 
 
 async def setup(bot):
