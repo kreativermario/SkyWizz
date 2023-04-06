@@ -2,13 +2,19 @@ import discord
 from discord.ext import commands
 from .utils.airport_functions import distance_between_airports, get_airport_info
 
-class AirportsCog(commands.Cog):
+
+class AirportsCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self. __cog_name__ = "Airport Commands"
 
     @commands.command(name='search', aliases=['s'])
     async def get_airport_info(self, ctx):
+        """
+        Command that returns information about an airport
+        (accepts ICAO/IATA codes)
+        """
         # Get the second word of the message, which should be the airport code
         # If no airport code is given, it will set airport_code to ''
         airport_code = ctx.message.content.split(' ')[1].upper() \
@@ -61,4 +67,4 @@ class AirportsCog(commands.Cog):
 
 async def setup(bot):
     print('Loading AirportsCog...')
-    await bot.add_cog(AirportsCog(bot))
+    await bot.add_cog(AirportsCommands(bot))

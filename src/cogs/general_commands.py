@@ -2,10 +2,11 @@ import discord
 from discord.ext import commands
 
 
-class GeneralCog(commands.Cog):
+class GeneralCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "General Commands"
 
     @commands.command(name='ping', aliases=['pong'])
     async def ping(self, ctx):
@@ -28,4 +29,4 @@ class GeneralCog(commands.Cog):
 
 async def setup(bot):
     print('Loading AirportsCog...')
-    await bot.add_cog(GeneralCog(bot))
+    await bot.add_cog(GeneralCommands(bot))

@@ -11,11 +11,17 @@ SUPPORTED_MIMETYPES = ["image/jpeg", "image/png", "image/webp"]
 
 
 class MemeCog(commands.Cog):
+
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "Meme Commands"
 
     @commands.command(name="caption")
     async def caption(self, ctx, caption_text):
+        """
+        Command that creates a caption from a given image
+        !caption "image caption"
+        """
         # Must have caption text
         if not caption_text:
             await ctx.message.reply(

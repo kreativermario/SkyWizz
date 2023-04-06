@@ -2,26 +2,45 @@ import discord
 from discord.ext import commands
 
 
-class HelpCog(commands.Cog):
+class Help(commands.Cog):
+
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ =  "Help"
 
     @commands.command(name="help")
-    async def help(self, ctx):
-        help_embed = discord.Embed(
-            title="Help",
-            description="List of available commands:",
-            color=discord.Color.blue()
-        )
-        for command in self.bot.commands:
-            help_embed.add_field(
-                name=f"{self.bot.command_prefix}{command.name}",
-                value=command.help,
-                inline=False
+    async def help_command(self, ctx, *args):
+        if not args:
+            # No arguments provided, show general help
+            help_embed = discord.Embed(
+                title="Help",
+                description=f"List of available commands:",
+                color=discord.Color.blue()
             )
-        await ctx.send(embed=help_embed)
+
+            # Group commands by cog name
+            command_groups = {}
+            for command in self.bot.commands:
+                cog_name = command.cog.__cog_name__
+                if cog_name not in command_groups:
+                    command_groups[cog_name] = []
+                command_groups[cog_name].append(command)
+
+            # Add command fields to embed for each cog
+            for cog_name, cog_commands in command_groups.items():
+                command_list = [f"`{self.bot.command_prefix}{c.name}` - {c.short_doc}" for c in cog_commands if
+                                c.enabled]
+                if command_list:
+                    help_embed.add_field(
+                        name=cog_name,
+                        value="\n".join(command_list),
+                        inline=False
+                    )
+
+            help_embed.set_footer(text="Powered by SkyWizz")
+            await ctx.send(embed=help_embed)
 
 
 async def setup(bot):
     print("Loading Help...")
-    await bot.add_cog(HelpCog(bot))
+    await bot.add_cog(Help(bot))

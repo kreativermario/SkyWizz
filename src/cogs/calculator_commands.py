@@ -2,10 +2,12 @@ import discord
 from discord.ext import commands
 from .utils.utility_functions import product, subtract
 
-class CalculatorCogs(commands.Cog):
+
+class CalculatorCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.__cog_name__ = "Calculator Commands"
         print(bot.command_prefix)
 
     @commands.command(name='sum', aliases=['somar'])
@@ -93,4 +95,4 @@ class CalculatorCogs(commands.Cog):
 
 async def setup(bot):
     print('Loading Calculator Commands...')
-    await bot.add_cog(CalculatorCogs(bot))
+    await bot.add_cog(CalculatorCommands(bot))
