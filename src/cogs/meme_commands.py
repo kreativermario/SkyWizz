@@ -15,13 +15,24 @@ class MemeCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.hidden = False
-        self.__cog_name__ = "Meme Commands"
+        self.__cog_name__ = 'Meme Commands'
 
-    @commands.command(name="caption")
+    @commands.command(name='caption')
     async def caption(self, ctx, caption_text):
         """
         Command that creates a caption from a given image
-        !caption "image caption"
+        Attention: You must send an image along with the command!
+
+        **Parameters:**
+        - image_caption: The image's caption
+
+        **Example:**
+        - `!caption "Hello World"`
+
+        **Usage:**
+        - `caption <image_caption>`
+
+        Usage: caption <image_caption>
         """
         # Must have caption text
         if not caption_text:
@@ -34,14 +45,14 @@ class MemeCog(commands.Cog):
         if ctx.message.attachments:
             image_url = ctx.message.attachments[0].url
         else:
-            await ctx.message.reply("Please attach an image for me to caption.")
+            await ctx.message.reply('Please attach an image for me to caption.')
             return
 
         # File must be an image
         if mimetypes.guess_type(image_url)[0] not in SUPPORTED_MIMETYPES:
             await ctx.message.reply(
-                "Sorry, the file you attached is not a supported image format. "
-                "Please upload a PNG, JPEG or WebP image.")
+                'Sorry, the file you attached is not a supported image format. '
+                'Please upload a PNG, JPEG or WebP image.')
             return
 
         # Fetch image file
@@ -54,7 +65,8 @@ class MemeCog(commands.Cog):
         final_image = caption_image(BytesIO(response.content), caption_text)
 
         # Send reply
-        await ctx.message.reply(file=discord.File(BytesIO(final_image), filename=f"captioned-{image_filename}"))
+        await ctx.message.reply(file=discord.File(BytesIO(final_image),
+                                filename=f'captioned-{image_filename}'))
 
 
 async def setup(bot):

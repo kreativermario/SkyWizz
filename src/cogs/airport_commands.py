@@ -14,6 +14,16 @@ class AirportsCommands(commands.Cog):
     async def get_airport_info(self, ctx):
         """
         Command that returns information about an airport
+
+         **Parameters:**
+        - airport_code: The airport code (ICAO or IATA)
+
+        **Example:**
+        - `!search JFK`
+        - `!search KJFK`
+
+        **Usage:**
+        - `search <airport_code>`
         """
         # Get the second word of the message, which should be the airport code
         # If no airport code is given, it will set airport_code to ''
@@ -43,6 +53,20 @@ class AirportsCommands(commands.Cog):
 
     @commands.command(name='distance', aliases=['d'])
     async def get_distance_between_airport(self, ctx):
+        """
+        Command that returns the distance between two given airports
+
+         **Parameters:**
+        - airport1: The first airport code (ICAO or IATA)
+        - airport2: The second airport code (ICAO or IATA)
+
+        **Example:**
+        - `!distance JFK LIS`
+        - `!search KJFK LPPT`
+
+        **Usage:**
+        - `distance <airport1> <airport2>`
+        """
         # Get the second word of the message, which should be the airport code
         depart_airport_code = ctx.message.content.split(' ')[1]
         arrival_airport_code = ctx.message.content.split(' ')[2]

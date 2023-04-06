@@ -13,6 +13,9 @@ class GeneralCommands(commands.Cog):
     async def ping(self, ctx):
         """
         Shows the round-trip time of the bot's connection to Discord.
+
+        **Usage:**
+        - `ping`
         """
         print('Received ping!')
         # convert to milliseconds and round to whole number

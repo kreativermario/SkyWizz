@@ -14,10 +14,17 @@ class CalculatorCommands(commands.Cog):
     @commands.command(name='sum', aliases=['somar'])
     async def sum_numbers(self, ctx, *args):
         """
-        Command that sums given numbers
-        :param ctx:
-        :param args:
-        :return:
+        Command that sums two given numbers
+
+        **Parameters:**
+        - number1 (float): the first number
+        - number2 (float): the second number
+
+        **Example:**
+        - `!sum 50 90`
+
+        **Usage:**
+        - `sum <number1> <number2>`
         """
         valid_numbers = []
         color = discord.Color.blue()
@@ -45,6 +52,19 @@ class CalculatorCommands(commands.Cog):
     @commands.command(name='product', aliases=['multiplicar', 'multi',
                                                'prod'])
     async def multiply(self, ctx, *args):
+        """
+        Command that multiplies two numbers
+
+        **Parameters:**
+        - number1 (float): the first number
+        - number2 (float): the second number
+
+        **Example:**
+        - `!product 50 10`
+
+        **Usage:**
+        - `product <number1> <number2>`
+        """
         valid_numbers = []
         color = discord.Color.blue()
         for arg in args:
@@ -70,6 +90,19 @@ class CalculatorCommands(commands.Cog):
 
     @commands.command(name='subtract', aliases=['subtrair', 'subtrai'])
     async def subtract_numbers(self, ctx, *args):
+        """
+        Command that subtracts one number from another
+
+         **Parameters:**
+        - number1 (float): the first number
+        - number2 (float): the second number
+
+        **Example:**
+        - `!subtract 50 10.5`
+
+        **Usage:**
+        - `subtract <number1> <number2>`
+        """
         valid_numbers = []
         color = discord.Color.blue()
         for arg in args:
