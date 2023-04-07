@@ -80,7 +80,7 @@ class CalculatorCommands(commands.Cog):
             text = str(product(valid_numbers))
 
         embed = discord.Embed(
-            title='Sum Result',
+            title='Product Result',
             description=f'{ctx.author.mention} {text}',
             color=color
         )
@@ -118,7 +118,7 @@ class CalculatorCommands(commands.Cog):
             text = str(subtract(valid_numbers))
 
         embed = discord.Embed(
-            title='Sum Result',
+            title='Subtraction Result',
             description=f'{ctx.author.mention} {text}',
             color=color
         )

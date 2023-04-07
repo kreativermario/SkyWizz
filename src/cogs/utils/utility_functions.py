@@ -2,16 +2,18 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import textwrap
 
+from src.cogs.utils.exceptions import APIRequestError, InvalidAirportCodeError
+
 
 def check_request_status(response):
     """
-    Function that checks the API response status code
-    :param response: API Response
-    :return: Raises exceptions if the API request fails
+    Check if the API response is successful
+    :param response: API response object
+    :type response: Response object from the requests library
     """
-    if response.status_code != 200:
-        raise Exception(f'API fetch failed! Status code: '
-                        f'{response.status_code}')
+    if not (200 <= response.status_code < 300):
+        raise APIRequestError(f'Request failed with status '
+                        f'{response.status_code}: {response.text}')
 
 
 def get_airport_code_type(airport_code):
@@ -39,7 +41,8 @@ def validate_airport_code(airport_code):
     :return:
     """
     if airport_code is None:
-        raise Exception("Airport code is not valid! Try using IATA or "
+        raise InvalidAirportCodeError("Airport code is not valid!"
+                                      " Try using IATA or "
                         "ICAO code format")
 
 
@@ -67,7 +70,7 @@ def subtract(nums):
     return result
 
 
-def caption_image(image_file, caption, font="impact.ttf"):
+def caption_image(image_file, caption):
     img = Image.open(image_file)
     draw = ImageDraw.Draw(img)
 
