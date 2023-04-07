@@ -48,7 +48,8 @@ class Help(commands.Cog):
     async def _detailed_help(self, ctx, command_name):
         command = self.bot.get_command(command_name)
         if not command:
-            await ctx.send(f"No command found for '{command_name}'")
+            embed = discord.Embed(title="Error", description=f"No command found for '{command_name}'", color=0xff0000)
+            await ctx.send(embed=embed)
             return
         embed = discord.Embed(title=
                               f"{command.name.capitalize()} Command Help",
