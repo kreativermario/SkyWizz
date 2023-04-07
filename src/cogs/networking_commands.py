@@ -46,7 +46,7 @@ class Networking(commands.Cog):
         try:
             # Run traceroute command with timeout of 30 seconds
             traceroute_result = subprocess.check_output(
-                ['traceroute', '-m', '30', '-n', '-q', '1', '-w', '2', host],
+                ['traceroute', '-m', '15', '-n', '-q', '1', '-w', '2', host],
                 timeout=30, universal_newlines=True)
         except subprocess.CalledProcessError as e:
             # Display error message if traceroute command failed
