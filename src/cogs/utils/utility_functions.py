@@ -2,7 +2,7 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import textwrap
 
-from src.cogs.utils.exceptions import APIRequestError, InvalidAirportCodeError
+from .exceptions import APIRequestError, InvalidAirportCodeError
 
 
 def check_request_status(response):
