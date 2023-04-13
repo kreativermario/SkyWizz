@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import textwrap
+import whois
 
 from .exceptions import APIRequestError, InvalidAirportCodeError
 
@@ -44,6 +45,54 @@ def validate_airport_code(airport_code):
         raise InvalidAirportCodeError("Airport code is not valid!"
                                       " Try using IATA or "
                         "ICAO code format")
+
+
+async def whois_lookup(domain):
+    """
+    Performs a WHOIS lookup for the specified domain.
+
+    **Parameters:**
+    - domain: The domain to lookup.
+
+    **Returns:**
+    - A dictionary containing the WHOIS data for the domain.
+    """
+    
+    DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+    whois_data = whois.whois(domain)
+    if isinstance(whois_data.expiration_date, list):
+        expiration_date = whois_data.expiration_date[0].strftime(DATE_FORMAT) \
+        if whois_data.expiration_date[0] is not None else 'N/A'
+    else:
+        expiration_date = whois_data.expiration_date
+
+    if isinstance(whois_data.creation_date, list):
+        creation_date = whois_data.creation_date[0].strftime(DATE_FORMAT)
+    else:
+        creation_date = whois_data.creation_date.strftime(DATE_FORMAT) \
+            if whois_data.creation_date is not None else 'N/A'
+
+    if isinstance(whois_data.last_updated, list):
+        last_updated = whois_data.last_updated[0].strftime(DATE_FORMAT)
+    else:
+        last_updated = whois_data.last_updated.strftime(DATE_FORMAT) \
+            if whois_data.last_updated is not None else 'N/A'
+
+    name = whois_data.name if whois_data.name is not None else 'N/A'
+    country = whois_data.country if whois_data.country is not None else 'N/A'
+    registrar = whois_data.registrar if whois_data.registrar is not None \
+        else 'N/A'
+    name_servers = whois_data.name_servers
+    
+    return {
+        'name': name,
+        'country': country,
+        'registrar': registrar,
+        'creation_date': creation_date ,
+        'expiration_date': expiration_date,
+        'last_updated': last_updated,
+        'name_servers': name_servers
+    }
 
 
 def product(nums):

@@ -1,7 +1,8 @@
 import discord
 import subprocess
-import whois
+import emoji
 from discord.ext import commands
+from .utils.utility_functions import whois_lookup
 from .utils.constants import FOOTER_TEXT
 
 
@@ -32,32 +33,6 @@ class Networking(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    async def whois_lookup(self, domain):
-        """
-        Performs a WHOIS lookup for the specified domain.
-
-        **Parameters:**
-        - domain: The domain to lookup.
-
-        **Returns:**
-        - A dictionary containing the WHOIS data for the domain.
-        """
-        whois_data = whois.whois(domain)
-        if isinstance(whois_data.expiration_date, list):
-            expiration_date = whois_data.expiration_date[0]
-        else:
-            expiration_date = whois_data.expiration_date
-
-        return {
-            'registrar': whois_data.registrar,
-            'creation_date': whois_data.creation_date.strftime(
-                "%Y-%m-%d %H:%M:%S") if whois_data.creation_date is not None else 'N/A',
-            'expiration_date': expiration_date.strftime("%Y-%m-%d %H:%M:%S") if expiration_date is not None else 'N/A',
-            'last_updated': whois_data.last_updated.strftime(
-                "%Y-%m-%d %H:%M:%S") if whois_data.last_updated is not None else 'N/A',
-            'name_servers': whois_data.name_servers
-        }
-
     @commands.command(name='whois')
     async def whois_command(self, ctx, *, domain: str):
         """
@@ -81,14 +56,30 @@ class Networking(commands.Cog):
         processing_message = await ctx.send(embed=processing_embed)
 
         try:
-            whois_data = await self.whois_lookup(domain)
+            whois_data = await whois_lookup(domain)
             # Limit the output to only the relevant fields
+            if whois_data['country'].lower() != 'n/a':
+                flag_emoji = emoji.emojize(f":flag_{whois_data['country'].lower()}:")
+            else:
+                flag_emoji = ''
+
             embed = discord.Embed(title=f"WHOIS lookup for {domain}", color=0x7289DA)
-            embed.add_field(name="Registrar", value=whois_data['registrar'], inline=False)
-            embed.add_field(name="Creation Date", value=whois_data['creation_date'], inline=False)
-            embed.add_field(name="Expiration Date", value=whois_data['expiration_date'], inline=False)
-            embed.add_field(name="Updated Date", value=whois_data['last_updated'], inline=False)
-            embed.add_field(name="Name Servers", value="\n".join(whois_data['name_servers']), inline=False)
+            embed.add_field(name="Name", value=whois_data['name'],
+                            inline=False)
+            embed.add_field(name="Country", value=f"{flag_emoji} "
+                                                  f"{whois_data['country']}" ,
+                            inline=False)
+            embed.add_field(name="Registrar", value=whois_data['registrar'],
+                            inline=False)
+            embed.add_field(name="Creation Date",
+                            value=whois_data['creation_date'], inline=False)
+            embed.add_field(name="Expiration Date",
+                            value=whois_data['expiration_date'], inline=False)
+            embed.add_field(name="Updated Date",
+                            value=whois_data['last_updated'], inline=False)
+            embed.add_field(name="Name Servers",
+                            value="\n".join(whois_data['name_servers']),
+                            inline=False)
             embed.set_footer(text=f'Requested by {ctx.author.display_name}')
             await processing_message.edit(content=None, embed=embed)
         except Exception as e:
