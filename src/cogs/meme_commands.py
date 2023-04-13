@@ -6,6 +6,7 @@ import discord
 import requests
 from discord.ext import commands
 from .utils.utility_functions import caption_image
+from .utils.constants import FOOTER_TEXT
 
 SUPPORTED_MIMETYPES = ["image/jpeg", "image/png", "image/webp"]
 

@@ -2,12 +2,35 @@ import discord
 import subprocess
 import whois
 from discord.ext import commands
+from .utils.constants import FOOTER_TEXT
+
 
 class Networking(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.hidden = False
         self.__cog_name__ = 'Networking'
+
+    @commands.command(name='ping', aliases=['pong'])
+    async def ping(self, ctx):
+        """
+        Shows the round-trip time of the bot's connection to Discord.
+
+        **Usage:**
+        - `ping`
+        """
+        print('Received ping!')
+        # convert to milliseconds and round to whole number
+        rtt = round(self.bot.latency * 1000)
+
+        embed = discord.Embed(
+            title="Pong!",
+            description=f"Round-trip time: {rtt} ms",
+            color=discord.Color.green()
+        )
+        embed.set_footer(text=FOOTER_TEXT)
+
+        await ctx.send(embed=embed)
 
     async def whois_lookup(self, domain):
         """
@@ -52,9 +75,9 @@ class Networking(commands.Cog):
         # Display processing message
         processing_embed = discord.Embed(title='Processing...', color=0xffd700)
         processing_embed.add_field(name='Message',
-                                   value='Performing WHOIS lookup for `{domain}`...'
+                                   value=f'Performing WHOIS lookup for `{domain}`...'
                                          'please wait...')
-        processing_embed.set_footer(text='Powered by SkyWizz')
+        processing_embed.set_footer(text=FOOTER_TEXT)
         processing_message = await ctx.send(embed=processing_embed)
 
         try:
@@ -95,7 +118,7 @@ class Networking(commands.Cog):
             error_embed = discord.Embed(title='Error', color=0xff0000)
             error_embed.add_field(name='Message',
                                   value=f'Please provide a host to traceroute to')
-            error_embed.set_footer(text='Powered by SkyWizz')
+            error_embed.set_footer(text=FOOTER_TEXT)
             await ctx.send(embed=error_embed)
             return
 
@@ -106,7 +129,7 @@ class Networking(commands.Cog):
         processing_embed.add_field(name='Message',
                                    value='Performing traceroute, '
                                          'please wait...')
-        processing_embed.set_footer(text='Powered by SkyWizz')
+        processing_embed.set_footer(text=FOOTER_TEXT)
         processing_message = await ctx.send(embed=processing_embed)
 
         try:
@@ -119,7 +142,7 @@ class Networking(commands.Cog):
             error_embed = discord.Embed(title='Error', color=0xff0000)
             error_embed.add_field(name='Message',
                                   value=f'Traceroute failed with error: {e}')
-            error_embed.set_footer(text='Powered by SkyWizz')
+            error_embed.set_footer(text=FOOTER_TEXT)
             await processing_message.edit(embed=error_embed)
             return
         except subprocess.TimeoutExpired:
@@ -127,7 +150,7 @@ class Networking(commands.Cog):
             timeout_embed = discord.Embed(title='Timeout', color=0xff0000)
             timeout_embed.add_field(name='Message',
                                     value=f'Traceroute took too long and was cancelled')
-            timeout_embed.set_footer(text='Powered by SkyWizz')
+            timeout_embed.set_footer(text=FOOTER_TEXT)
             await processing_message.edit(embed=timeout_embed)
             return
 
@@ -136,7 +159,7 @@ class Networking(commands.Cog):
                                       color=0x00ff00)
         results_embed.add_field(name='Results:',
                                 value=f'```{traceroute_result}```')
-        results_embed.set_footer(text='Powered by SkyWizz')
+        results_embed.set_footer(text=FOOTER_TEXT)
         await processing_message.edit(embed=results_embed)
 
 

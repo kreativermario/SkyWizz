@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from .utils.constants import FOOTER_TEXT
 
 
 class Help(commands.Cog):
@@ -42,7 +43,7 @@ class Help(commands.Cog):
                     embed.add_field(name=cog.__cog_name__,
                                     value='\n'.join(command_list),
                                     inline=False)
-        embed.set_footer(text="Powered by SkyWizz")
+        embed.set_footer(text=FOOTER_TEXT)
         await ctx.send(embed=embed)
 
     async def _detailed_help(self, ctx, command_name):
@@ -59,7 +60,7 @@ class Help(commands.Cog):
             embed.add_field(name='Aliases',
                             value=' | '.join(command.aliases),
                             inline=False)
-        embed.set_footer(text="Powered by SkyWizz")
+        embed.set_footer(text=FOOTER_TEXT)
         await ctx.send(embed=embed)
 
 

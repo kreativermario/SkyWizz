@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from .utils.utility_functions import product, subtract
+from .utils.constants import FOOTER_TEXT
 
 
 class CalculatorCommands(commands.Cog):
@@ -45,7 +46,7 @@ class CalculatorCommands(commands.Cog):
             description=f'{ctx.author.mention} {text}',
             color=color
         )
-        embed.set_footer(text='Powered by SkyWizz')
+        embed.set_footer(text=FOOTER_TEXT)
 
         await ctx.send(embed=embed)
 
@@ -84,7 +85,7 @@ class CalculatorCommands(commands.Cog):
             description=f'{ctx.author.mention} {text}',
             color=color
         )
-        embed.set_footer(text='Powered by SkyWizz')
+        embed.set_footer(text=FOOTER_TEXT)
 
         await ctx.send(embed=embed)
 
@@ -122,7 +123,7 @@ class CalculatorCommands(commands.Cog):
             description=f'{ctx.author.mention} {text}',
             color=color
         )
-        embed.set_footer(text='Powered by SkyWizz')
+        embed.set_footer(text=FOOTER_TEXT)
 
         await ctx.send(embed=embed)
 

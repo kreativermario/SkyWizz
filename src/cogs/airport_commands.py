@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 from .utils.airport_functions import distance_between_airports, get_airport_info
+from .utils.constants import FOOTER_TEXT
 
 
 class AirportsCommands(commands.Cog):
@@ -48,7 +49,7 @@ class AirportsCommands(commands.Cog):
             description=text,
             color=color
         )
-        embed.set_footer(text='Powered by SkyWizz')
+        embed.set_footer(text=FOOTER_TEXT)
         await ctx.send(embed=embed)
 
     @commands.command(name='distance', aliases=['d'])
