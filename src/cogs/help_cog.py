@@ -34,15 +34,11 @@ class Help(commands.Cog):
         embed = discord.Embed(title='Command List', color=0x00ff00)
         for cog in self.bot.cogs.values():
             if not cog.hidden:
-                cog_commands = [cmd for cmd in cog.get_commands()
-                                if not cmd.hidden]
+                cog_commands = [cmd for cmd in cog.get_commands() if not cmd.hidden]
                 if cog_commands:
-                    command_list = [f"`{cmd.name}`" + (
-                        f" (aliases: {' | '.join(cmd.aliases)})"
-                        if cmd.aliases else "") for cmd in cog_commands]
-                    embed.add_field(name=cog.__cog_name__,
-                                    value='\n'.join(command_list),
-                                    inline=False)
+                    command_list = [f"`{cmd.name}`" + (f" (aliases: {' | '.join(cmd.aliases)})" if cmd.aliases else "")
+                                    for cmd in cog_commands]
+                    embed.add_field(name=cog.__cog_name__, value='\n'.join(command_list), inline=False)
         embed.set_footer(text=FOOTER_TEXT)
         await ctx.send(embed=embed)
 
