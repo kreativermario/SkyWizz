@@ -48,7 +48,7 @@ bot = SkyWizzBot(command_prefix='!', intents=intents)
 
 @bot.check
 def global_cooldown_check(ctx):
-    default_cooldown = commands.CooldownMapping.from_cooldown(1, 60, commands.BucketType.user)
+    default_cooldown = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.user)
     bucket = default_cooldown.get_bucket(ctx.message)
     retry_after = bucket.update_rate_limit()
 
