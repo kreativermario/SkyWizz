@@ -2,6 +2,7 @@ import discord
 import subprocess
 import emoji
 from discord.ext import commands
+from discord.ext.commands import BucketType
 from .utils.utility_functions import whois_lookup
 from .utils.constants import FOOTER_TEXT
 
@@ -12,6 +13,7 @@ class Networking(commands.Cog):
         self.hidden = False
         self.__cog_name__ = 'Networking'
 
+    @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.command(name='ping', aliases=['pong'])
     async def ping(self, ctx):
         """
@@ -33,6 +35,7 @@ class Networking(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.command(name='whois')
     async def whois_command(self, ctx, *, domain: str):
         """

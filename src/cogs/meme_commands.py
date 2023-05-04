@@ -69,6 +69,30 @@ class MemeCog(commands.Cog):
         await ctx.message.reply(file=discord.File(BytesIO(final_image),
                                 filename=f'captioned-{image_filename}'))
 
+    @commands.command(name='tiocosta', alias=['antoniocosta'])
+    async def tiocosta(self, ctx):
+        """
+        Command that sends a random quote by António Costa
+
+        **Example:**
+        - `!tiocosta`
+
+        **Usage:**
+        - `tiocosta`
+
+        Usage: tiocosta
+        """
+
+        embed = discord.Embed(
+            title="Tio Costa",
+            description="Ontem foi ontem, hoje é um novo dia, muito bom céu,"
+                        " ta tao bonito, adeus",
+            color=discord.Color.red()
+        )
+        embed.set_footer(text=FOOTER_TEXT)
+
+        await ctx.send(embed=embed)
+
 
 async def setup(bot):
     print('Loading Meme Commands...')
