@@ -12,6 +12,7 @@ class CalculatorCommands(commands.Cog):
         self.__cog_name__ = "Calculator Commands"
         print(bot.command_prefix)
 
+    @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='sum', aliases=['somar'])
     async def sum_numbers(self, ctx, *args):
         """
@@ -50,6 +51,7 @@ class CalculatorCommands(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='product', aliases=['multiplicar', 'multi',
                                                'prod'])
     async def multiply(self, ctx, *args):
@@ -89,6 +91,7 @@ class CalculatorCommands(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='subtract', aliases=['subtrair', 'subtrai'])
     async def subtract_numbers(self, ctx, *args):
         """

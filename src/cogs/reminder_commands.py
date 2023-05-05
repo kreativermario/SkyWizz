@@ -11,6 +11,7 @@ class Reminder(commands.Cog):
         self.hidden = False
         self.__cog_name__ = "Reminder Commands"
 
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='remindme')
     async def remindme_command(self, ctx, duration: int, *, message: str):
         """

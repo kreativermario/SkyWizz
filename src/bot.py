@@ -39,6 +39,15 @@ class SkyWizzBot(commands.Bot):
     async def on_message(self, message):
         if message.author.bot:
             return
+        # Define the blacklist
+        user_blacklist = [
+            123456789012345678,  # Replace this with the actual user ID(s) you want to blacklist
+        ]
+
+        # Check if the message author's ID is in the blacklist
+        if message.author.id in user_blacklist:
+            return
+
         await self.process_commands(message)
 
 

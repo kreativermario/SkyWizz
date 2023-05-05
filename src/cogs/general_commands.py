@@ -9,6 +9,7 @@ class GeneralCommands(commands.Cog):
         self.hidden = False
         self.__cog_name__ = "General Commands"
 
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='server')
     async def server_info(self, ctx):
         """

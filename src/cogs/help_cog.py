@@ -10,6 +10,7 @@ class Help(commands.Cog):
         self.hidden = False
         self.__cog_name__ =  "Help"
 
+    @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='help', aliases=['h'])
     async def help_command(self, ctx, *args):
         """

@@ -11,6 +11,7 @@ class AirportsCommands(commands.Cog):
         self.hidden = False
         self. __cog_name__ = "Airport Commands"
 
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='search', aliases=['s'])
     async def get_airport_info(self, ctx):
         """
@@ -52,6 +53,7 @@ class AirportsCommands(commands.Cog):
         embed.set_footer(text=FOOTER_TEXT)
         await ctx.send(embed=embed)
 
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='distance', aliases=['d'])
     async def get_distance_between_airport(self, ctx):
         """

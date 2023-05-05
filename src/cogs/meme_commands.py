@@ -18,6 +18,7 @@ class MemeCog(commands.Cog):
         self.hidden = False
         self.__cog_name__ = 'Meme Commands'
 
+    @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.command(name='caption')
     async def caption(self, ctx, caption_text):
         """
@@ -69,6 +70,7 @@ class MemeCog(commands.Cog):
         await ctx.message.reply(file=discord.File(BytesIO(final_image),
                                 filename=f'captioned-{image_filename}'))
 
+    @commands.cooldown(2, 60, commands.BucketType.user)
     @commands.command(name='tiocosta', alias=['antoniocosta'])
     async def tiocosta(self, ctx):
         """

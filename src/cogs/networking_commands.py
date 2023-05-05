@@ -13,7 +13,7 @@ class Networking(commands.Cog):
         self.hidden = False
         self.__cog_name__ = 'Networking'
 
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(2, 60, commands.BucketType.user)
     @commands.command(name='ping', aliases=['pong'])
     async def ping(self, ctx):
         """
@@ -35,7 +35,7 @@ class Networking(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.cooldown(1, 60, commands.BucketType.user)
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='whois')
     async def whois_command(self, ctx, *, domain: str):
         """
@@ -92,6 +92,7 @@ class Networking(commands.Cog):
             error_embed.add_field(name="Error", value=str(e))
             await processing_message.edit(content=None, embed=error_embed)
 
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='traceroute', aliases=['tr'])
     async def traceroute_command(self, ctx, *args):
         """
