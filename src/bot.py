@@ -41,7 +41,7 @@ class SkyWizzBot(commands.Bot):
             return
         # Define the blacklist
         user_blacklist = [
-            123456789012345678,  # Replace this with the actual user ID(s) you want to blacklist
+            282176568732811266,  # Replace this with the actual user ID(s) you want to blacklist
         ]
 
         # Check if the message author's ID is in the blacklist
