@@ -1,17 +1,20 @@
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 import textwrap
+import whois
+
+from .exceptions import APIRequestError, InvalidAirportCodeError
 
 
 def check_request_status(response):
     """
-    Function that checks the API response status code
-    :param response: API Response
-    :return: Raises exceptions if the API request fails
+    Check if the API response is successful
+    :param response: API response object
+    :type response: Response object from the requests library
     """
-    if response.status_code != 200:
-        raise Exception(f'API fetch failed! Status code: '
-                        f'{response.status_code}')
+    if not (200 <= response.status_code < 300):
+        raise APIRequestError(f'Request failed with status '
+                        f'{response.status_code}: {response.text}')
 
 
 def get_airport_code_type(airport_code):
@@ -39,8 +42,57 @@ def validate_airport_code(airport_code):
     :return:
     """
     if airport_code is None:
-        raise Exception("Airport code is not valid! Try using IATA or "
+        raise InvalidAirportCodeError("Airport code is not valid!"
+                                      " Try using IATA or "
                         "ICAO code format")
+
+
+async def whois_lookup(domain):
+    """
+    Performs a WHOIS lookup for the specified domain.
+
+    **Parameters:**
+    - domain: The domain to lookup.
+
+    **Returns:**
+    - A dictionary containing the WHOIS data for the domain.
+    """
+    
+    DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+    whois_data = whois.whois(domain)
+    if isinstance(whois_data.expiration_date, list):
+        expiration_date = whois_data.expiration_date[0].strftime(DATE_FORMAT) \
+        if whois_data.expiration_date[0] is not None else 'N/A'
+    else:
+        expiration_date = whois_data.expiration_date
+
+    if isinstance(whois_data.creation_date, list):
+        creation_date = whois_data.creation_date[0].strftime(DATE_FORMAT)
+    else:
+        creation_date = whois_data.creation_date.strftime(DATE_FORMAT) \
+            if whois_data.creation_date is not None else 'N/A'
+
+    if isinstance(whois_data.last_updated, list):
+        last_updated = whois_data.last_updated[0].strftime(DATE_FORMAT)
+    else:
+        last_updated = whois_data.last_updated.strftime(DATE_FORMAT) \
+            if whois_data.last_updated is not None else 'N/A'
+
+    name = whois_data.name if whois_data.name is not None else 'N/A'
+    country = whois_data.country if whois_data.country is not None else 'N/A'
+    registrar = whois_data.registrar if whois_data.registrar is not None \
+        else 'N/A'
+    name_servers = whois_data.name_servers
+    
+    return {
+        'name': name,
+        'country': country,
+        'registrar': registrar,
+        'creation_date': creation_date ,
+        'expiration_date': expiration_date,
+        'last_updated': last_updated,
+        'name_servers': name_servers
+    }
 
 
 def product(nums):
@@ -67,7 +119,7 @@ def subtract(nums):
     return result
 
 
-def caption_image(image_file, caption, font="impact.ttf"):
+def caption_image(image_file, caption):
     img = Image.open(image_file)
     draw = ImageDraw.Draw(img)
 

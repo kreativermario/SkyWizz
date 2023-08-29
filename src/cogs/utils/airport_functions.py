@@ -2,6 +2,8 @@ import json
 import requests
 import os
 from dotenv import load_dotenv
+
+from .exceptions import EmptyAirportCodeError, InvalidAirportCodeError, DifferentCodeFormatError, EmptyAPIResponseError
 from .utility_functions import get_airport_code_type, check_request_status\
     , validate_airport_code
 
@@ -52,7 +54,7 @@ def get_airport_info(airport_code):
         country_name = airport_data['country']['name']
         timezone = airport_data['timeZone']
     except (KeyError, json.JSONDecodeError):
-        raise Exception('API response did not contain any data')
+        raise EmptyAPIResponseError('API response did not contain any data')
 
     text = f'Full Airport Name: {full_name}\n' \
            f'Country Code: {country_code}\n' \
@@ -78,14 +80,15 @@ def distance_between_airports(airport1=None, airport2=None):
     """
     # check if arguments are empty or not
     if airport1 is None or airport2 is None:
-        raise Exception('Airports can not be empty!')
+        raise EmptyAirportCodeError('Airports cannot be empty!')
     else:
         code_type1 = get_airport_code_type(airport1)
         code_type2 = get_airport_code_type(airport2)
     if code_type1 is None or code_type2 is None:
-        raise Exception('Airports are not ICAO or IATA code')
+        raise InvalidAirportCodeError('Airports are not IATA or ICAO code')
     elif code_type1 != code_type2:
-        raise Exception('Airports are not in the same code format!')
+        raise DifferentCodeFormatError('Airports are not in '
+                                       'the same code format!')
 
     url = f'https://aerodatabox.p.rapidapi.com/airports/{code_type1}' \
           f'/{airport1}/distance-time/{airport2}'
@@ -105,7 +108,7 @@ def distance_between_airports(airport1=None, airport2=None):
         distance_km = round(data['greatCircleDistance']['km'], 2)
         distance_time = data['approxFlightTime']
     except (KeyError, json.JSONDecodeError):
-        raise Exception('API response did not contain any data')
+        raise EmptyAPIResponseError('API response did not contain any data')
 
     text = f'Calculated distance between:\n' \
            f'{icao_airport_1} - {name_airport_1}\n' \

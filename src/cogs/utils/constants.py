@@ -1,0 +1,1 @@
+FOOTER_TEXT = 'Powered by SkyWizz'

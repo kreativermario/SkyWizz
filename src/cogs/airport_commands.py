@@ -1,19 +1,32 @@
 import discord
 from discord.ext import commands
 from .utils.airport_functions import distance_between_airports, get_airport_info
+from .utils.constants import FOOTER_TEXT
 
-class AirportsCog(commands.Cog):
+
+class AirportsCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.hidden = False
+        self. __cog_name__ = "Airport Commands"
 
-    @commands.command(name='ping', aliases=['pong'])
-    async def ping(self, ctx):
-        print('Received ping!')
-        await ctx.send('Pong!')
-
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='search', aliases=['s'])
     async def get_airport_info(self, ctx):
+        """
+        Command that returns information about an airport
+
+         **Parameters:**
+        - airport_code: The airport code (ICAO or IATA)
+
+        **Example:**
+        - `!search JFK`
+        - `!search KJFK`
+
+        **Usage:**
+        - `search <airport_code>`
+        """
         # Get the second word of the message, which should be the airport code
         # If no airport code is given, it will set airport_code to ''
         airport_code = ctx.message.content.split(' ')[1].upper() \
@@ -37,11 +50,26 @@ class AirportsCog(commands.Cog):
             description=text,
             color=color
         )
-        embed.set_footer(text='Powered by SkyWizz')
+        embed.set_footer(text=FOOTER_TEXT)
         await ctx.send(embed=embed)
 
+    @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='distance', aliases=['d'])
     async def get_distance_between_airport(self, ctx):
+        """
+        Command that returns the distance between two given airports
+
+         **Parameters:**
+        - airport1: The first airport code (ICAO or IATA)
+        - airport2: The second airport code (ICAO or IATA)
+
+        **Example:**
+        - `!distance JFK LIS`
+        - `!search KJFK LPPT`
+
+        **Usage:**
+        - `distance <airport1> <airport2>`
+        """
         # Get the second word of the message, which should be the airport code
         depart_airport_code = ctx.message.content.split(' ')[1]
         arrival_airport_code = ctx.message.content.split(' ')[2]
@@ -66,4 +94,4 @@ class AirportsCog(commands.Cog):
 
 async def setup(bot):
     print('Loading AirportsCog...')
-    await bot.add_cog(AirportsCog(bot))
+    await bot.add_cog(AirportsCommands(bot))
