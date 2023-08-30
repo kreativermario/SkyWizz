@@ -1,10 +1,11 @@
 import functools
 import warnings
+import aiohttp
+import textwrap
+import whois
 
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-import textwrap
-import whois
 
 from .exceptions import APIRequestError
 
@@ -24,6 +25,24 @@ def deprecated(func):
         return func(*args, **kwargs)
 
     return new_func
+
+
+async def get_coordinates(city_name):
+    """
+    Function that gets the GPS coordinates of a given city_name
+    """
+    async with aiohttp.ClientSession() as session:
+        url = 'https://nominatim.openstreetmap.org/search'
+        params = {
+            "format": "json",
+            "city": city_name,
+        }
+        async with session.get(url, params=params) as response:
+            data = await response.json()
+            if data:
+                return float(data[0]["lat"]), float(data[0]["lon"])
+            else:
+                raise ValueError("City not found")
 
 
 def check_request_status(response):
