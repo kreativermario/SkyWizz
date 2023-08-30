@@ -1,4 +1,4 @@
-.env
+src/.env
 .idea
 .log
 /src2/discord/discord.log
