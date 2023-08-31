@@ -8,10 +8,12 @@ from .utils.constants import FOOTER_TEXT
 
 
 class Networking(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, logger):
         self.bot = bot
+        self.logger = logger
         self.hidden = False
         self.__cog_name__ = 'Networking'
+        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(2, 60, commands.BucketType.user)
     @commands.command(name='ping', aliases=['pong'])
@@ -158,6 +160,5 @@ class Networking(commands.Cog):
         await processing_message.edit(embed=results_embed)
 
 
-async def setup(bot):
-    print('Loading Networking...')
-    await bot.add_cog(Networking(bot))
+async def setup(bot, logger):
+    await bot.add_cog(Networking(bot, logger))

@@ -5,10 +5,12 @@ from .utils.constants import FOOTER_TEXT
 
 class Help(commands.Cog):
 
-    def __init__(self, bot):
+    def __init__(self, bot, logger):
         self.bot = bot
         self.hidden = False
+        self.logger = logger
         self.__cog_name__ =  "Help"
+        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='help', aliases=['h'])
@@ -61,6 +63,5 @@ class Help(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot):
-    print("Loading Help...")
-    await bot.add_cog(Help(bot))
+async def setup(bot, logger):
+    await bot.add_cog(Help(bot, logger))

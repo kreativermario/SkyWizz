@@ -13,10 +13,12 @@ SUPPORTED_MIMETYPES = ["image/jpeg", "image/png", "image/webp"]
 
 class MemeCog(commands.Cog):
 
-    def __init__(self, bot):
+    def __init__(self, bot, logger):
         self.bot = bot
+        self.logger = logger
         self.hidden = False
         self.__cog_name__ = 'Meme Commands'
+        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(1, 60, commands.BucketType.user)
     @commands.command(name='caption')
@@ -96,6 +98,5 @@ class MemeCog(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot):
-    print('Loading Meme Commands...')
-    await bot.add_cog(MemeCog(bot))
+async def setup(bot, logger):
+    await bot.add_cog(MemeCog(bot, logger))
