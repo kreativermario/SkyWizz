@@ -36,10 +36,15 @@
 
 # ✈️🧙‍♂️ SkyWizz 
 
-SkyWizz is a side project aimed at improving my current Python and software development skills. The project is a Graphical User Interface (GUI) where aviation enthusiasts can use it to search multiple information about flights, aircraft, and airports. It is also a project to help me learn how to use APIs.
+SkyWizz is a side project aimed at improving my current Python and software development 
+skills. The project consists in a Discord bot that uses various APIs to provide users
+with interesting, useful and fun commands.
+It is also a project to help me learn how to use APIs.
 
 ## ⚠️ Warning
-The API used for the aviation functions is no longer free and we can not afford to pay for it so these functions are now deprecated and not available to use. 
+The API used for the aviation functions is no longer free 
+and we can not afford to pay for it so these functions 
+are now deprecated and not available to use. 
 Sorry for the inconvenience caused.
 
 ## Table of Contents
@@ -53,13 +58,13 @@ Sorry for the inconvenience caused.
 
 - [X] Simple networking functions such as whois, traceroute, ping.
 - [X] Captioning images
+- [X] Setup script that creates .env configuration
 - [ ] Weather functions - in development
+  - [X] Simple daily weather forecast (current day)
+  - [ ] Daily forecast by time (current day)
+  - [ ] Weekly forecast
 - [ ] Stock market functions
 - [ ] Basic server functions (current member count, bots, age)
-- [ ] ~~Ability to search for airports by ICAO or IATA code.~~
-- [X] ~~Ability to get the distance and time between two airports.~~
-- [ ] ~~Ability to get the current weather at a given airport.~~
-- [ ] ~~Ability to get the status of a given flight.~~ 
 
 
 ## Dependencies
@@ -67,10 +72,6 @@ Sorry for the inconvenience caused.
 The project uses the following dependencies:
 
 - Python 3.x
-- PyQt5
-- Requests
-- ~~Aerodatabox API~~ (paid API now)
-- RapidAPI for various API options
 
 ## Installation
 
@@ -86,18 +87,13 @@ The project uses the following dependencies:
   pip install -r requirements.txt
   ```
   
-3. Create a .env file with your API keys:
+3. Run the bot, make sure you are in the correct folder.
   ```bash
-  api_key = YOUR_API_KEY_HERE
-  ```
-
-4. Run the application
-  ```bash
-  python main.py
+  python SkyWizz.py
   ```
   or
   ```bash
-  python3 main.py
+  python3 SkyWizz.py
   ```
   
 ## Contributions
