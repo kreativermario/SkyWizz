@@ -16,7 +16,7 @@
         <img src="https://img.shields.io/github/issues-pr/kreativermario/SkyWizz.svg"
         alt="GitHub Open Pull Requests">
     </a>
-    <a href="https://github.com/kreativermario/SkyWizz/pulls">
+    <a href="https://github.com/kreativermario/SkyWizz/pulls?q=is%3Apr+is%3Aclosed">
         <img src="https://img.shields.io/github/issues-pr-closed/kreativermario/SkyWizz.svg"
         alt="GitHub Closed Pull Requests">
     </a>
