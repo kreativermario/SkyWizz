@@ -4,10 +4,16 @@ import socket
 import sys
 from .cogs import *
 from .events import *
+from .setup import *
+from .config import *
 
 
 def version():
     return "v0.0.1"
+
+
+def config_version():
+    return "0.1"  # do not edit this!
 
 
 def time():
