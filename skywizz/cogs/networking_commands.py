@@ -3,8 +3,9 @@ import subprocess
 import emoji
 from discord.ext import commands
 from discord.ext.commands import BucketType
-from .utils.utility_functions import whois_lookup
-from .utils.constants import FOOTER_TEXT
+import skywizz
+import skywizz.tools as tools
+import skywizz.tools.embed as embd
 
 
 class Networking(commands.Cog):
@@ -24,16 +25,11 @@ class Networking(commands.Cog):
         **Usage:**
         - `ping`
         """
-        print('Received ping!')
         # convert to milliseconds and round to whole number
         rtt = round(self.bot.latency * 1000)
 
-        embed = discord.Embed(
-            title="Pong!",
-            description=f"Round-trip time: {rtt} ms",
-            color=discord.Color.green()
-        )
-        embed.set_footer(text=FOOTER_TEXT)
+        embed = embd.newembed(title="Pong!",
+                              description=f"Round-trip time: {rtt} ms")
 
         await ctx.send(embed=embed)
 
@@ -53,26 +49,28 @@ class Networking(commands.Cog):
         - `whois <domain>`
         """
         # Display processing message
-        processing_embed = discord.Embed(title='Processing...', color=0xffd700)
+        processing_embed = embd.newembed(title='Processing...', description='',
+                                         color=0xffd700)
         processing_embed.add_field(name='Message',
                                    value=f'Performing WHOIS lookup for `{domain}`...'
                                          'please wait...')
-        processing_embed.set_footer(text=FOOTER_TEXT)
         processing_message = await ctx.send(embed=processing_embed)
 
         try:
-            whois_data = await whois_lookup(domain)
+            whois_data = await tools.whois_lookup(domain)
             # Limit the output to only the relevant fields
             if whois_data['country'].lower() != 'n/a':
                 flag_emoji = emoji.emojize(f":flag_{whois_data['country'].lower()}:")
             else:
                 flag_emoji = ''
 
-            embed = discord.Embed(title=f"WHOIS lookup for {domain}", color=0x7289DA)
+            embed = embd.newembed(title=f"WHOIS lookup for {domain}",
+                                  description='',
+                                  color=0x7289DA)
             embed.add_field(name="Name", value=whois_data['name'],
                             inline=False)
             embed.add_field(name="Country", value=f"{flag_emoji} "
-                                                  f"{whois_data['country']}" ,
+                                                  f"{whois_data['country']}",
                             inline=False)
             embed.add_field(name="Registrar", value=whois_data['registrar'],
                             inline=False)
@@ -88,9 +86,9 @@ class Networking(commands.Cog):
             embed.set_footer(text=f'Requested by {ctx.author.display_name}')
             await processing_message.edit(content=None, embed=embed)
         except Exception as e:
-            error_embed = discord.Embed(title="WHOIS Lookup Error",
-                                        description=f"An error occurred while performing a WHOIS lookup for `{domain}`.",
-                                        color=0xFF0000)
+            error_embed = skywizz.specific_error(f"An error occurred while "
+                                                 f"performing a WHOIS lookup "
+                                                 f"for `{domain}`.")
             error_embed.add_field(name="Error", value=str(e))
             await processing_message.edit(content=None, embed=error_embed)
 
@@ -112,21 +110,20 @@ class Networking(commands.Cog):
         """
         if not args:
             # Display error message if traceroute command failed
-            error_embed = discord.Embed(title='Error', color=0xff0000)
-            error_embed.add_field(name='Message',
-                                  value=f'Please provide a host to traceroute to')
-            error_embed.set_footer(text=FOOTER_TEXT)
+            error_embed = skywizz.specific_error('Please provide a host to '
+                                                 'traceroute to')
             await ctx.send(embed=error_embed)
             return
 
         host = args[0]
 
         # Display processing message
-        processing_embed = discord.Embed(title='Processing...', color=0xffd700)
+        processing_embed = embd.newembed(title='Processing...',
+                                         description='',
+                                         color=0xffd700)
         processing_embed.add_field(name='Message',
                                    value='Performing traceroute, '
                                          'please wait...')
-        processing_embed.set_footer(text=FOOTER_TEXT)
         processing_message = await ctx.send(embed=processing_embed)
 
         try:
@@ -136,27 +133,23 @@ class Networking(commands.Cog):
                 timeout=30, universal_newlines=True)
         except subprocess.CalledProcessError as e:
             # Display error message if traceroute command failed
-            error_embed = discord.Embed(title='Error', color=0xff0000)
-            error_embed.add_field(name='Message',
-                                  value=f'Traceroute failed with error: {e}')
-            error_embed.set_footer(text=FOOTER_TEXT)
+            error_embed = skywizz.specific_error(f'Traceroute failed with '
+                                                 f'error: {e}')
             await processing_message.edit(embed=error_embed)
             return
         except subprocess.TimeoutExpired:
             # Display message if traceroute command took too long
-            timeout_embed = discord.Embed(title='Timeout', color=0xff0000)
-            timeout_embed.add_field(name='Message',
-                                    value=f'Traceroute took too long and was cancelled')
-            timeout_embed.set_footer(text=FOOTER_TEXT)
+            timeout_embed = skywizz.specific_error('Traceroute took too long '
+                                                   'and was cancelled')
             await processing_message.edit(embed=timeout_embed)
             return
 
         # Traceroute successful, create and send embed with results
-        results_embed = discord.Embed(title=f'Traceroute to {host}',
+        results_embed = embd.newembed(title=f'Traceroute to {host}',
+                                      description='',
                                       color=0x00ff00)
         results_embed.add_field(name='Results:',
                                 value=f'```{traceroute_result}```')
-        results_embed.set_footer(text=FOOTER_TEXT)
         await processing_message.edit(embed=results_embed)
 
 

@@ -1,10 +1,10 @@
 import discord
 import requests
 from discord.ext import commands
-
-from .utils.constants import FOOTER_TEXT
-from .utils.exceptions import APIRequestError
-from .utils.utility_functions import get_coordinates, check_request_status
+import skywizz
+import skywizz.tools.exceptions
+import skywizz.tools as tools
+import skywizz.tools.embed as embd
 
 
 class WeatherCommands(commands.Cog):
@@ -27,13 +27,11 @@ class WeatherCommands(commands.Cog):
         """
         if city_name is None:
             # Display error message if user does not give a city
-            error_embed = discord.Embed(title='Error', color=0xff0000)
-            error_embed.add_field(name='Message', value='Please provide a city to get the forecast')
-            error_embed.set_footer(text=FOOTER_TEXT)
+            error_embed = skywizz.specific_error('Please provide a city to get the forecast')
             await ctx.send(embed=error_embed)
             return
 
-        latitude, longitude = await get_coordinates(city_name)
+        latitude, longitude = await tools.get_coordinates(city_name)
 
         # Construct the API URL
         api_url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}" \
@@ -59,17 +57,16 @@ class WeatherCommands(commands.Cog):
         # Make the HTTP request
         response = requests.get(api_url)
         try:
-            check_request_status(response)
-        except APIRequestError:
+            tools.check_request_status(response)
+        except skywizz.tools.APIRequestError:
             # Display error message if API response fails
-            error_embed = discord.Embed(title='API Request Error', color=0xff0000)
-            error_embed.add_field(name='Message', value='Oops! Looks like there '
-                                                        'was an error fetching '
-                                                        'weather information '
-                                                        'for that city...')
-            error_embed.set_footer(text=FOOTER_TEXT)
+            error_embed = skywizz.specific_error('Oops! Looks like there '
+                                                 'was an error fetching '
+                                                 'weather information '
+                                                 'for that city...')
             await ctx.send(embed=error_embed)
             return
+
         data = response.json()
 
         # Process the JSON response as needed
@@ -81,17 +78,15 @@ class WeatherCommands(commands.Cog):
         min_temperature = data['daily']['temperature_2m_min'][0]
         precipitation_prob = data['daily']['precipitation_probability_max'][0]
 
-        embed = discord.Embed(title=f"Weather Forecast for {city_name}",
-                              description=f"Here's the forecast for {today_date} 🌦️",
-                              color=0x00ff00)
+        embed = embd.newembed(title=f"Weather Forecast for {city_name.capitalize()}",
+                              description=f"Here's the forecast for {today_date} 🌦️")
+
         embed.add_field(name="Sunrise", value=sunrise)
         embed.add_field(name="Sunset", value=sunset)
         embed.add_field(name="Max UV Index", value=max_uv_index)
         embed.add_field(name="🌡️Max Temperature", value=f"{max_temperature} °C")
         embed.add_field(name="Min Temperature", value=f"{min_temperature} °C")
         embed.add_field(name="Max Precipitation Probability", value=f"{precipitation_prob} %")
-
-        embed.set_footer(text=FOOTER_TEXT)
 
         await ctx.send(embed=embed)
 

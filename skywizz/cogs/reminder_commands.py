@@ -3,6 +3,8 @@ import datetime
 
 import discord
 from discord.ext import commands
+import skywizz
+import skywizz.tools.embed as embd
 
 
 class Reminder(commands.Cog):
@@ -26,23 +28,18 @@ class Reminder(commands.Cog):
         **Example:**
         - `!remindme 10 Take a break`
         """
-        reminder_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=duration)
+        reminder_time = datetime.datetime.utcnow() + datetime.timedelta(
+            minutes=duration)
 
-        embed = discord.Embed(
-            title=f"Reminder: {message}",
-            description=f"Set for {reminder_time.strftime('%Y-%m-%d %H:%M:%S')} UTC.",
-            color=0xffd700
-        )
+        embed = embd.newembed(title=f"Reminder: {message}",
+                              description=f"Set for {reminder_time.strftime('%Y-%m-%d %H:%M:%S')} UTC.",
+                              )
         embed.set_footer(text="Reminder set by {}".format(ctx.author.display_name))
         await ctx.send(embed=embed)
 
         await asyncio.sleep(duration * 60)
-
-        feedback_embed = discord.Embed(
-            title="Reminder",
-            description=f"{message}",
-            color=0x00ff00
-        )
+        feedback_embed = embd.newembed(title="Reminder",
+                                       description=f"{message}")
         feedback_embed.set_footer(text="Reminder sent by {}".format(self.bot.user.display_name))
         await ctx.author.send(embed=feedback_embed)
 

@@ -6,8 +6,8 @@ import whois
 
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-
-from .exceptions import APIRequestError
+from .exceptions import *
+from .embed import *
 
 
 def deprecated(func):
