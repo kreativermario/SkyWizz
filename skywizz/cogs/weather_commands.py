@@ -9,10 +9,12 @@ from .utils.utility_functions import get_coordinates, check_request_status
 
 class WeatherCommands(commands.Cog):
 
-    def __init__(self, bot):
+    def __init__(self, bot, logger):
         self.bot = bot
+        self.logger = logger
         self.hidden = False
         self.__cog_name__ = "Weather Commands"
+        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='forecast')
@@ -94,6 +96,5 @@ class WeatherCommands(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot):
-    print('Loading Weather Cog...')
-    await bot.add_cog(WeatherCommands(bot))
+async def setup(bot, logger):
+    await bot.add_cog(WeatherCommands(bot, logger))

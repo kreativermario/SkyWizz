@@ -6,10 +6,12 @@ from discord.ext import commands
 
 
 class Reminder(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, logger):
         self.bot = bot
+        self.logger = logger
         self.hidden = False
         self.__cog_name__ = "Reminder Commands"
+        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='remindme')
@@ -45,6 +47,5 @@ class Reminder(commands.Cog):
         await ctx.author.send(embed=feedback_embed)
 
 
-async def setup(bot):
-    print("Loading Reminder Commands...")
-    await bot.add_cog(Reminder(bot))
+async def setup(bot, logger):
+    await bot.add_cog(Reminder(bot, logger))

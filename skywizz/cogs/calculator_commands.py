@@ -6,11 +6,12 @@ from .utils.constants import FOOTER_TEXT
 
 class CalculatorCommands(commands.Cog):
 
-    def __init__(self, bot):
+    def __init__(self, bot, logger):
         self.bot = bot
+        self.logger = logger
         self.hidden = False
         self.__cog_name__ = "Calculator Commands"
-        print(bot.command_prefix)
+        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='sum', aliases=['somar'])
@@ -131,6 +132,5 @@ class CalculatorCommands(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot):
-    print('Loading Calculator Commands...')
-    await bot.add_cog(CalculatorCommands(bot))
+async def setup(bot, logger):
+    await bot.add_cog(CalculatorCommands(bot, logger))
