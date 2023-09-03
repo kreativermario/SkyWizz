@@ -27,22 +27,51 @@ def deprecated(func):
     return new_func
 
 
-async def get_coordinates(city_name):
+async def get_coordinates(city_name, country_name=None):
     """
-    Function that gets the GPS coordinates of a given city_name
+    Function that gets the GPS coordinates of a given city_name and
+    optionally a country name
     """
     async with aiohttp.ClientSession() as session:
         url = 'https://nominatim.openstreetmap.org/search'
+
         params = {
             "format": "json",
-            "city": city_name,
+            "q": city_name,  # Use "q" for query, which accepts city and country
         }
+
+        if country_name:
+            params["q"] = f"{city_name}, {country_name}"
+
         async with session.get(url, params=params) as response:
             data = await response.json()
             if data:
                 return float(data[0]["lat"]), float(data[0]["lon"])
             else:
-                raise ValueError("City not found")
+                raise ValueError("Location not found")
+
+
+async def reverse_gps(latitude, longitude):
+    """
+    Function that returns the city,country given GPS coordinates
+    """
+    async with aiohttp.ClientSession() as session:
+        url = 'https://nominatim.openstreetmap.org/reverse'
+        params = {
+            "format": "json",
+            "lat": latitude,
+            "lon": longitude,
+            "zoom": 10,
+        }
+        async with session.get(url, params=params) as response:
+            data = await response.json()
+            if data:
+                city = data['address']['city']
+                country = data['address']['country']
+                country_code = data['address']['country_code']
+                return city, country, country_code
+            else:
+                raise ValueError("Country not found")
 
 
 def check_request_status(response):

@@ -13,6 +13,10 @@ def version():
     return "v0.0.1"
 
 
+def footer():
+    return f"{skywizz.copyright()} - Running on {version()}"
+
+
 def config_version():
     return "0.1"  # do not edit this!
 

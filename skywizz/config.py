@@ -12,7 +12,7 @@ def bot_prefix():
 
 
 def bot_status():
-    default_prefix = f'{", ".join(skywizz.config.bot_prefix())} | SkyWizz.py {skywizz.version()}'
+    default_prefix = f'{", ".join(skywizz.config.bot_prefix())} | SkyWizz {skywizz.version()}'
     try:
         return os.getenv('BOT_STATUS', default_prefix)
     except:
