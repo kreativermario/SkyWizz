@@ -82,6 +82,44 @@ async def reverse_gps(latitude, longitude):
                 raise ValueError("Country not found")
 
 
+def return_weather_emoji(weather_code):
+    weather_emoji = {
+        0: "☀️ Clear sky",
+        1: "🌤️ Mainly clear",
+        2: "⛅ Partly cloudy",
+        3: "☁️ Overcast",
+        45: "🌫️ Fog",
+        48: "🌫️ Depositing Rime Fog",
+        51: "🌧️ Light Drizzle",
+        53: "🌧️🌧️ Moderate Drizzle",
+        55: "🌧️🌧️🌧️ Heavy Drizzle",
+        56: "🌧️❄️ Light Freezing Drizzle",
+        57: "🌧️❄️❄️ Dense Freezing Drizzle",
+        61: "💧 Slight Rain",
+        63: "💧💧 Moderate Rain",
+        65: "💧💧💧 Heavy Rain",
+        66: "🌨️❄️ Light Freezing Rain",
+        67: "🌨️❄️❄️ Heavy Freezing Rain",
+        71: "❄️ Slight Snowfall",
+        73: "❄️❄️ Moderate Snowfall",
+        75: "❄️❄️❄️ Heavy Snowfall",
+        77: "🌨️❄️ Snow Grains",
+        80: "🌦️ Slight Rain Showers",
+        81: "🌦️🌦️ Moderate Rain Showers",
+        82: "🌦️🌦️🌦️ Violent Rain Showers",
+        85: "❄️ Slight Snow Showers",
+        86: "❄️❄️ Heavy Snow Showers",
+        95: "⛈️ Slight or Moderate Thunderstorm",
+        96: "⛈️❄️ Thunderstorm with Slight Hail",
+        99: "⛈️❄️❄️ Thunderstorm with Heavy Hail",
+    }
+
+    # Get the corresponding emoji and weather description
+    emoji_description = weather_emoji.get(weather_code, "Unknown Weather")
+
+    return emoji_description.split(" ", 1)  # Split into emoji and description
+
+
 def check_request_status(response):
     """
     Check if the API response is successful

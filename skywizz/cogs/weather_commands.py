@@ -12,6 +12,7 @@ import skywizz.tools.embed as embd
 
 def create_forecast_embed(data, city, country, country_code, latitude, longitude):
     # Process the JSON response as needed
+    weather_code = data['daily']['weathercode'][0]
     today_date = data['daily']['time'][0]
     sunrise = data['daily']['sunrise'][0]
     sunset = data['daily']['sunset'][0]
@@ -34,9 +35,16 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
     else:
         flag_emoji = ''
 
-    embed = embd.newembed(title=f"Weather Forecast for {city}, {country}, "
-                                f"{flag_emoji}",
-                          description=f"Here's the forecast for {today_date} 🌦️")
+    weather_emoji, weather_description = tools.return_weather_emoji(weather_code)
+
+    embed = embd.newembed(title="Weather Forecast",
+                          description=f"Here's the forecast for {today_date}")
+    embed.add_field(name="🌍 Location",
+                    value=f"{city}, {country} {flag_emoji}",
+                    inline=False)
+    embed.add_field(name=f"{weather_emoji} Weather",
+                    value=weather_description,
+                    inline=False)
     embed.add_field(name="🌅 Sunrise",
                     value=sunrise_formatted)
     embed.add_field(name="🌇 Sunset",
@@ -54,7 +62,6 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
                     value=f"{precipitation_sum} mm",)
     embed.add_field(name="☔ Max Precipitation Probability",
                     value=f"{precipitation_prob} %",)
-
     embed.add_field(name="🛰️ GPS Coordinates",
                     value=f"`Latitude: {latitude}, "
                           f"Longitude: {longitude}`",
@@ -63,7 +70,7 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
     map_image_url = tools.get_map_image_url(latitude, longitude)
 
     # Add the map image as a field in the embed
-    embed.add_field(name="Map", value=f"[View Location]({map_image_url})")
+    embed.add_field(name="📌 Map", value=f"[View Location]({map_image_url})")
 
     return embed
 
