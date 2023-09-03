@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 import platform
 import socket
 import sys
@@ -10,7 +10,7 @@ from .messages import *
 
 
 def version():
-    return "v0.0.1"
+    return "v0.0.2 - John Dalton"
 
 
 def footer():
@@ -22,11 +22,11 @@ def config_version():
 
 
 def time():
-    return datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
+    return datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")
 
 
 def year():
-    return str(datetime.datetime.now().year)
+    return str(datetime.now().year)
 
 
 def copyright():

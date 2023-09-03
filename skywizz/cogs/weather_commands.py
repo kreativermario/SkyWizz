@@ -1,9 +1,9 @@
-import io
-
 import discord
 import requests
 import emoji
 from discord.ext import commands
+from datetime import datetime
+
 import skywizz
 import skywizz.tools.exceptions
 import skywizz.tools as tools
@@ -15,10 +15,19 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
     today_date = data['daily']['time'][0]
     sunrise = data['daily']['sunrise'][0]
     sunset = data['daily']['sunset'][0]
+    # Assuming sunrise and sunset are in ISO 8601 format, e.g., '2023-09-03T05:35'
+    sunrise_datetime = datetime.fromisoformat(sunrise)
+    sunset_datetime = datetime.fromisoformat(sunset)
+    sunrise_formatted = sunrise_datetime.strftime('%H:%M')
+    sunset_formatted = sunset_datetime.strftime('%H:%M')
     max_uv_index = data['daily']['uv_index_max'][0]
     max_temperature = data['daily']['temperature_2m_max'][0]
     min_temperature = data['daily']['temperature_2m_min'][0]
+    precipitation_sum = data['daily']['precipitation_sum'][0]
     precipitation_prob = data['daily']['precipitation_probability_max'][0]
+    wind_speed_max = data['daily']['windspeed_10m_max'][0]
+    wind_direction = data['daily']['winddirection_10m_dominant'][0]
+
     # Create flag emoji
     if country_code.lower() != 'n/a':
         flag_emoji = emoji.emojize(f":flag_{country_code.lower()}:")
@@ -28,18 +37,28 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
     embed = embd.newembed(title=f"Weather Forecast for {city}, {country}, "
                                 f"{flag_emoji}",
                           description=f"Here's the forecast for {today_date} 🌦️")
+    embed.add_field(name="🌅 Sunrise",
+                    value=sunrise_formatted)
+    embed.add_field(name="🌇 Sunset",
+                    value=sunset_formatted)
+    embed.add_field(name="☀️ Max UV Index",
+                    value=max_uv_index)
+    embed.add_field(name="🌡️ Max Temperature",
+                    value=f"{max_temperature} °C")
+    embed.add_field(name="❄️ Min Temperature",
+                    value=f"{min_temperature} °C")
+    embed.add_field(name="🌬️ Max Wind Speed",
+                    value=f"{wind_speed_max} km/h",)
+    embed.add_field(name="🪁 Wind Direction", value=f"{wind_direction}º")
+    embed.add_field(name="🌧️ Precipitation",
+                    value=f"{precipitation_sum} mm",)
+    embed.add_field(name="☔ Max Precipitation Probability",
+                    value=f"{precipitation_prob} %",)
 
-    embed.add_field(name="GPS Coordinates",
+    embed.add_field(name="🛰️ GPS Coordinates",
                     value=f"`Latitude: {latitude}, "
                           f"Longitude: {longitude}`",
                     inline=False)
-    embed.add_field(name="Sunrise", value=sunrise)
-    embed.add_field(name="Sunset", value=sunset)
-    embed.add_field(name="Max UV Index", value=max_uv_index)
-    embed.add_field(name="🌡️Max Temperature", value=f"{max_temperature} °C")
-    embed.add_field(name="Min Temperature", value=f"{min_temperature} °C")
-    embed.add_field(name="Max Precipitation Probability", value=f"{precipitation_prob} %")
-
     # Get the map image URL
     map_image_url = tools.get_map_image_url(latitude, longitude)
 
@@ -97,21 +116,20 @@ class WeatherCommands(commands.Cog):
             return
 
         # Construct the API URL
-        api_url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}" \
+        api_url = f"https://api.open-meteo.com/v1/forecast?" \
+                  f"latitude={latitude}" \
                   f"&longitude={longitude}" \
                   f"&daily=weathercode," \
                   f"temperature_2m_max," \
                   f"temperature_2m_min," \
-                  f"sunrise," \
-                  f"sunset," \
+                  f"sunrise,sunset," \
                   f"uv_index_max," \
                   f"precipitation_sum," \
-                  f"rain_sum," \
                   f"precipitation_probability_max," \
                   f"windspeed_10m_max," \
-                  f"windgusts_10m_max," \
                   f"winddirection_10m_dominant" \
-                  f"&timezone=auto"
+                  f"&timezone=auto" \
+                  f"&forecast_days=1"
 
         # Make the HTTP request
         response = requests.get(api_url)
