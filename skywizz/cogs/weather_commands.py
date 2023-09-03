@@ -1,3 +1,5 @@
+import io
+
 import discord
 import requests
 import emoji
@@ -37,6 +39,12 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
     embed.add_field(name="🌡️Max Temperature", value=f"{max_temperature} °C")
     embed.add_field(name="Min Temperature", value=f"{min_temperature} °C")
     embed.add_field(name="Max Precipitation Probability", value=f"{precipitation_prob} %")
+
+    # Get the map image URL
+    map_image_url = tools.get_map_image_url(latitude, longitude)
+
+    # Add the map image as a field in the embed
+    embed.add_field(name="Map", value=f"[View Location]({map_image_url})")
 
     return embed
 

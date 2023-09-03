@@ -51,6 +51,14 @@ async def get_coordinates(city_name, country_name=None):
                 raise ValueError("Location not found")
 
 
+def get_map_image_url(latitude, longitude, zoom=10):
+    """
+    Function that returns an image given GPS coordinates
+    """
+    map_image_url = f"https://www.openstreetmap.org/#map={zoom}/{latitude}/{longitude}"
+    return map_image_url
+
+
 async def reverse_gps(latitude, longitude):
     """
     Function that returns the city,country given GPS coordinates
