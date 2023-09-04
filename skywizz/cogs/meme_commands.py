@@ -5,8 +5,9 @@ import mimetypes
 import discord
 import requests
 from discord.ext import commands
-from .utils.utility_functions import caption_image
-from .utils.constants import FOOTER_TEXT
+import skywizz
+import skywizz.tools as tools
+import skywizz.tools.embed as embd
 
 SUPPORTED_MIMETYPES = ["image/jpeg", "image/png", "image/webp"]
 
@@ -40,23 +41,30 @@ class MemeCog(commands.Cog):
         """
         # Must have caption text
         if not caption_text:
-            await ctx.message.reply(
-                "Please include some caption text after the `!caption` "
-                "command. For example `!caption \"Hello world!\"")
+            embed = skywizz.specific_error("Please include some caption "
+                                           "text after the `!caption` "
+                                           "command. "
+                                           "For example "
+                                           "`!caption \"Hello world!\"")
+            await ctx.message.reply(embed=embed)
             return
 
         # Must have a file attached
         if ctx.message.attachments:
             image_url = ctx.message.attachments[0].url
         else:
-            await ctx.message.reply('Please attach an image for me to caption.')
+            embed = skywizz.specific_error('Please attach '
+                                           'an image for me to caption.')
+            await ctx.message.reply(embed=embed)
             return
 
         # File must be an image
         if mimetypes.guess_type(image_url)[0] not in SUPPORTED_MIMETYPES:
-            await ctx.message.reply(
-                'Sorry, the file you attached is not a supported image format. '
-                'Please upload a PNG, JPEG or WebP image.')
+            embed = skywizz.specific_error('Sorry, the file you attached is '
+                                           'not a supported image format. '
+                                           'Please upload a PNG, JPEG or '
+                                           'WebP image.')
+            await ctx.message.reply(embed=embed)
             return
 
         # Fetch image file
@@ -66,36 +74,11 @@ class MemeCog(commands.Cog):
         image_filename = ctx.message.attachments[0].filename
 
         # Caption image
-        final_image = caption_image(BytesIO(response.content), caption_text)
+        final_image = tools.caption_image(BytesIO(response.content), caption_text)
 
         # Send reply
         await ctx.message.reply(file=discord.File(BytesIO(final_image),
-                                filename=f'captioned-{image_filename}'))
-
-    @commands.cooldown(2, 60, commands.BucketType.user)
-    @commands.command(name='tiocosta', alias=['antoniocosta'])
-    async def tiocosta(self, ctx):
-        """
-        Command that sends a random quote by António Costa
-
-        **Example:**
-        - `!tiocosta`
-
-        **Usage:**
-        - `tiocosta`
-
-        Usage: tiocosta
-        """
-
-        embed = discord.Embed(
-            title="Tio Costa",
-            description="Ontem foi ontem, hoje é um novo dia, muito bom céu,"
-                        " ta tao bonito, adeus",
-            color=discord.Color.red()
-        )
-        embed.set_footer(text=FOOTER_TEXT)
-
-        await ctx.send(embed=embed)
+                                                  filename=f'captioned-{image_filename}'))
 
 
 async def setup(bot, logger):

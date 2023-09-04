@@ -1,7 +1,8 @@
 import discord
 from discord.ext import commands
-from .utils.utility_functions import product, subtract
-from .utils.constants import FOOTER_TEXT
+import skywizz
+import skywizz.tools as tools
+import skywizz.tools.embed as embd
 
 
 class CalculatorCommands(commands.Cog):
@@ -14,7 +15,7 @@ class CalculatorCommands(commands.Cog):
         self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(10, 30, commands.BucketType.user)
-    @commands.command(name='sum', aliases=['somar'])
+    @commands.command(name='sum')
     async def sum_numbers(self, ctx, *args):
         """
         Command that sums two given numbers
@@ -30,7 +31,6 @@ class CalculatorCommands(commands.Cog):
         - `sum <number1> <number2>`
         """
         valid_numbers = []
-        color = discord.Color.blue()
         for arg in args:
             try:
                 num = float(arg)
@@ -39,22 +39,19 @@ class CalculatorCommands(commands.Cog):
                 pass
 
         if not valid_numbers:
-            text = 'No valid numbers provided!'
+            error_embed = skywizz.messages.invalid_argument(given_arg=args,
+                                                            valid_args=
+                                                            '5, 4, 10, ...')
+            await ctx.send(embed=error_embed)
+            return
         else:
             text = str(sum(valid_numbers))
-
-        embed = discord.Embed(
-            title='Sum Result',
-            description=f'{ctx.author.mention} {text}',
-            color=color
-        )
-        embed.set_footer(text=FOOTER_TEXT)
-
+        embed = embd.newembed(title='Sum Result',
+                              description=f'{ctx.author.mention} {text}')
         await ctx.send(embed=embed)
 
     @commands.cooldown(10, 30, commands.BucketType.user)
-    @commands.command(name='product', aliases=['multiplicar', 'multi',
-                                               'prod'])
+    @commands.command(name='product', aliases=['prod'])
     async def multiply(self, ctx, *args):
         """
         Command that multiplies two numbers
@@ -70,7 +67,6 @@ class CalculatorCommands(commands.Cog):
         - `product <number1> <number2>`
         """
         valid_numbers = []
-        color = discord.Color.blue()
         for arg in args:
             try:
                 num = float(arg)
@@ -79,21 +75,19 @@ class CalculatorCommands(commands.Cog):
                 pass
 
         if not valid_numbers:
-            text = 'No valid numbers provided!'
+            error_embed = skywizz.messages.invalid_argument(given_arg=args,
+                                                            valid_args=
+                                                            '5, 4, 10, ...')
+            await ctx.send(embed=error_embed)
+            return
         else:
-            text = str(product(valid_numbers))
-
-        embed = discord.Embed(
-            title='Product Result',
-            description=f'{ctx.author.mention} {text}',
-            color=color
-        )
-        embed.set_footer(text=FOOTER_TEXT)
-
+            text = str(tools.product(valid_numbers))
+        embed = embd.newembed(title='Product Result',
+                              description=f'{ctx.author.mention} {text}')
         await ctx.send(embed=embed)
 
     @commands.cooldown(10, 30, commands.BucketType.user)
-    @commands.command(name='subtract', aliases=['subtrair', 'subtrai'])
+    @commands.command(name='subtract')
     async def subtract_numbers(self, ctx, *args):
         """
         Command that subtracts one number from another
@@ -109,7 +103,6 @@ class CalculatorCommands(commands.Cog):
         - `subtract <number1> <number2>`
         """
         valid_numbers = []
-        color = discord.Color.blue()
         for arg in args:
             try:
                 num = float(arg)
@@ -118,16 +111,16 @@ class CalculatorCommands(commands.Cog):
                 pass
 
         if not valid_numbers:
-            text = 'No valid numbers provided!'
+            error_embed = skywizz.messages.invalid_argument(given_arg=args,
+                                                            valid_args=
+                                                            '5, 4, 10, ...')
+            await ctx.send(embed=error_embed)
+            return
         else:
-            text = str(subtract(valid_numbers))
+            text = str(tools.subtract(valid_numbers))
 
-        embed = discord.Embed(
-            title='Subtraction Result',
-            description=f'{ctx.author.mention} {text}',
-            color=color
-        )
-        embed.set_footer(text=FOOTER_TEXT)
+        embed = embd.newembed(title='Subtraction Result',
+                              description=f'{ctx.author.mention} {text}')
 
         await ctx.send(embed=embed)
 

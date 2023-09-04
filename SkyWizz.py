@@ -78,20 +78,6 @@ def global_cooldown_check(ctx):
     return True
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
-        embed = discord.Embed(
-            title="Cooldown",
-            description=f"Slow down Speedy Gonzales! "
-                        f"Please wait {error.retry_after:.2f} seconds before using that command again.",
-            color=discord.Color.red(),
-        )
-        await ctx.send(embed=embed)
-    else:
-        raise error
-
-
 try:
     discord_time_start = time.perf_counter()
     bot.run(skywizz.config.bot_token(), log_handler=handler,

@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+import skywizz.tools.embed as embd
 
 
 class GeneralCommands(commands.Cog):
@@ -20,9 +21,8 @@ class GeneralCommands(commands.Cog):
         **Usage:**
         - `server`
         """
-        embed = discord.Embed(title=f"{ctx.guild.name} Info",
-                              description="Information of this Server",
-                              color=0x00ff00)
+        embed = embd.newembed(title=f"{ctx.guild.name} Info",
+                              description="Information of this Server")
         embed.add_field(name='ℹ️Server ID', value=f"{ctx.guild.id}",
                         inline=True)
         embed.add_field(name='📆Created On',
@@ -32,12 +32,11 @@ class GeneralCommands(commands.Cog):
                         inline=True)
         embed.add_field(name='👥Members',
                         value=f'{ctx.guild.member_count} Members',
-                        inline=True)
+                        inline=False)
         embed.add_field(name='💬Channels',
                         value=f'{len(ctx.guild.text_channels)} Text | '
                               f'{len(ctx.guild.voice_channels)} Voice',
-                        inline=True)
-        embed.set_footer(text='Powered By SkyWizz')
+                        inline=False)
         await ctx.send(embed=embed)
 
 
