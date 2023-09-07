@@ -18,6 +18,11 @@ nav:
       - Calculator Commands: skywizz/calculator_commands.md
       - General Commands: skywizz/general_commands.md
       - Help Commands: skywizz/help_commands.md
+      - Meme Commands: skywizz/meme_commands.md
+      - Networking Commands: skywizz/networking_commands.md
+      - Reminder Commands: skywizz/reminder_commands.md
+      - Weather Commands: skywizz/weather_commands.md
+
   - About:
     - Code of Conduct: about/code_of_conduct.md
     - Contributing: about/contributing.md
