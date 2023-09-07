@@ -44,6 +44,31 @@ docs: update README with new screenshots
 ## Code Style
   
 We use PEP 8 guidelines for Python code style. Please ensure your code follows these guidelines.
+
+## Documentation
+
+We follow Google style for documentation.
+
+Here is an example:
+```python
+def add(a: Union[float, int], b: Union[float, int]) -> float:
+    """Compute and return the sum of two numbers.
+
+    Examples:
+        >>> add(4.0, 2.0)
+        6.0
+        >>> add(4, 2)
+        6.0
+
+    Args:
+        a (float): A number representing the first addend in the addition.
+        b (float): A number representing the second addend in the addition.
+
+    Returns:
+        float: A number representing the arithmetic sum of `a` and `b`.
+    """
+    return float(a + b)
+```
   
 ## Issues and Bugs
   

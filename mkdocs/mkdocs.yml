@@ -1,0 +1,24 @@
+site_name: SkyWizz Documentation
+
+docs_dir: docs
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ['..']
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Dependencies: user-guide/dependencies.md
+    - Installation: user-guide/installation.md
+  - Documentation:
+    - SkyWizz: skywizz/skywizz.md
+  - About:
+    - Code of Conduct: code_of_conduct.md
+    - Contributing: contributing.md
+    - License: license.md
+    - Release Notes: release-notes.md
+
+theme: readthedocs
