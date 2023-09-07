@@ -9,15 +9,16 @@ class GeneralCommands(commands.Cog):
     Hosts commands such as server info.
     This class extends `commands.Cog` from discord.
 
-    Args:
+    **Args:**
         bot: Discord API client
         logger: Logger object for logging purposes
 
-    Attributes:
+    **Attributes:**
         bot: Discord API client
         logger: Logger object for logging purposes
-        hidden (bool): boolean to determine if list of command
-                        should show in help command or not.
+        hidden (bool): Attribute that determines if this list of
+                 command should show in the help command or not.
+                 If `false`, will show in help.
         __cog_name__ (str): Command designation for the help command
     """
 

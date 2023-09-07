@@ -11,11 +11,11 @@ class CalculatorCommands(commands.Cog):
     sum, multiply and subtract.
     This class extends `commands.Cog` from discord.
 
-    Args:
+    **Args:**
         bot: Discord API client
         logger: Logger object for logging purposes
 
-    Attributes:
+    **Attributes:**
         bot: Discord API client
         logger: Logger object for logging purposes
         hidden (bool): Attribute that determines if this list of
@@ -37,7 +37,7 @@ class CalculatorCommands(commands.Cog):
         """
         Command that sums two or more given numbers
 
-        Args:
+        **Args:**
             *args (float): Variable length argument list, this means you can have multiple numbers, but must pass 2 numbers.
 
         **Example:**
