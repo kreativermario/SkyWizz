@@ -4,6 +4,22 @@ import skywizz.tools.embed as embd
 
 
 class GeneralCommands(commands.Cog):
+    """
+    Class that holds general commands about the bot or server
+    Hosts commands such as server info.
+    This class extends `commands.Cog` from discord.
+
+    Args:
+        bot: Discord API client
+        logger: Logger object for logging purposes
+
+    Attributes:
+        bot: Discord API client
+        logger: Logger object for logging purposes
+        hidden (bool): boolean to determine if list of command
+                        should show in help command or not.
+        __cog_name__ (str): Command designation for the help command
+    """
 
     def __init__(self, bot, logger):
         self.bot = bot
@@ -16,10 +32,14 @@ class GeneralCommands(commands.Cog):
     @commands.command(name='server')
     async def server_info(self, ctx):
         """
-        Shows details about the current server
+        Command that shows details about the current server
 
         **Usage:**
-        - `server`
+            `!server`
+
+        **Returns:**
+            Embed with server information
+
         """
         embed = embd.newembed(title=f"{ctx.guild.name} Info",
                               description="Information of this Server")
