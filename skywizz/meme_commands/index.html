@@ -140,7 +140,90 @@
           <p class="doc doc-class-bases">
             Bases: <code><span title="discord.ext.commands.Cog">Cog</span></code></p>
 
+  
+      <p>Class that holds meme commands
+This class extends <code>commands.Cog</code> from discord.</p>
 
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b>bot</b>
+              –
+              <div class="doc-md-description">
+                <p>Discord API client</p>
+              </div>
+            </li>
+            <li>
+              <b>logger</b>
+              –
+              <div class="doc-md-description">
+                <p>Logger object for logging purposes</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b>bot</b>
+              –
+              <div class="doc-md-description">
+                <p>Discord API client</p>
+              </div>
+            </li>
+            <li>
+              <b>logger</b>
+              –
+              <div class="doc-md-description">
+                <p>Logger object for logging purposes</p>
+              </div>
+            </li>
+            <li>
+              <b>hidden</b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>Attribute that determines if this list of
+     command should show in the help command or not.
+     If <code>false</code>, will show in help.</p>
+              </div>
+            </li>
+            <li>
+              <b>__cog_name__</b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Command designation for the help command</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
             <details class="quote">
               <summary>Source code in <code>/Users/caoma/Documents/Programming/GIT/SkyWizz/skywizz/cogs/meme_commands.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
@@ -209,7 +292,38 @@
 <span class="normal">78</span>
 <span class="normal">79</span>
 <span class="normal">80</span>
-<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MemeCog</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">Cog</span><span class="p">):</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">MemeCog</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">Cog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class that holds meme commands</span>
+<span class="sd">        This class extends `commands.Cog` from discord.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            bot: Discord API client</span>
+<span class="sd">            logger: Logger object for logging purposes</span>
+
+<span class="sd">        Attributes:</span>
+<span class="sd">            bot: Discord API client</span>
+<span class="sd">            logger: Logger object for logging purposes</span>
+<span class="sd">            hidden (bool): Attribute that determines if this list of</span>
+<span class="sd">                     command should show in the help command or not.</span>
+<span class="sd">                     If `false`, will show in help.</span>
+<span class="sd">            __cog_name__ (str): Command designation for the help command</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bot</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bot</span> <span class="o">=</span> <span class="n">bot</span>
@@ -222,19 +336,17 @@
     <span class="nd">@commands</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;caption&#39;</span><span class="p">)</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">caption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">caption_text</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Command that creates a caption from a given image</span>
+<span class="sd">        Command that places a caption from a given image</span>
 <span class="sd">        Attention: You must send an image along with the command!</span>
 
-<span class="sd">        **Parameters:**</span>
-<span class="sd">        - image_caption: The image&#39;s caption</span>
+<span class="sd">        Args:</span>
+<span class="sd">            caption_text (str): Desired caption of the image</span>
 
-<span class="sd">        **Example:**</span>
-<span class="sd">        - `!caption &quot;Hello World&quot;`</span>
+<span class="sd">        Example:</span>
+<span class="sd">            `!caption &quot;Hello World&quot;`</span>
 
-<span class="sd">        **Usage:**</span>
-<span class="sd">        - `caption &lt;image_caption&gt;`</span>
-
-<span class="sd">        Usage: caption &lt;image_caption&gt;</span>
+<span class="sd">        Usage:</span>
+<span class="sd">            `caption &lt;image_caption&gt;`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Must have caption text</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">caption_text</span><span class="p">:</span>
@@ -271,7 +383,8 @@
         <span class="n">image_filename</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">attachments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span>
 
         <span class="c1"># Caption image</span>
-        <span class="n">final_image</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">caption_image</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">),</span> <span class="n">caption_text</span><span class="p">)</span>
+        <span class="n">final_image</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">caption_image</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">),</span>
+                                          <span class="n">caption_text</span><span class="p">)</span>
 
         <span class="c1"># Send reply</span>
         <span class="k">await</span> <span class="n">ctx</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">discord</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">final_image</span><span class="p">),</span>
@@ -309,35 +422,45 @@
 
   <div class="doc doc-contents ">
   
-      <p>Command that creates a caption from a given image
+      <p>Command that places a caption from a given image
 Attention: You must send an image along with the command!</p>
-<p><strong>Parameters:</strong>
-- image_caption: The image's caption</p>
-<p><strong>Example:</strong>
-- <code>!caption "Hello World"</code></p>
-<p><strong>Usage:</strong>
-- <code>caption &lt;image_caption&gt;</code></p>
-<p>Usage: caption <image_caption></p>
 
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b>caption_text</b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Desired caption of the image</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<details class="example" open>
+  <summary>Example</summary>
+  <p><code>!caption "Hello World"</code></p>
+</details>
+<details class="usage" open>
+  <summary>Usage</summary>
+  <p><code>caption &lt;image_caption&gt;</code></p>
+</details>
           <details class="quote">
             <summary> <code>/Users/caoma/Documents/Programming/GIT/SkyWizz/skywizz/cogs/meme_commands.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
-<span class="normal">33</span>
-<span class="normal">34</span>
-<span class="normal">35</span>
-<span class="normal">36</span>
-<span class="normal">37</span>
-<span class="normal">38</span>
-<span class="normal">39</span>
-<span class="normal">40</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">40</span>
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
@@ -378,23 +501,36 @@ Attention: You must send an image along with the command!</p>
 <span class="normal">78</span>
 <span class="normal">79</span>
 <span class="normal">80</span>
-<span class="normal">81</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span>
+<span class="normal">86</span>
+<span class="normal">87</span>
+<span class="normal">88</span>
+<span class="normal">89</span>
+<span class="normal">90</span>
+<span class="normal">91</span>
+<span class="normal">92</span>
+<span class="normal">93</span>
+<span class="normal">94</span>
+<span class="normal">95</span>
+<span class="normal">96</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
 <span class="nd">@commands</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;caption&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">caption</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="n">caption_text</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Command that creates a caption from a given image</span>
+<span class="sd">    Command that places a caption from a given image</span>
 <span class="sd">    Attention: You must send an image along with the command!</span>
 
-<span class="sd">    **Parameters:**</span>
-<span class="sd">    - image_caption: The image&#39;s caption</span>
+<span class="sd">    Args:</span>
+<span class="sd">        caption_text (str): Desired caption of the image</span>
 
-<span class="sd">    **Example:**</span>
-<span class="sd">    - `!caption &quot;Hello World&quot;`</span>
+<span class="sd">    Example:</span>
+<span class="sd">        `!caption &quot;Hello World&quot;`</span>
 
-<span class="sd">    **Usage:**</span>
-<span class="sd">    - `caption &lt;image_caption&gt;`</span>
-
-<span class="sd">    Usage: caption &lt;image_caption&gt;</span>
+<span class="sd">    Usage:</span>
+<span class="sd">        `caption &lt;image_caption&gt;`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Must have caption text</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">caption_text</span><span class="p">:</span>
@@ -431,7 +567,8 @@ Attention: You must send an image along with the command!</p>
     <span class="n">image_filename</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">attachments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">filename</span>
 
     <span class="c1"># Caption image</span>
-    <span class="n">final_image</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">caption_image</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">),</span> <span class="n">caption_text</span><span class="p">)</span>
+    <span class="n">final_image</span> <span class="o">=</span> <span class="n">tools</span><span class="o">.</span><span class="n">caption_image</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">),</span>
+                                      <span class="n">caption_text</span><span class="p">)</span>
 
     <span class="c1"># Send reply</span>
     <span class="k">await</span> <span class="n">ctx</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply</span><span class="p">(</span><span class="n">file</span><span class="o">=</span><span class="n">discord</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">final_image</span><span class="p">),</span>

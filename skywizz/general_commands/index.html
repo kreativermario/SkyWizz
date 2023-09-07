@@ -140,7 +140,91 @@
           <p class="doc doc-class-bases">
             Bases: <code><span title="discord.ext.commands.Cog">Cog</span></code></p>
 
+  
+      <p>Class that holds general commands about the bot or server
+Hosts commands such as server info.
+This class extends <code>commands.Cog</code> from discord.</p>
 
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b>bot</b>
+              –
+              <div class="doc-md-description">
+                <p>Discord API client</p>
+              </div>
+            </li>
+            <li>
+              <b>logger</b>
+              –
+              <div class="doc-md-description">
+                <p>Logger object for logging purposes</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Attributes:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b>bot</b>
+              –
+              <div class="doc-md-description">
+                <p>Discord API client</p>
+              </div>
+            </li>
+            <li>
+              <b>logger</b>
+              –
+              <div class="doc-md-description">
+                <p>Logger object for logging purposes</p>
+              </div>
+            </li>
+            <li>
+              <b>hidden</b>
+                  (<code>bool</code>)
+              –
+              <div class="doc-md-description">
+                <p>Attribute that determines if this list of
+     command should show in the help command or not.
+     If <code>false</code>, will show in help.</p>
+              </div>
+            </li>
+            <li>
+              <b>__cog_name__</b>
+                  (<code>str</code>)
+              –
+              <div class="doc-md-description">
+                <p>Command designation for the help command</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
             <details class="quote">
               <summary>Source code in <code>/Users/caoma/Documents/Programming/GIT/SkyWizz/skywizz/cogs/general_commands.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 6</span>
@@ -177,7 +261,42 @@
 <span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">GeneralCommands</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">Cog</span><span class="p">):</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">GeneralCommands</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">Cog</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that holds general commands about the bot or server</span>
+<span class="sd">    Hosts commands such as server info.</span>
+<span class="sd">    This class extends `commands.Cog` from discord.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        bot: Discord API client</span>
+<span class="sd">        logger: Logger object for logging purposes</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        bot: Discord API client</span>
+<span class="sd">        logger: Logger object for logging purposes</span>
+<span class="sd">        hidden (bool): Attribute that determines if this list of</span>
+<span class="sd">                 command should show in the help command or not.</span>
+<span class="sd">                 If `false`, will show in help.</span>
+<span class="sd">        __cog_name__ (str): Command designation for the help command</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bot</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bot</span> <span class="o">=</span> <span class="n">bot</span>
@@ -190,10 +309,11 @@
     <span class="nd">@commands</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;server&#39;</span><span class="p">)</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">server_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Shows details about the current server</span>
+<span class="sd">        Command that shows details about the current server</span>
 
-<span class="sd">        **Usage:**</span>
-<span class="sd">        - `server`</span>
+<span class="sd">        Usage:</span>
+<span class="sd">            `!server`</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">embed</span> <span class="o">=</span> <span class="n">embd</span><span class="o">.</span><span class="n">newembed</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">guild</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> Info&quot;</span><span class="p">,</span>
                               <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Information of this Server&quot;</span><span class="p">)</span>
@@ -245,30 +365,15 @@
 
   <div class="doc doc-contents ">
   
-      <p>Shows details about the current server</p>
-<p><strong>Usage:</strong>
-- <code>server</code></p>
+      <p>Command that shows details about the current server</p>
 
+<details class="usage" open>
+  <summary>Usage</summary>
+  <p><code>!server</code></p>
+</details>
           <details class="quote">
             <summary> <code>/Users/caoma/Documents/Programming/GIT/SkyWizz/skywizz/cogs/general_commands.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span>
-<span class="normal">29</span>
-<span class="normal">30</span>
-<span class="normal">31</span>
-<span class="normal">32</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">32</span>
 <span class="normal">33</span>
 <span class="normal">34</span>
 <span class="normal">35</span>
@@ -276,14 +381,33 @@
 <span class="normal">37</span>
 <span class="normal">38</span>
 <span class="normal">39</span>
-<span class="normal">40</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
 <span class="nd">@commands</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;server&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">server_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Shows details about the current server</span>
+<span class="sd">    Command that shows details about the current server</span>
 
-<span class="sd">    **Usage:**</span>
-<span class="sd">    - `server`</span>
+<span class="sd">    Usage:</span>
+<span class="sd">        `!server`</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">embed</span> <span class="o">=</span> <span class="n">embd</span><span class="o">.</span><span class="n">newembed</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">guild</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> Info&quot;</span><span class="p">,</span>
                           <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Information of this Server&quot;</span><span class="p">)</span>

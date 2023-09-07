@@ -143,7 +143,7 @@
   
       <p>Class that holds the commands related to calculator functions such as
 sum, multiply and subtract.
-This class extends commands.Cog from discord.</p>
+This class extends <code>commands.Cog</code> from discord.</p>
 
 
 
@@ -209,7 +209,7 @@ This class extends commands.Cog from discord.</p>
               <div class="doc-md-description">
                 <p>Attribute that determines if this list of
      command should show in the help command or not.
-     If false, it will show in the help command.</p>
+     If <code>false</code>, will show in help.</p>
               </div>
             </li>
             <li>
@@ -360,28 +360,11 @@ This class extends commands.Cog from discord.</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CalculatorCommands</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">Cog</span><span class="p">):</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">CalculatorCommands</span><span class="p">(</span><span class="n">commands</span><span class="o">.</span><span class="n">Cog</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Class that holds the commands related to calculator functions such as</span>
 <span class="sd">    sum, multiply and subtract.</span>
-<span class="sd">    This class extends commands.Cog from discord.</span>
+<span class="sd">    This class extends `commands.Cog` from discord.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        bot: Discord API client</span>
@@ -392,7 +375,7 @@ This class extends commands.Cog from discord.</p>
 <span class="sd">        logger: Logger object for logging purposes</span>
 <span class="sd">        hidden (bool): Attribute that determines if this list of</span>
 <span class="sd">                 command should show in the help command or not.</span>
-<span class="sd">                 If false, it will show in the help command.</span>
+<span class="sd">                 If `false`, will show in help.</span>
 <span class="sd">        __cog_name__ (str): Command designation for the help command</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -412,18 +395,11 @@ This class extends commands.Cog from discord.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            *args (float): Variable length argument list, this means you can have multiple numbers, but must pass 2 numbers.</span>
 
-<span class="sd">        **Example:**</span>
+<span class="sd">        Example:</span>
 <span class="sd">            `!sum 50 90`</span>
 
-<span class="sd">        **Usage:**</span>
+<span class="sd">        Usage:</span>
 <span class="sd">            `sum &lt;number1&gt; &lt;number2&gt; &lt;...&gt;`</span>
-
-<span class="sd">        **Returns:**</span>
-<span class="sd">            Returns an embed with the result</span>
-
-<span class="sd">        **Raises:**</span>
-<span class="sd">            InvalidArgument: If the given arguments are not numbers, will send</span>
-<span class="sd">                            an error embed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">valid_numbers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
@@ -451,20 +427,15 @@ This class extends commands.Cog from discord.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Command that multiplies two or more numbers</span>
 
-<span class="sd">        **Args:**</span>
+<span class="sd">        Args:</span>
 <span class="sd">            *args (float): Variable length argument list. This means it receives multiple numbers but must pass 2 numbers minimum.</span>
 
-<span class="sd">        **Example:**</span>
+<span class="sd">        Example:</span>
 <span class="sd">            `!product 50 10`</span>
 
-<span class="sd">        **Usage:**</span>
+<span class="sd">        Usage:</span>
 <span class="sd">            `product &lt;number1&gt; &lt;number2&gt; &lt;...&gt;`</span>
 
-<span class="sd">        **Returns:**</span>
-<span class="sd">            Returns an embed with the result</span>
-
-<span class="sd">        **Raises:**</span>
-<span class="sd">            InvalidArgument: if the arguments are not numbers, will send an error embed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">valid_numbers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
@@ -492,20 +463,15 @@ This class extends commands.Cog from discord.</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Command that subtracts multiple numbers from another</span>
 
-<span class="sd">         **Parameters:**</span>
+<span class="sd">         Parameters:</span>
 <span class="sd">            *args (float): Variable length argument list. This means it receives multiple numbers but must receive atleast two.</span>
 
-<span class="sd">        **Example:**</span>
+<span class="sd">        Example:</span>
 <span class="sd">            `!subtract 50 10.5`</span>
 
-<span class="sd">        **Usage:**</span>
+<span class="sd">        Usage:</span>
 <span class="sd">            `subtract &lt;number1&gt; &lt;number2&gt; &lt;...&gt;`</span>
 
-<span class="sd">        **Returns:**</span>
-<span class="sd">            An embed with the result</span>
-
-<span class="sd">        **Raises:**</span>
-<span class="sd">            InvalidArgument: if the arguments are not numbers</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">valid_numbers</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
@@ -562,20 +528,52 @@ This class extends commands.Cog from discord.</p>
   <div class="doc doc-contents ">
   
       <p>Command that multiplies two or more numbers</p>
-<p><strong>Args:</strong>
-    *args (float): Variable length argument list. This means it receives multiple numbers but must pass 2 numbers minimum.</p>
-<p><strong>Example:</strong>
-    <code>!product 50 10</code></p>
-<p><strong>Usage:</strong>
-    <code>product &lt;number1&gt; &lt;number2&gt; &lt;...&gt;</code></p>
-<p><strong>Returns:</strong>
-    Returns an embed with the result</p>
-<p><strong>Raises:</strong>
-    InvalidArgument: if the arguments are not numbers, will send an error embed</p>
 
+
+
+<table class="field-list">
+  <colgroup>
+    <col class="field-name" />
+    <col class="field-body" />
+  </colgroup>
+  <tbody valign="top">
+    <tr class="field">
+      <th class="field-name">Parameters:</th>
+      <td class="field-body">
+        <ul class="first simple">
+            <li>
+              <b>*args</b>
+                  (<code>float</code>, default:
+                      <code>()</code>
+)
+              –
+              <div class="doc-md-description">
+                <p>Variable length argument list. This means it receives multiple numbers but must pass 2 numbers minimum.</p>
+              </div>
+            </li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<details class="example" open>
+  <summary>Example</summary>
+  <p><code>!product 50 10</code></p>
+</details>
+<details class="usage" open>
+  <summary>Usage</summary>
+  <p><code>product &lt;number1&gt; &lt;number2&gt; &lt;...&gt;</code></p>
+</details>
           <details class="quote">
             <summary> <code>/Users/caoma/Documents/Programming/GIT/SkyWizz/skywizz/cogs/calculator_commands.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 76</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
 <span class="normal"> 77</span>
 <span class="normal"> 78</span>
 <span class="normal"> 79</span>
@@ -602,38 +600,21 @@ This class extends commands.Cog from discord.</p>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
-<span class="normal">103</span>
-<span class="normal">104</span>
-<span class="normal">105</span>
-<span class="normal">106</span>
-<span class="normal">107</span>
-<span class="normal">108</span>
-<span class="normal">109</span>
-<span class="normal">110</span>
-<span class="normal">111</span>
-<span class="normal">112</span>
-<span class="normal">113</span>
-<span class="normal">114</span>
-<span class="normal">115</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+<span class="normal">103</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
 <span class="nd">@commands</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;product&#39;</span><span class="p">,</span> <span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;prod&#39;</span><span class="p">])</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">multiply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Command that multiplies two or more numbers</span>
 
-<span class="sd">    **Args:**</span>
+<span class="sd">    Args:</span>
 <span class="sd">        *args (float): Variable length argument list. This means it receives multiple numbers but must pass 2 numbers minimum.</span>
 
-<span class="sd">    **Example:**</span>
+<span class="sd">    Example:</span>
 <span class="sd">        `!product 50 10`</span>
 
-<span class="sd">    **Usage:**</span>
+<span class="sd">    Usage:</span>
 <span class="sd">        `product &lt;number1&gt; &lt;number2&gt; &lt;...&gt;`</span>
 
-<span class="sd">    **Returns:**</span>
-<span class="sd">        Returns an embed with the result</span>
-
-<span class="sd">    **Raises:**</span>
-<span class="sd">        InvalidArgument: if the arguments are not numbers, will send an error embed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">valid_numbers</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
@@ -679,20 +660,32 @@ This class extends commands.Cog from discord.</p>
   <div class="doc doc-contents ">
   
       <p>Command that subtracts multiple numbers from another</p>
-<p><strong>Parameters:</strong>
+<p>Parameters:
     *args (float): Variable length argument list. This means it receives multiple numbers but must receive atleast two.</p>
-<p><strong>Example:</strong>
-    <code>!subtract 50 10.5</code></p>
-<p><strong>Usage:</strong>
-    <code>subtract &lt;number1&gt; &lt;number2&gt; &lt;...&gt;</code></p>
-<p><strong>Returns:</strong>
-    An embed with the result</p>
-<p><strong>Raises:</strong>
-    InvalidArgument: if the arguments are not numbers</p>
 
+<details class="example" open>
+  <summary>Example</summary>
+  <p><code>!subtract 50 10.5</code></p>
+</details>
+<details class="usage" open>
+  <summary>Usage</summary>
+  <p><code>subtract &lt;number1&gt; &lt;number2&gt; &lt;...&gt;</code></p>
+</details>
           <details class="quote">
             <summary> <code>/Users/caoma/Documents/Programming/GIT/SkyWizz/skywizz/cogs/calculator_commands.py</code></summary>
-            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
 <span class="normal">120</span>
@@ -716,43 +709,21 @@ This class extends commands.Cog from discord.</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span>
-<span class="normal">142</span>
-<span class="normal">143</span>
-<span class="normal">144</span>
-<span class="normal">145</span>
-<span class="normal">146</span>
-<span class="normal">147</span>
-<span class="normal">148</span>
-<span class="normal">149</span>
-<span class="normal">150</span>
-<span class="normal">151</span>
-<span class="normal">152</span>
-<span class="normal">153</span>
-<span class="normal">154</span>
-<span class="normal">155</span>
-<span class="normal">156</span>
-<span class="normal">157</span>
-<span class="normal">158</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
 <span class="nd">@commands</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;subtract&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">subtract_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Command that subtracts multiple numbers from another</span>
 
-<span class="sd">     **Parameters:**</span>
+<span class="sd">     Parameters:</span>
 <span class="sd">        *args (float): Variable length argument list. This means it receives multiple numbers but must receive atleast two.</span>
 
-<span class="sd">    **Example:**</span>
+<span class="sd">    Example:</span>
 <span class="sd">        `!subtract 50 10.5`</span>
 
-<span class="sd">    **Usage:**</span>
+<span class="sd">    Usage:</span>
 <span class="sd">        `subtract &lt;number1&gt; &lt;number2&gt; &lt;...&gt;`</span>
 
-<span class="sd">    **Returns:**</span>
-<span class="sd">        An embed with the result</span>
-
-<span class="sd">    **Raises:**</span>
-<span class="sd">        InvalidArgument: if the arguments are not numbers</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">valid_numbers</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
@@ -827,16 +798,15 @@ This class extends commands.Cog from discord.</p>
       </td>
     </tr>
   </tbody>
-</table>      <p><strong>Example:</strong>
-    <code>!sum 50 90</code></p>
-<p><strong>Usage:</strong>
-    <code>sum &lt;number1&gt; &lt;number2&gt; &lt;...&gt;</code></p>
-<p><strong>Returns:</strong>
-    Returns an embed with the result</p>
-<p><strong>Raises:</strong>
-    InvalidArgument: If the given arguments are not numbers, will send
-                    an error embed</p>
-
+</table>
+<details class="example" open>
+  <summary>Example</summary>
+  <p><code>!sum 50 90</code></p>
+</details>
+<details class="usage" open>
+  <summary>Usage</summary>
+  <p><code>sum &lt;number1&gt; &lt;number2&gt; &lt;...&gt;</code></p>
+</details>
           <details class="quote">
             <summary> <code>/Users/caoma/Documents/Programming/GIT/SkyWizz/skywizz/cogs/calculator_commands.py</code></summary>
             <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">34</span>
@@ -872,14 +842,7 @@ This class extends commands.Cog from discord.</p>
 <span class="normal">64</span>
 <span class="normal">65</span>
 <span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span>
-<span class="normal">73</span>
-<span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
+<span class="normal">67</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@commands</span><span class="o">.</span><span class="n">cooldown</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="n">commands</span><span class="o">.</span><span class="n">BucketType</span><span class="o">.</span><span class="n">user</span><span class="p">)</span>
 <span class="nd">@commands</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;sum&#39;</span><span class="p">)</span>
 <span class="k">async</span> <span class="k">def</span> <span class="nf">sum_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ctx</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -888,18 +851,11 @@ This class extends commands.Cog from discord.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        *args (float): Variable length argument list, this means you can have multiple numbers, but must pass 2 numbers.</span>
 
-<span class="sd">    **Example:**</span>
+<span class="sd">    Example:</span>
 <span class="sd">        `!sum 50 90`</span>
 
-<span class="sd">    **Usage:**</span>
+<span class="sd">    Usage:</span>
 <span class="sd">        `sum &lt;number1&gt; &lt;number2&gt; &lt;...&gt;`</span>
-
-<span class="sd">    **Returns:**</span>
-<span class="sd">        Returns an embed with the result</span>
-
-<span class="sd">    **Raises:**</span>
-<span class="sd">        InvalidArgument: If the given arguments are not numbers, will send</span>
-<span class="sd">                        an error embed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">valid_numbers</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
