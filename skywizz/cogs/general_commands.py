@@ -9,11 +9,11 @@ class GeneralCommands(commands.Cog):
     Hosts commands such as server info.
     This class extends `commands.Cog` from discord.
 
-    **Args:**
+    Args:
         bot: Discord API client
         logger: Logger object for logging purposes
 
-    **Attributes:**
+    Attributes:
         bot: Discord API client
         logger: Logger object for logging purposes
         hidden (bool): Attribute that determines if this list of
@@ -35,11 +35,8 @@ class GeneralCommands(commands.Cog):
         """
         Command that shows details about the current server
 
-        **Usage:**
+        Usage:
             `!server`
-
-        **Returns:**
-            Embed with server information
 
         """
         embed = embd.newembed(title=f"{ctx.guild.name} Info",

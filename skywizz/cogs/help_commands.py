@@ -9,17 +9,17 @@ class Help(commands.Cog):
         Class that holds help commands that provide detailed help to the user
         This class extends `commands.Cog` from discord.
 
-        **Args:**
+        Args:
             bot: Discord API client
             logger: Logger object for logging purposes
 
-        **Attributes:**
-        bot: Discord API client
-        logger: Logger object for logging purposes
-        hidden (bool): Attribute that determines if this list of
-                 command should show in the help command or not.
-                 If `false`, will show in help.
-        __cog_name__ (str): Command designation for the help command
+        Attributes:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+            hidden (bool): Attribute that determines if this list of
+                     command should show in the help command or not.
+                     If `false`, will show in help.
+            __cog_name__ (str): Command designation for the help command
     """
 
     def __init__(self, bot, logger):
@@ -35,18 +35,15 @@ class Help(commands.Cog):
         """
         Help command that lists the commands available
 
-        **Args:**
+        Args:
             args (str, optional): The command name or alias
 
-        **Example:**
+        Example:
             `!help`
             `!help search`
 
-        **Usage:**
+        Usage:
             `help <command_name>`
-
-        **Returns:**
-            Embed with help
         """
         if args:
             await self._detailed_help(ctx, args[0])
@@ -71,12 +68,9 @@ class Help(commands.Cog):
         """
         Detailed help command
 
-        **Args:**
+        Args:
             command_name (str): command corresponding to the argument
                                 given by the user
-
-        **Returns:**
-            Embed with detailed help (docstring of the command)
         """
         command = self.bot.get_command(command_name)
         if not command:

@@ -17,17 +17,17 @@ class MemeCog(commands.Cog):
         Class that holds meme commands
         This class extends `commands.Cog` from discord.
 
-        **Args:**
+        Args:
             bot: Discord API client
             logger: Logger object for logging purposes
 
-        **Attributes:**
-        bot: Discord API client
-        logger: Logger object for logging purposes
-        hidden (bool): Attribute that determines if this list of
-                 command should show in the help command or not.
-                 If `false`, will show in help.
-        __cog_name__ (str): Command designation for the help command
+        Attributes:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+            hidden (bool): Attribute that determines if this list of
+                     command should show in the help command or not.
+                     If `false`, will show in help.
+            __cog_name__ (str): Command designation for the help command
     """
 
     def __init__(self, bot, logger):
@@ -44,20 +44,14 @@ class MemeCog(commands.Cog):
         Command that places a caption from a given image
         Attention: You must send an image along with the command!
 
-        **Args:**
+        Args:
             caption_text (str): Desired caption of the image
 
-        **Example:**
+        Example:
             `!caption "Hello World"`
 
-        **Usage:**
+        Usage:
             `caption <image_caption>`
-
-        **Returns:**
-            The original image with a caption on top of it
-
-        **Raises:**
-            SpecificError: if no caption is included with the command
         """
         # Must have caption text
         if not caption_text:

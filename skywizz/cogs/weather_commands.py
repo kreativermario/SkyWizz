@@ -10,7 +10,25 @@ import skywizz.tools as tools
 import skywizz.tools.embed as embd
 
 
-def create_forecast_embed(data, city, country, country_code, latitude, longitude):
+def create_forecast_embed(data: dict, city: str, country: str, country_code: str,
+                          latitude: str, longitude: str):
+    """
+    Function that creates a weather forecast embed given API data
+
+    Args:
+        data: Open-meteo API weather data
+        city: City name
+        country: Country name
+        country_code: Country code like US, FR, DE
+        latitude: GPS latitude coordinates
+        longitude: GPS longitude coordinates
+
+    Returns:
+        embed (discord.Embed): A discord embed with the weather data and relevant information
+
+    """
+    #TODO Raise custom exception if data empty or any field, or dont create field
+
     # Process the JSON response as needed
     weather_code = data['daily']['weathercode'][0]
     today_date = data['daily']['time'][0]
@@ -56,12 +74,12 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
     embed.add_field(name="❄️ Min Temperature",
                     value=f"{min_temperature} °C")
     embed.add_field(name="🌬️ Max Wind Speed",
-                    value=f"{wind_speed_max} km/h",)
+                    value=f"{wind_speed_max} km/h", )
     embed.add_field(name="🪁 Wind Direction", value=f"{wind_direction}º")
     embed.add_field(name="🌧️ Precipitation",
-                    value=f"{precipitation_sum} mm",)
+                    value=f"{precipitation_sum} mm", )
     embed.add_field(name="☔ Max Precipitation Probability",
-                    value=f"{precipitation_prob} %",)
+                    value=f"{precipitation_prob} %", )
     embed.add_field(name="🛰️ GPS Coordinates",
                     value=f"`Latitude: {latitude}, "
                           f"Longitude: {longitude}`",
@@ -76,6 +94,22 @@ def create_forecast_embed(data, city, country, country_code, latitude, longitude
 
 
 class WeatherCommands(commands.Cog):
+    """
+        Class that holds weather commands
+        This class extends `commands.Cog` from discord.
+
+        Args:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+
+        Attributes:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+            hidden (bool): Attribute that determines if this list of
+                     command should show in the help command or not.
+                     If `false`, will show in help.
+            __cog_name__ (str): Command designation for the help command
+    """
 
     def __init__(self, bot, logger):
         self.bot = bot
@@ -86,18 +120,18 @@ class WeatherCommands(commands.Cog):
 
     @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='forecast')
-    async def forecast(self, ctx, *, location):
+    async def forecast(self, ctx, *, location: str):
         """
-        Shows forecast given a city and optionally a country.
+        Command that shows weather forecast given a city and optionally a country.
 
-        **Parameters:**
-        - location (str): city name, and optionally country (e.g., "Paris, France")
+        Args:
+            location: city name, and optionally country (e.g., "Paris, France")
 
-        **Example:**
-        - `!forecast Paris, France`
+        Example:
+            `!forecast Paris, France`
 
-        **Usage:**
-        - `forecast <city_name>, <country (optional)>`
+        Usage:
+            `forecast <city_name>, <country (optional)>`
         """
         # Split the location into city and country (if available)
         location_parts = location.split(',')

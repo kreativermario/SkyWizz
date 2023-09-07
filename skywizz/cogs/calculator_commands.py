@@ -11,11 +11,11 @@ class CalculatorCommands(commands.Cog):
     sum, multiply and subtract.
     This class extends `commands.Cog` from discord.
 
-    **Args:**
+    Args:
         bot: Discord API client
         logger: Logger object for logging purposes
 
-    **Attributes:**
+    Attributes:
         bot: Discord API client
         logger: Logger object for logging purposes
         hidden (bool): Attribute that determines if this list of
@@ -37,21 +37,14 @@ class CalculatorCommands(commands.Cog):
         """
         Command that sums two or more given numbers
 
-        **Args:**
+        Args:
             *args (float): Variable length argument list, this means you can have multiple numbers, but must pass 2 numbers.
 
-        **Example:**
+        Example:
             `!sum 50 90`
 
-        **Usage:**
+        Usage:
             `sum <number1> <number2> <...>`
-
-        **Returns:**
-            Returns an embed with the result
-
-        **Raises:**
-            InvalidArgument: If the given arguments are not numbers, will send
-                            an error embed
         """
         valid_numbers = []
         for arg in args:
@@ -79,20 +72,15 @@ class CalculatorCommands(commands.Cog):
         """
         Command that multiplies two or more numbers
 
-        **Args:**
+        Args:
             *args (float): Variable length argument list. This means it receives multiple numbers but must pass 2 numbers minimum.
 
-        **Example:**
+        Example:
             `!product 50 10`
 
-        **Usage:**
+        Usage:
             `product <number1> <number2> <...>`
 
-        **Returns:**
-            Returns an embed with the result
-
-        **Raises:**
-            InvalidArgument: if the arguments are not numbers, will send an error embed
         """
         valid_numbers = []
         for arg in args:
@@ -120,20 +108,15 @@ class CalculatorCommands(commands.Cog):
         """
         Command that subtracts multiple numbers from another
 
-         **Parameters:**
+         Parameters:
             *args (float): Variable length argument list. This means it receives multiple numbers but must receive atleast two.
 
-        **Example:**
+        Example:
             `!subtract 50 10.5`
 
-        **Usage:**
+        Usage:
             `subtract <number1> <number2> <...>`
 
-        **Returns:**
-            An embed with the result
-
-        **Raises:**
-            InvalidArgument: if the arguments are not numbers
         """
         valid_numbers = []
         for arg in args:
