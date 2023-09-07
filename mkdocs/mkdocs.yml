@@ -14,11 +14,14 @@ nav:
     - Dependencies: user-guide/dependencies.md
     - Installation: user-guide/installation.md
   - Documentation:
-    - SkyWizz: skywizz/skywizz.md
+    - Commands:
+      - Calculator Commands: skywizz/calculator_commands.md
+      - General Commands: skywizz/general_commands.md
+      - Help Commands: skywizz/help_commands.md
   - About:
-    - Code of Conduct: code_of_conduct.md
-    - Contributing: contributing.md
-    - License: license.md
-    - Release Notes: release-notes.md
+    - Code of Conduct: about/code_of_conduct.md
+    - Contributing: about/contributing.md
+    - License: about/license.md
+    - Release Notes: about/release-notes.md
 
 theme: readthedocs
