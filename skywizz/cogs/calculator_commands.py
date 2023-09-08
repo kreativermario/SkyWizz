@@ -36,16 +36,20 @@ class CalculatorCommands(commands.Cog):
                 num = float(arg)
                 valid_numbers.append(num)
             except ValueError:
-                pass
+                error_embed = skywizz.messages.invalid_argument(given_arg=args,
+                                                                valid_args=
+                                                                '5, 4, 10, ...')
+                await ctx.send(embed=error_embed)
+                return
 
-        if not valid_numbers:
-            error_embed = skywizz.messages.invalid_argument(given_arg=args,
-                                                            valid_args=
-                                                            '5, 4, 10, ...')
-            await ctx.send(embed=error_embed)
-            return
-        else:
-            text = str(sum(valid_numbers))
+        # if not valid_numbers:
+        #     error_embed = skywizz.messages.invalid_argument(given_arg=args,
+        #                                                     valid_args=
+        #                                                     '5, 4, 10, ...')
+        #     await ctx.send(embed=error_embed)
+        #     return
+        # else:
+        text = str(sum(valid_numbers))
         embed = embd.newembed(title='Sum Result',
                               description=f'{ctx.author.mention} {text}')
         await ctx.send(embed=embed)
