@@ -1,0 +1,32 @@
+site_name: SkyWizz Documentation
+
+docs_dir: docs
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: ['..']
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Dependencies: user-guide/dependencies.md
+    - Installation: user-guide/installation.md
+  - Documentation:
+    - Commands:
+      - Calculator Commands: skywizz/calculator_commands.md
+      - General Commands: skywizz/general_commands.md
+      - Help Commands: skywizz/help_commands.md
+      - Meme Commands: skywizz/meme_commands.md
+      - Networking Commands: skywizz/networking_commands.md
+      - Reminder Commands: skywizz/reminder_commands.md
+      - Weather Commands: skywizz/weather_commands.md
+
+  - About:
+    - Code of Conduct: about/code_of_conduct.md
+    - Contributing: about/contributing.md
+    - License: about/license.md
+    - Release Notes: about/release-notes.md
+
+theme: readthedocs

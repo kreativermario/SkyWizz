@@ -95,7 +95,12 @@ The project uses the following dependencies:
   ```bash
   python3 SkyWizz.py
   ```
+
+## Documentation
+There is detailed documentation [here](https://kreativermario.github.io/SkyWizz/).
+If the documentation is outdated, feel free to contribute!
   
+
 ## Contributions
 Contributions are welcome! If you want to contribute to the project, you can:
 

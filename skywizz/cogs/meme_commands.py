@@ -13,6 +13,22 @@ SUPPORTED_MIMETYPES = ["image/jpeg", "image/png", "image/webp"]
 
 
 class MemeCog(commands.Cog):
+    """
+        Class that holds meme commands
+        This class extends `commands.Cog` from discord.
+
+        Args:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+
+        Attributes:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+            hidden (bool): Attribute that determines if this list of
+                     command should show in the help command or not.
+                     If `false`, will show in help.
+            __cog_name__ (str): Command designation for the help command
+    """
 
     def __init__(self, bot, logger):
         self.bot = bot
@@ -25,19 +41,17 @@ class MemeCog(commands.Cog):
     @commands.command(name='caption')
     async def caption(self, ctx, caption_text):
         """
-        Command that creates a caption from a given image
+        Command that places a caption from a given image
         Attention: You must send an image along with the command!
 
-        **Parameters:**
-        - image_caption: The image's caption
+        Args:
+            caption_text (str): Desired caption of the image
 
-        **Example:**
-        - `!caption "Hello World"`
+        Example:
+            `!caption "Hello World"`
 
-        **Usage:**
-        - `caption <image_caption>`
-
-        Usage: caption <image_caption>
+        Usage:
+            `caption <image_caption>`
         """
         # Must have caption text
         if not caption_text:
@@ -74,7 +88,8 @@ class MemeCog(commands.Cog):
         image_filename = ctx.message.attachments[0].filename
 
         # Caption image
-        final_image = tools.caption_image(BytesIO(response.content), caption_text)
+        final_image = tools.caption_image(BytesIO(response.content),
+                                          caption_text)
 
         # Send reply
         await ctx.message.reply(file=discord.File(BytesIO(final_image),

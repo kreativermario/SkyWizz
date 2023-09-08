@@ -9,6 +9,23 @@ import skywizz.tools.embed as embd
 
 
 class Networking(commands.Cog):
+    """
+        Class that holds networking commands
+        This class extends `commands.Cog` from discord.
+
+        Args:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+
+        Attributes:
+            bot: Discord API client
+            logger: Logger object for logging purposes
+            hidden (bool): Attribute that determines if this list of
+                     command should show in the help command or not.
+                     If `false`, will show in help.
+            __cog_name__ (str): Command designation for the help command
+    """
+
     def __init__(self, bot, logger):
         self.bot = bot
         self.logger = logger
@@ -20,10 +37,10 @@ class Networking(commands.Cog):
     @commands.command(name='ping', aliases=['pong'])
     async def ping(self, ctx):
         """
-        Shows the round-trip time of the bot's connection to Discord.
+        Command that shows the round-trip time of the bot's connection to Discord.
 
-        **Usage:**
-        - `ping`
+        Usage:
+            `ping`
         """
         # convert to milliseconds and round to whole number
         rtt = round(self.bot.latency * 1000)
@@ -37,16 +54,16 @@ class Networking(commands.Cog):
     @commands.command(name='whois')
     async def whois_command(self, ctx, *, domain: str):
         """
-        Performs a WHOIS lookup for the specified domain.
+        Command that performs a WHOIS lookup for the specified domain.
 
-        **Parameters:**
-        - domain: The domain to lookup.
+        Args:
+            domain: The domain to lookup.
 
-        **Example:**
-        - `!whois google.com`
+        Example:
+            `!whois google.com`
 
-        **Usage:**
-        - `whois <domain>`
+        Usage:
+            `whois <domain>`
         """
         # Display processing message
         processing_embed = embd.newembed(title='Processing...', description='',
@@ -98,15 +115,15 @@ class Networking(commands.Cog):
         """
         Traceroute command that performs a traceroute to a given host
 
-        **Parameters:**
-        - host: The IP address or domain name to trace route to
+        Args:
+            *args: The IP address or domain name to trace route to
 
-        **Example:**
-        - `!traceroute 8.8.8.8`
-        - `!traceroute google.com`
+        Example:
+            `!traceroute 8.8.8.8`
+            `!traceroute google.com`
 
-        **Usage:**
-        - `traceroute <host>`
+        Usage:
+            `traceroute <host>`
         """
         if not args:
             # Display error message if traceroute command failed
