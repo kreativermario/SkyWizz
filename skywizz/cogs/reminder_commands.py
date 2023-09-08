@@ -17,7 +17,7 @@ class Reminder(commands.Cog):
 
     @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='remindme')
-    async def remindme_command(self, ctx, duration: int, *, message: str):
+    async def remindme_command(self, ctx, duration: float, *, message: str):
         """
         Set a reminder for a specified duration from now.
 
