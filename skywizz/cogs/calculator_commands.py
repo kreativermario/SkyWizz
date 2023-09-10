@@ -102,7 +102,7 @@ class CalculatorCommands(commands.Cog):
         """
         Command that subtracts multiple numbers from another
 
-         Parameters:
+        Parameters:
             *args (float): Variable length argument list. This means it receives multiple numbers but must receive atleast two.
 
         Example:

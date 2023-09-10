@@ -2,6 +2,7 @@ import functools
 import warnings
 import aiohttp
 import textwrap
+import requests
 import whois
 
 from PIL import Image, ImageDraw, ImageFont
@@ -25,6 +26,63 @@ def deprecated(func):
         return func(*args, **kwargs)
 
     return new_func
+
+
+def get_weekly_forecast_api_url(latitude: str, longitude: str) -> str:
+    """
+    Function that returns the api url for Open-Meteo weekly forecast
+
+    Args:
+        latitude: GPS latitude coordinates
+        longitude: GPS longitude coordinates
+
+    Returns:
+        api_url: Open-Meteo API url for weekly forecast (7 days)
+    """
+    api_url = f"https://api.open-meteo.com/v1/forecast?" \
+              f"latitude={latitude}" \
+              f"&longitude={longitude}" \
+              f"&daily=weathercode," \
+              f"temperature_2m_max," \
+              f"temperature_2m_min," \
+              f"sunrise," \
+              f"sunset," \
+              f"uv_index_max," \
+              f"precipitation_sum," \
+              f"precipitation_probability_max," \
+              f"windspeed_10m_max," \
+              f"winddirection_10m_dominant" \
+              f"&timezone=auto"
+    return api_url
+
+
+def get_daily_forecast_api_url(latitude: str, longitude: str) -> str:
+    """
+    Function that returns the api url for Open-Meteo daily forecast (1-day)
+
+    Args:
+        latitude: GPS latitude coordinates
+        longitude: GPS longitude coordinates
+
+    Returns:
+        api_url: Open-Meteo API url for daily forecast (1 day)
+    """
+    # Construct the API URL
+    api_url = f"https://api.open-meteo.com/v1/forecast?" \
+              f"latitude={latitude}" \
+              f"&longitude={longitude}" \
+              f"&daily=weathercode," \
+              f"temperature_2m_max," \
+              f"temperature_2m_min," \
+              f"sunrise,sunset," \
+              f"uv_index_max," \
+              f"precipitation_sum," \
+              f"precipitation_probability_max," \
+              f"windspeed_10m_max," \
+              f"winddirection_10m_dominant" \
+              f"&timezone=auto" \
+              f"&forecast_days=1"
+    return api_url
 
 
 async def get_coordinates(city_name, country_name=None):
@@ -129,6 +187,26 @@ def check_request_status(response):
     if not (200 <= response.status_code < 300):
         raise APIRequestError(f'Request failed with status '
                               f'{response.status_code}: {response.text}')
+
+
+def get_api_data(api_url: str) -> dict:
+    """
+    Function that returns JSON data from given API url
+
+    Args:
+        api_url: API url
+
+    Returns:
+        data: JSON data dict
+
+    Raises:
+        skywizz.tools.exceptions.APIRequestError: if check_request_status fails
+    """
+    # Make the HTTP request
+    response = requests.get(api_url)
+    check_request_status(response)
+    data = response.json()
+    return data
 
 
 async def whois_lookup(domain):
