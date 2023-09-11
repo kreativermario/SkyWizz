@@ -24,6 +24,10 @@
         <img src="https://img.shields.io/github/issues/kreativermario/SkyWizz.svg"
         alt="GitHub Issues">
     </a>
+    <a href="">
+        <img src="https://sonarcloud.io/api/project_badges/measure?project=kreativermario_SkyWizz&metric=alert_status">
+        <alt="Sonarcloud Quality Gate">
+    </a>
     <a href="https://github.com/kreativermario/SkyWizz/stargazers">
         <img src="https://img.shields.io/github/stars/kreativermario/SkyWizz.svg"
         alt="GitHub Stars">
