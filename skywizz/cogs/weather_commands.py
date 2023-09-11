@@ -100,23 +100,19 @@ class WeatherCommands(commands.Cog):
 
         Args:
             bot: Discord API client
-            logger: Logger object for logging purposes
 
         Attributes:
             bot: Discord API client
-            logger: Logger object for logging purposes
             hidden (bool): Attribute that determines if this list of
                      command should show in the help command or not.
                      If `false`, will show in help.
             __cog_name__ (str): Command designation for the help command
     """
 
-    def __init__(self, bot, logger):
+    def __init__(self, bot):
         self.bot = bot
-        self.logger = logger
         self.hidden = False
         self.__cog_name__ = "Weather Commands"
-        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='forecast')
@@ -149,7 +145,6 @@ class WeatherCommands(commands.Cog):
             latitude, longitude = await tools.get_coordinates(city_name=city_name,
                                                               country_name=country_name)
             city, country, country_code = await tools.reverse_gps(latitude, longitude)
-            self.logger.debug(f"RETRIEVED: {city}, {country}, {country_code}")
         except Exception:
             # Display error message if API response fails
             error_embed = skywizz.error()
@@ -192,5 +187,5 @@ class WeatherCommands(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot, logger):
-    await bot.add_cog(WeatherCommands(bot, logger))
+async def setup(bot):
+    await bot.add_cog(WeatherCommands(bot))

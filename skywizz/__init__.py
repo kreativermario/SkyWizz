@@ -1,12 +1,37 @@
+import logging
 from datetime import datetime
 import platform
 import socket
 import sys
+
+import colorlog
+
 from .cogs import *
 from .events import *
 from .setup import *
 from .config import *
 from .messages import *
+
+
+def setup_logger(name):
+    # Configure colorlog
+    handler = colorlog.StreamHandler()
+    handler.setFormatter(colorlog.ColoredFormatter(
+        '%(log_color)s%(asctime)s %(levelname)s:%(name)s:%(message)s',
+        log_colors={
+            'DEBUG': 'cyan',
+            'INFO': 'green',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_white',
+        }
+    ))
+
+    # Set up logger
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)  # Add the file handler
+    return logger
 
 
 def version():

@@ -11,23 +11,19 @@ class Help(commands.Cog):
 
         Args:
             bot: Discord API client
-            logger: Logger object for logging purposes
 
         Attributes:
             bot: Discord API client
-            logger: Logger object for logging purposes
             hidden (bool): Attribute that determines if this list of
                      command should show in the help command or not.
                      If `false`, will show in help.
             __cog_name__ (str): Command designation for the help command
     """
 
-    def __init__(self, bot, logger):
+    def __init__(self, bot):
         self.bot = bot
         self.hidden = False
-        self.logger = logger
         self.__cog_name__ = "Help"
-        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='help', aliases=['h'])
@@ -86,5 +82,5 @@ class Help(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot, logger):
-    await bot.add_cog(Help(bot, logger))
+async def setup(bot):
+    await bot.add_cog(Help(bot))

@@ -24,12 +24,10 @@ class CalculatorCommands(commands.Cog):
         __cog_name__ (str): Command designation for the help command
     """
 
-    def __init__(self, bot, logger):
+    def __init__(self, bot):
         self.bot = bot
-        self.logger = logger
         self.hidden = False
         self.__cog_name__ = "Calculator Commands"
-        self.logger.info(f"Loaded {self.__cog_name__}")
 
     @commands.cooldown(10, 30, commands.BucketType.user)
     @commands.command(name='sum')
@@ -131,5 +129,5 @@ class CalculatorCommands(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot, logger):
-    await bot.add_cog(CalculatorCommands(bot, logger))
+async def setup(bot):
+    await bot.add_cog(CalculatorCommands(bot))
