@@ -1,0 +1,40 @@
+name: Auto Label
+
+on:
+  pull_request:
+    types:
+      - opened
+  issues:
+    types:
+      - opened
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Label issues and pull requests
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const labeler = require('github-label-sync');
+            const fs = require('fs');
+
+            // Read the labeler configuration from the file
+            const config = fs.readFileSync('.github/labeler.yml', 'utf8');
+
+            // Parse the configuration
+            const configObj = JSON.parse(JSON.stringify(jsyaml.load(config)));
+
+            // Label issues and pull requests
+            await labeler({
+              repo: context.repo,
+              labels: configObj.rules,
+              dryRun: false,
+              token: process.env.GITHUB_TOKEN,
+            });
+

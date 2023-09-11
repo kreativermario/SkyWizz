@@ -1,26 +1,27 @@
-version: v1
+rules:
+  - name: Bug
+    keywords:
+      - bug
+    colors:
+      - "d73a4a"
+    appliesTo:
+      - issues
+      - pull_requests
 
-labels:
-  - label: 'Enhancement'
-    sync: true
-    matcher:
-      commits: '^feat(\(.+?\))?:'
-      title: '^feat(\(.+?\))?:|^feat:'
+  - name: Enhancement
+    keywords:
+      - enhancement
+    colors:
+      - "a2eeef"
+    appliesTo:
+      - issues
+      - pull_requests
 
-  - label: 'Bug'
-    sync: true
-    matcher:
-      commits: '^fix(\(.+?\))?:'
-      title: '^fix(\(.+?\))?:|^fix:'
-
-  - label: 'Documentation'
-    sync: true
-    matcher:
-      commits: '^docs(\(.+?\))?:'
-      title: '^docs(\(.+?\))?:|^docs:'
-
-  - label: 'Dependencies'
-    sync: true
-    matcher:
-      files: ['**/requirements.txt']
-      author: 'renovate'
+  - name: Documentation
+    keywords:
+      - docs
+    colors:
+      - "0075ca"
+    appliesTo:
+      - issues
+      - pull_requests
