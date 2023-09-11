@@ -1,0 +1,26 @@
+version: v1
+
+labels:
+  - label: 'Enhancement'
+    sync: true
+    matcher:
+      commits: '^feat(\(.+?\))?:'
+      title: '^feat(\(.+?\))?:|^feat:'
+
+  - label: 'Bug'
+    sync: true
+    matcher:
+      commits: '^fix(\(.+?\))?:'
+      title: '^fix(\(.+?\))?:|^fix:'
+
+  - label: 'Documentation'
+    sync: true
+    matcher:
+      commits: '^docs(\(.+?\))?:'
+      title: '^docs(\(.+?\))?:|^docs:'
+
+  - label: 'Dependencies'
+    sync: true
+    matcher:
+      files: ['**/requirements.txt']
+      author: 'renovate'
