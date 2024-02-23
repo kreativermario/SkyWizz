@@ -1,3 +1,7 @@
+import io
+import os
+import matplotlib.pyplot as plt
+import pandas as pd  # Import pandas
 import discord
 import requests
 import emoji
@@ -10,8 +14,8 @@ import skywizz.tools as tools
 import skywizz.tools.embed as embd
 
 
-def create_forecast_embed(data: dict, city: str, country: str, country_code: str,
-                          latitude: str, longitude: str):
+def create_daily_forecast_embed(data: dict, city: str, country: str, country_code: str,
+                                latitude: str, longitude: str):
     """
     Function that creates a weather forecast embed given API data
 
@@ -27,70 +31,198 @@ def create_forecast_embed(data: dict, city: str, country: str, country_code: str
         embed (discord.Embed): A discord embed with the weather data and relevant information
 
     """
-    #TODO Raise custom exception if data empty or any field, or dont create field
+    def get_field(name, value, inline=True):
+        return {"name": name, "value": value, "inline": inline}
 
-    # Process the JSON response as needed
-    weather_code = data['daily']['weathercode'][0]
-    today_date = data['daily']['time'][0]
-    sunrise = data['daily']['sunrise'][0]
-    sunset = data['daily']['sunset'][0]
-    # Assuming sunrise and sunset are in ISO 8601 format, e.g., '2023-09-03T05:35'
-    sunrise_datetime = datetime.fromisoformat(sunrise)
-    sunset_datetime = datetime.fromisoformat(sunset)
-    sunrise_formatted = sunrise_datetime.strftime('%H:%M')
-    sunset_formatted = sunset_datetime.strftime('%H:%M')
-    max_uv_index = data['daily']['uv_index_max'][0]
-    max_temperature = data['daily']['temperature_2m_max'][0]
-    min_temperature = data['daily']['temperature_2m_min'][0]
-    precipitation_sum = data['daily']['precipitation_sum'][0]
-    precipitation_prob = data['daily']['precipitation_probability_max'][0]
-    wind_speed_max = data['daily']['windspeed_10m_max'][0]
-    wind_direction = data['daily']['winddirection_10m_dominant'][0]
+    def format_time(iso_time):
+        time = datetime.fromisoformat(iso_time)
+        return time.strftime('%H:%M')
 
-    # Create flag emoji
-    if country_code.lower() != 'n/a':
-        flag_emoji = emoji.emojize(f":flag_{country_code.lower()}:")
-    else:
-        flag_emoji = ''
+    daily = data['daily']
 
+    fields = [
+        get_field("🌍 Location", f"{city}, {country} {emoji.emojize(f':flag_{country_code.lower()}:')}"),
+        get_field("🌅 Sunrise", format_time(daily['sunrise'][0])),
+        get_field("🌇 Sunset", format_time(daily['sunset'][0])),
+        get_field("☀️ Max UV Index", daily['uv_index_max'][0]),
+        get_field("🌡️ Max Temperature", f"{daily['temperature_2m_max'][0]} °C"),
+        get_field("❄️ Min Temperature", f"{daily['temperature_2m_min'][0]} °C"),
+        get_field("🌬️ Max Wind Speed", f"{daily['windspeed_10m_max'][0]} km/h"),
+        get_field("🪁 Wind Direction", f"{daily['winddirection_10m_dominant'][0]}º"),
+        get_field("🌧️ Precipitation", f"{daily['precipitation_sum'][0]} mm"),
+        get_field("☔ Max Precipitation Probability", f"{daily['precipitation_probability_max'][0]} %"),
+        get_field("🛰️ GPS Coordinates", f"`Latitude: {latitude}, Longitude: {longitude}`", inline=False),
+    ]
+
+    weather_code = daily['weathercode'][0]
     weather_emoji, weather_description = tools.return_weather_emoji(weather_code)
+    fields.insert(1, get_field(f"{weather_emoji} Weather", weather_description, inline=False))
 
     embed = embd.newembed(title="Weather Forecast",
-                          description=f"Here's the forecast for {today_date}")
-    embed.add_field(name="🌍 Location",
-                    value=f"{city}, {country} {flag_emoji}",
-                    inline=False)
-    embed.add_field(name=f"{weather_emoji} Weather",
-                    value=weather_description,
-                    inline=False)
-    embed.add_field(name="🌅 Sunrise",
-                    value=sunrise_formatted)
-    embed.add_field(name="🌇 Sunset",
-                    value=sunset_formatted)
-    embed.add_field(name="☀️ Max UV Index",
-                    value=max_uv_index)
-    embed.add_field(name="🌡️ Max Temperature",
-                    value=f"{max_temperature} °C")
-    embed.add_field(name="❄️ Min Temperature",
-                    value=f"{min_temperature} °C")
-    embed.add_field(name="🌬️ Max Wind Speed",
-                    value=f"{wind_speed_max} km/h", )
-    embed.add_field(name="🪁 Wind Direction", value=f"{wind_direction}º")
-    embed.add_field(name="🌧️ Precipitation",
-                    value=f"{precipitation_sum} mm", )
-    embed.add_field(name="☔ Max Precipitation Probability",
-                    value=f"{precipitation_prob} %", )
-    embed.add_field(name="🛰️ GPS Coordinates",
-                    value=f"`Latitude: {latitude}, "
-                          f"Longitude: {longitude}`",
-                    inline=False)
+                          description=f"Here's the forecast for {daily['time'][0]}")
+
+    for field in fields:
+        embed.add_field(**field)
+
     # Get the map image URL
     map_image_url = tools.get_map_image_url(latitude, longitude)
-
-    # Add the map image as a field in the embed
     embed.add_field(name="📌 Map", value=f"[View Location]({map_image_url})")
 
     return embed
+
+
+def create_weekly_plot(user_id: str, data: dict, city: str, country: str,
+                       country_code: str):
+    """
+    Function that creates the weekly (7 days) forecast plot with max temperature and
+    min temperature
+
+    Args:
+        user_id: Unique discord user id of the user that requested the weekly forecast
+        data: API data
+        city: City name
+        country: Country name
+        country_code: Country code like FR, DE
+
+    Returns:
+        unique_filename (str): Unique filename for the plot
+        embed (discord.Embed): Embed to be sent
+    """
+    # Create unique filename to not overwrite
+    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+    unique_filename = f'images/weekly_forecast_{user_id}_{timestamp}.png'
+
+    # Create a DataFrame from the weather data
+    weather_df = pd.DataFrame({
+        'Day': data['daily']['time'],
+        'Max Temp (°C)': data['daily']['temperature_2m_max'],
+        'Min Temp (°C)': data['daily']['temperature_2m_min']
+    })
+
+    # Create a line plot using pandas with different line colors
+    plt.figure(figsize=(12, 6))  # Increase figsize for more margin
+    plt.plot(weather_df['Day'], weather_df['Max Temp (°C)'], marker='o',
+             linestyle='-', color='red', label='Max Temperature')
+    plt.plot(weather_df['Day'], weather_df['Min Temp (°C)'], marker='o',
+             linestyle='-', color='blue', label='Min Temperature')
+
+    # Adjust vertical positions for Max Temp values
+    for i, max_temp in enumerate(weather_df['Max Temp (°C)']):
+        plt.text(i, max_temp + 0.8, f"{max_temp}°C", ha='center', va='bottom')
+    # Adjust vertical positions for Min Temp values
+    for i, min_temp in enumerate(weather_df['Min Temp (°C)']):
+        plt.text(i, min_temp - 0.8, f"{min_temp}°C", ha='center', va='top')
+
+    plt.xlabel('Day')
+    plt.ylabel('Temperature (°C)')
+    plt.title(f'Weekly Temperature Forecast for {city}, {country}')
+
+    plt.grid(True)
+
+    # Place the legend slightly above the x-axis label with padding
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.2), fancybox=True,
+               shadow=True, ncol=2)
+
+    # Add some padding to the graph bounds
+    plt.margins(y=0.3)
+
+    # Save the plot as an image
+    plt.savefig(unique_filename, bbox_inches='tight')
+
+    # Close the plot to free up resources
+    plt.close()
+
+    # Include the graph as an attachment in the Discord embed
+    country_emoji = emoji.emojize(f':flag_{country_code.lower()}:')
+    embed = embd.newembed(title=f"📡 Weekly Forecast for {city}, {country} "
+                                f"{country_emoji}",
+                          description="📈 Temperature graph for the week:")
+    embed.set_image(url=f'attachment://{unique_filename}')
+
+    return unique_filename, embed
+
+
+async def daily_forecast(ctx, city: str, country: str, country_code: str,
+                         latitude: str, longitude: str):
+    """
+    Function that fetches daily forecast data and returns to user
+
+    Args:
+        ctx: Discord context object
+        city: City name
+        country: Country name
+        country_code: Country code like FR, DE
+        latitude: GPS Latitude coordinates
+        longitude: GPS longitude coordinates
+    Raises:
+        skywizz.tools.exceptions.APIRequestError: if API request fails
+
+    """
+    api_url = skywizz.tools.get_daily_forecast_api_url(latitude,
+                                                       longitude)
+    try:
+        data = skywizz.tools.get_api_data(api_url)
+        if data is None:
+            raise skywizz.tools.exceptions.APIRequestError
+    except skywizz.tools.exceptions.APIRequestError:
+        # Display error message if API response fails
+        error_embed = skywizz.specific_error('Oops! Looks like there '
+                                             'was an error fetching '
+                                             'weather information '
+                                             'for that city...')
+        await ctx.send(embed=error_embed)
+        return
+    embed = create_daily_forecast_embed(data, city, country, country_code,
+                                        latitude, longitude)
+    await ctx.send(embed=embed)
+
+
+async def weekly_forecast(ctx, city: str, country: str, country_code: str,
+                          latitude: str,longitude: str):
+    """
+    Function that handles weekly forecast
+
+    Args:
+        ctx: Discord context object
+        city: City name
+        country: Country name
+        country_code: Country code like FR, DE
+        latitude: GPS Latitude coordinates
+        longitude: GPS longitude coordinates
+    Raises:
+        skywizz.tools.exceptions.APIRequestError: if API request fails
+
+    """
+    api_url = skywizz.tools.get_weekly_forecast_api_url(latitude,
+                                                       longitude)
+    try:
+        data = skywizz.tools.get_api_data(api_url)
+        if data is None:
+            raise skywizz.tools.exceptions.APIRequestError
+    except skywizz.tools.exceptions.APIRequestError:
+        # Display error message if API response fails
+        error_embed = skywizz.specific_error('Oops! Looks like there '
+                                             'was an error fetching '
+                                             'weather information '
+                                             'for that city...')
+        await ctx.send(embed=error_embed)
+        return
+
+    # Create a unique filename for the weekly graph
+    user_id = ctx.author.id
+    unique_filename, embed = create_weekly_plot(user_id=user_id,
+                                                     data=data,
+                                                     city=city,
+                                                     country=country,
+                                                     country_code=country_code)
+    await ctx.send(embed=embed)
+    # Send the embed with the graph as an attachment
+    with open(unique_filename, 'rb') as plot_file:
+        plot_file = discord.File(plot_file, filename=unique_filename)
+        await ctx.send(file=plot_file)
+
+    # Delete the image file after sending
+    os.remove(unique_filename)
 
 
 class WeatherCommands(commands.Cog):
@@ -120,19 +252,34 @@ class WeatherCommands(commands.Cog):
 
     @commands.cooldown(2, 30, commands.BucketType.user)
     @commands.command(name='forecast')
-    async def forecast(self, ctx, *, location: str):
+    async def forecast(self, ctx, forecast_type: str,  *, location: str):
         """
         Command that shows weather forecast given a city and optionally a country.
 
         Args:
+            ctx: Discord context client
+            forecast_type: Type of forecast `daily` /  `d` or `weekly` / `w`.
             location: city name, and optionally country (e.g., "Paris, France")
 
         Example:
-            `!forecast Paris, France`
+            `!forecast daily Paris, France`
+            `!forecast d Paris, France`
+            `!forecast weekly New York City`
+            `!forecast w New York City`
 
         Usage:
-            `forecast <city_name>, <country (optional)>`
+            `forecast <daily or weekly> <city_name>, <country (optional)>`
         """
+        # Check if forecast type is valid
+        if forecast_type.lower() not in ['d', 'daily', 'w', 'weekly']:
+            # Display error message if user does not provide a valid argument
+            error_embed = skywizz.invalid_argument(forecast_type,
+                                                   'daily or weekly',
+                                                   'Please use !help forecast if '
+                                                   'you need further help.')
+            await ctx.send(embed=error_embed)
+            return
+
         # Split the location into city and country (if available)
         location_parts = location.split(',')
         if len(location_parts) < 1:
@@ -156,40 +303,16 @@ class WeatherCommands(commands.Cog):
             await ctx.send(embed=error_embed)
             return
 
-        # Construct the API URL
-        api_url = f"https://api.open-meteo.com/v1/forecast?" \
-                  f"latitude={latitude}" \
-                  f"&longitude={longitude}" \
-                  f"&daily=weathercode," \
-                  f"temperature_2m_max," \
-                  f"temperature_2m_min," \
-                  f"sunrise,sunset," \
-                  f"uv_index_max," \
-                  f"precipitation_sum," \
-                  f"precipitation_probability_max," \
-                  f"windspeed_10m_max," \
-                  f"winddirection_10m_dominant" \
-                  f"&timezone=auto" \
-                  f"&forecast_days=1"
-
-        # Make the HTTP request
-        response = requests.get(api_url)
-        try:
-            tools.check_request_status(response)
-        except skywizz.tools.APIRequestError:
-            # Display error message if API response fails
-            error_embed = skywizz.specific_error('Oops! Looks like there '
-                                                 'was an error fetching '
-                                                 'weather information '
-                                                 'for that city...')
-            await ctx.send(embed=error_embed)
-            return
-
-        data = response.json()
-        embed = create_forecast_embed(data, city, country, country_code,
-                                      latitude, longitude)
-
-        await ctx.send(embed=embed)
+        # If daily forecast
+        if forecast_type.lower() == 'daily' or forecast_type.lower() == 'd':
+            await daily_forecast(ctx=ctx, city=city, country=country,
+                                country_code=country_code,
+                                latitude=latitude, longitude=longitude)
+        # If weekly forecast
+        elif forecast_type.lower() == 'weekly' or forecast_type.lower() == 'w':
+            await weekly_forecast(ctx=ctx, city=city, country=country,
+                                 country_code=country_code,
+                                 latitude=latitude, longitude=longitude)
 
 
 async def setup(bot, logger):
