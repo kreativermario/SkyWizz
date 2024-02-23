@@ -10,6 +10,9 @@ COPY requirements.txt .
 # Add C and C++ compiler for matplotlib
 RUN apk add --no-cache make gcc g++
 
+# Run cmake
+RUN apk add --no-cache cmake
+
 # Install dependencies
 RUN pip install -r requirements.txt
 
