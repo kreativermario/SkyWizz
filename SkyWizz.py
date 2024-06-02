@@ -13,8 +13,8 @@ handler = colorlog.StreamHandler()
 handler.setFormatter(colorlog.ColoredFormatter(
     '%(log_color)s%(asctime)s %(levelname)s:%(name)s:%(message)s',
     log_colors={
-        'DEBUG': 'cyan',
-        'INFO': 'green',
+        'DEBUG': 'green',
+        'INFO': 'cyan',
         'WARNING': 'yellow',
         'ERROR': 'red',
         'CRITICAL': 'red,bg_white',
@@ -57,9 +57,17 @@ bot = commands.Bot(
 async def on_ready():
     logger.info(f"Connected to Discord API in {round(time.perf_counter() - discord_time_start, 2)}s")
     time_start = time.perf_counter()
+    # Initialize SQLite
+    db_conn = skywizz.db.initialize_database(logger)
+    
+    # Check if db_conn is None
+    if db_conn is None:
+        logger.error("Failed to connect to the database. Exiting bot.")
+        exit(1)
+
     # Load the extensions when the bot starts up
     logger.info('Loading cogs...')
-    await load_cogs()
+    await load_cogs(db_conn=db_conn, logger=logger)
     logger.info(f"Registered commands and events in {round(time.perf_counter() - time_start, 2)}s")
     await bot.change_presence(
         status=discord.Status.online,
@@ -68,6 +76,7 @@ async def on_ready():
     logger.info('Guilds:')
     for guild in bot.guilds:
         logger.info(f'- {guild.name} ({guild.id})')
+
 
 @bot.check
 def global_cooldown_check(ctx):
@@ -78,7 +87,7 @@ def global_cooldown_check(ctx):
         raise commands.CommandOnCooldown(bucket, retry_after)
     return True
 
-async def load_cogs():
+async def load_cogs(db_conn, logger):
     try:
         skywizz.events.__init__(bot)
         await skywizz.cogs.calculator_commands.setup(bot, logger)
@@ -88,7 +97,7 @@ async def load_cogs():
         await skywizz.cogs.networking_commands.setup(bot, logger)
         await skywizz.cogs.reminder_commands.setup(bot, logger)
         await skywizz.cogs.weather_commands.setup(bot, logger)
-        await skywizz.cogs.moderation_commands.setup(bot, logger)
+        await skywizz.cogs.moderation_commands.setup(bot, logger, db_conn)
     except Exception as e:
         logger.error(f"Failed to load cogs: {e}")
         exit(1)

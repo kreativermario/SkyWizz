@@ -7,6 +7,7 @@ from .events import *
 from .setup import *
 from .config import *
 from .messages import *
+from .db import *
 
 
 def version():
