@@ -98,6 +98,7 @@ async def load_cogs(db_conn, logger):
         await skywizz.cogs.reminder_commands.setup(bot, logger)
         await skywizz.cogs.weather_commands.setup(bot, logger)
         await skywizz.cogs.moderation_commands.setup(bot, logger, db_conn)
+        await skywizz.cogs.economy.bank.setup(bot, logger, db_conn)
     except Exception as e:
         logger.error(f"Failed to load cogs: {e}")
         exit(1)
