@@ -280,6 +280,12 @@ def subtract(nums):
         result -= num
     return result
 
+async def send_embed(self, ctx, title, description, fields=None):
+    embed = discord.Embed(title=title, description=description)
+    if fields:
+        for name, value, inline in fields:
+            embed.add_field(name=name, value=value, inline=inline)
+    await ctx.send(embed=embed)
 
 def caption_image(image_file, caption):
     img = Image.open(image_file)
