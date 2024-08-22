@@ -162,5 +162,5 @@ cython_debug/
 # Config
 *.env
 
-# Databases
+# SQLite
 *.db

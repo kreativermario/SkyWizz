@@ -7,10 +7,11 @@ from .events import *
 from .setup import *
 from .config import *
 from .messages import *
+from .db import *
 
 
 def version():
-    return "v0.0.2 - John Dalton"
+    return "v1 - Merlin"
 
 
 def footer():
@@ -30,10 +31,7 @@ def year():
 
 
 def copyright():
-    if year() == "2023":
-        return "© 2023 SkyWizz"
-    else:
-        return f"© 2023-{year()} SkyWizz"
+    return f"© 2023-{year()} SkyWizz"
 
 
 def platform():
