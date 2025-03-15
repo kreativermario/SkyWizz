@@ -1,132 +1,107 @@
+# Imported modules
 import os
 import time
-import logging
-import colorlog
 import discord
+import asyncio
+import importlib
+import pkgutil
 from discord.ext import commands
 from dotenv import load_dotenv
 from os.path import join, dirname
+
+# Custom modules
 import skywizz
+from skywizz.logger import logger
 
-# Set up logger
-def setup_logger():
-    global handler
-    handler = colorlog.StreamHandler()
-    handler.setFormatter(colorlog.ColoredFormatter(
-        '%(log_color)s%(asctime)s %(levelname)s:%(name)s:%(message)s',
-        log_colors={
-            'DEBUG': 'green',
-            'INFO': 'cyan',
-            'WARNING': 'yellow',
-            'ERROR': 'red',
-            'CRITICAL': 'red,bg_white',
-        }
-    ))
-
-    logger = logging.getLogger('discord')
-    logger.setLevel(logging.DEBUG)
-    logger.addHandler(handler)
-    return logger
-
-# Load environment variables and check configuration
-def load_environment_variables(env_path):
-    if not os.path.exists(env_path):
-        logger.warning("Unable to find .env file. Running setup.py...")
-        skywizz.setup.__init__()  # Run setup.py if .env is missing
+# Load environment variables
+env_path = join(dirname(__file__), '.env')
+if not os.path.exists(env_path):
+    logger.warning("Unable to find .env file. Running setup.py...")
+    skywizz.setup.__init__()  # Run setup.py if .env is missing
+else:
     load_dotenv(env_path)
 
-def check_config_version():
-    if os.getenv('CONFIG_VERSION') != skywizz.config_version():
-        if os.path.isfile('.env'):
-            logger.error("Missing environment variables. Please backup and delete .env, then run SkyWizz.py again.")
-            quit(2)
-        logger.warning("Unable to find required environment variables. Running setup.py...")
-        skywizz.setup.__init__()  # Run setup.py
+# Validate Configuration
+if os.getenv('CONFIG_VERSION') != skywizz.config_version():
+    if os.path.isfile('.env'):
+        logger.error("Missing environment variables. Please backup and delete .env, then run SkyWizz.py again.")
+        quit(2)
+    logger.warning("Unable to find required environment variables. Running setup.py...")
+    skywizz.setup.__init__()  # Run setup.py
 
-# Initialize bot
-def setup_bot():
-    intents = discord.Intents.all()
-    intents.members = True
-    intents.typing = False
+# Bot Setup
+intents = discord.Intents.default()
+intents.messages = True
+intents.guilds = True
+intents.members = True
+intents.typing = False
+intents.message_content = True
 
-    bot_instance = commands.Bot(
-        command_prefix=skywizz.config.bot_prefix(),
-        help_command=None,
-        intents=intents,
-        logger=logger
-    )
-    return bot_instance
 
-# Define global variables and bot instance
-logger = setup_logger()
-env_path = join(dirname(__file__), '.env')
-load_environment_variables(env_path)
-check_config_version()
-bot = setup_bot()
+bot = commands.Bot(
+    command_prefix=skywizz.config.bot_prefix(),
+    help_command=None,
+    intents=intents
+)
 
-# Define events and commands
+
+# Load Cogs Dynamically
+async def load_cogs():
+    try:
+        for _, cog_name, _ in pkgutil.iter_modules(skywizz.cogs.__path__):
+            cog_module = importlib.import_module(f"skywizz.cogs.{cog_name}")
+            
+            # Check if the module has a setup function
+            if hasattr(cog_module, "setup") and callable(getattr(cog_module, "setup")):
+                await cog_module.setup(bot, logger)
+                logger.info(f"Loaded cog: {cog_name}")
+            else:
+                logger.warning(f"Skipping {cog_name}: No setup function found.")
+                
+        logger.info("All valid cogs loaded successfully.")
+    except Exception as e:
+        logger.error(f"Failed to load cogs: {e}")
+
+
 @bot.event
 async def on_ready():
-    global discord_time_start
-    logger.info(f"Connected to Discord API in {round(time.perf_counter() - discord_time_start, 2)}s")
-    time_start = time.perf_counter()
-    
-    # Initialize SQLite
-    db_conn = skywizz.db.initialize_database(logger)
-    
-    if db_conn is None:
-        logger.error("Failed to connect to the database. Exiting bot.")
-        exit(1)
-
+    logger.info(f"Bot connected in {round(time.perf_counter() - bot.start_time, 2)}s")
     logger.info('Loading cogs...')
-    await load_cogs(bot, db_conn)
-    logger.info(f"Registered commands and events in {round(time.perf_counter() - time_start, 2)}s")
-    
+    await load_cogs()
     await bot.change_presence(
         status=discord.Status.online,
         activity=discord.Game(skywizz.config.bot_status())
     )
-    
-    logger.info('Guilds:')
-    for guild in bot.guilds:
-        logger.info(f'- {guild.name} ({guild.id})')
+    logger.info(f"Connected to {len(bot.guilds)} guild(s).")
+
+
+@bot.event
+async def on_shutdown():
+    await bot.close()
+    logger.info("Bot is shutting down...")
+
 
 @bot.check
 def global_cooldown_check(ctx):
-    default_cooldown = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.user)
-    bucket = default_cooldown.get_bucket(ctx.message)
+    cooldown = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.user)
+    bucket = cooldown.get_bucket(ctx.message)
     retry_after = bucket.update_rate_limit()
     if retry_after:
         raise commands.CommandOnCooldown(bucket, retry_after)
     return True
 
-async def load_cogs(bot, db_conn):
-    try:
-        skywizz.events.__init__(bot)
-        await skywizz.cogs.calculator_commands.setup(bot, logger)
-        await skywizz.cogs.utility_commands.setup(bot, logger, discord_time_start)
-        await skywizz.cogs.help_commands.setup(bot, logger)
-        await skywizz.cogs.meme_commands.setup(bot, logger)
-        await skywizz.cogs.networking_commands.setup(bot, logger)
-        await skywizz.cogs.reminder_commands.setup(bot, logger)
-        await skywizz.cogs.weather_commands.setup(bot, logger)
-        await skywizz.cogs.moderation_commands.setup(bot, logger, db_conn)
-        await skywizz.cogs.economy.bank.setup(bot, logger, db_conn)
-    except Exception as e:
-        logger.error(f"Failed to load cogs: {e}")
-        exit(1)
 
-def run_bot():
-    global discord_time_start
-    discord_time_start = time.perf_counter()
+# Run Bot
+async def run_bot():
+    bot.start_time = time.perf_counter()
     try:
-        bot.run(skywizz.config.bot_token(), log_handler=handler, log_level=logging.DEBUG)
+        await bot.start(skywizz.config.bot_token())
     except discord.LoginFailure:
-        logger.error("Invalid bot token. Please check your .env file!")
+        logger.error("Invalid token. Check your .env file.")
     except Exception as e:
-        logger.error(f"Failed to connect to Discord API: {e}")
-        time.sleep(5)
+        logger.error(f"Discord API connection failed: {e}")
+        await asyncio.sleep(5)
         exit(1)
 
 if __name__ == "__main__":
-    run_bot()
+    asyncio.run(run_bot())

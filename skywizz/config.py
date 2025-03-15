@@ -1,6 +1,9 @@
 import os
-
 import skywizz
+
+
+def log_level():
+    return os.getenv('LOG_LEVEL', 'INFO')
 
 
 def bot_token():
