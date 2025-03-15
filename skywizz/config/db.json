@@ -1,0 +1,74 @@
+{
+    "banks": [
+        {
+            "name": "Banco Santander Totta S.A.",
+            "description": "Banco Santander Totta S.A., also known as Banco Santander (Portugal), is a subsidiary of Spanish bank Banco Santander in Portugal. ",
+            "account_type": "Conta Mundo 123",
+            "monthly_account_cost": 8.60,
+            "annual_account_cost": 103.2,
+            "country": "Portugal",
+            "country_code": "PT"
+        },
+        {
+            "name": "Millenium BCP",
+            "description": "Banco Comercial Português, S.A. (BCP), conhecido como Millennium bcp a partir de 2004, é o segundo maior banco privado português.",
+            "account_type": "Millenium+",
+            "monthly_account_cost": 7.60,
+            "annual_account_cost": 91.2,
+            "country": "Portugal",
+            "country_code": "PT"
+        }
+    ],
+    "schemas": {
+        "banks": {
+            "id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+            "name": "TEXT UNIQUE NOT NULL",
+            "description": "TEXT",
+            "account_type": "TEXT",
+            "monthly_account_cost": "DOUBLE",
+            "annual_account_cost": "DOUBLE",
+            "country": "TEXT",
+            "country_code": "TEXT"
+        },
+        "users": {
+            "id": "INTEGER PRIMARY KEY",
+            "username": "TEXT",
+            "discriminator": "TEXT",
+            "balance": "DOUBLE DEFAULT 0.0",
+            "daily_claim_time": "TIMESTAMP",
+            "weekly_claim_time": "TIMESTAMP",
+            "work_count": "INTEGER DEFAULT 0",
+            "work_reset_time": "TIMESTAMP"
+        },
+        "bank_accounts": {
+            "user_id": "INTEGER",
+            "bank_id": "INTEGER",
+            "account_type": "TEXT NOT NULL",
+            "balance": "DOUBLE DEFAULT 0.0",
+            "PRIMARY KEY": "(user_id, bank_id)",
+            "FOREIGN KEY (bank_id)": "REFERENCES banks (id)",
+            "FOREIGN KEY (user_id)": "REFERENCES users (id)"
+        },
+        "warnings": {
+            "id": "INTEGER PRIMARY KEY",
+            "user_id": "INTEGER",
+            "moderator_id": "INTEGER",
+            "guild_id": "INTEGER",
+            "reason": "TEXT",
+            "timestamp": "TIMESTAMP",
+            "foreign_keys": [
+                "user_id REFERENCES users (id)"
+            ]
+        },
+        "transactions": {
+            "transaction_id": "INTEGER PRIMARY KEY AUTOINCREMENT",
+            "user_id": "INTEGER",
+            "type": "TEXT",
+            "amount": "DOUBLE",
+            "timestamp": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+            "foreign_keys": [
+                "user_id REFERENCES users (id)"
+            ]
+        }
+    }
+}

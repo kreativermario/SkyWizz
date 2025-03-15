@@ -7,3 +7,6 @@ from .reminder_commands import *
 from .weather_commands import *
 from .utility_commands import *
 from .moderation_commands import *
+
+# Import all from economy submodule
+from .economy.bank import *
