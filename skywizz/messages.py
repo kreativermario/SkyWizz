@@ -1,5 +1,3 @@
-import discord
-
 import skywizz
 import skywizz.tools.embed as embd
 
@@ -31,6 +29,17 @@ def error(e="executing command"):
     embed.set_footer(text=skywizz.footer())
     return embed
 
+def missing_argument(given_arg, expected, recommendation=None):
+    embed = embd.newembed(title="⚠️ Missing argument(s)!",
+                          description=f"Expected arguments: ``{expected}``",
+                          color=0xFF0000)
+    embed.add_field(name="Your argument(s):", value=f"``{given_arg}``",
+                    inline=False)
+    if recommendation:
+        embed.add_field(name="Tip:", value=recommendation)
+
+    embed.set_footer(text=skywizz.footer())
+    return embed
 
 def invalid_argument(given_arg, valid_args, recommendation=None):
     embed = embd.newembed(title="🛑 Invalid argument!",

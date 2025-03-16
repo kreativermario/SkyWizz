@@ -15,11 +15,7 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
     PIP_NO_CACHE_DIR=1
 
 # Install necessary system packages and Poetry
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tzdata curl && \
-    ln -fs /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+RUN apt-get update && apt-get install -y --no-install-recommends && \
     pip install --no-cache-dir poetry
 
 WORKDIR /skywizz
@@ -37,7 +33,7 @@ ENV MPLCONFIGDIR="/skywizz/.config/matplotlib"
 
 # Install necessary system packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl tzdata && \
+    curl tzdata traceroute && \
     ln -fs /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
     apt-get clean && rm -rf /var/lib/apt/lists/*

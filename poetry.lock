@@ -1599,6 +1599,18 @@ files = [
 test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 
 [[package]]
+name = "whois"
+version = "1.20240129.2"
+description = "Python package for retrieving WHOIS information of domains."
+optional = false
+python-versions = ">=3.9"
+groups = ["main"]
+files = [
+    {file = "whois-1.20240129.2-py3-none-any.whl", hash = "sha256:1a7924e8ac1c534c326e5f1f3bd7975197d1a84dc968a9ce972b437cee494ba7"},
+    {file = "whois-1.20240129.2.tar.gz", hash = "sha256:b81367d0d1d6b742a7d0a7f8403acb246a57cd7b9bf934d825cf1cdf67cef284"},
+]
+
+[[package]]
 name = "yarl"
 version = "1.18.3"
 description = "Yet another URL library"
@@ -1698,4 +1710,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11"
-content-hash = "347872fb31b3220bf4525797d17d4993184ee573edfe0f80d13ed385864d767e"
+content-hash = "006ad1ee25f8793c676566335a4e1653651cebc29958b6949f3b6f3f7a22337b"

@@ -6,9 +6,8 @@ import skywizz.tools.embed as embd
 
 class CalculatorCommands(commands.Cog):
     """
-    Class that holds the commands related to calculator functions such as
-    sum, multiply and subtract.
-    This class extends `commands.Cog` from discord.
+    CalculatorCommands cog provides basic arithmetic operations:
+    sum, multiplication, and subtraction.
 
     Args:
         bot: Discord API client
@@ -17,10 +16,8 @@ class CalculatorCommands(commands.Cog):
     Attributes:
         bot: Discord API client
         logger: Logger object for logging purposes
-        hidden (bool): Attribute that determines if this list of
-                 command should show in the help command or not.
-                 If `false`, will show in help.
-        __cog_name__ (str): Command designation for the help command
+        hidden (bool): Determines if this list of commands should show in the help command.
+        __cog_name__ (str): Name for the help command.
     """
 
     def __init__(self, bot, logger):
@@ -30,14 +27,45 @@ class CalculatorCommands(commands.Cog):
         self.__cog_name__ = "Calculator Commands"
         self.logger.info(f"Loaded {self.__cog_name__}")
 
-    @commands.cooldown(10, 30, commands.BucketType.user)
-    @commands.command(name='sum')
-    async def sum_numbers(self, ctx, *args):
+    async def _parse_arguments(self, ctx, args, operation_name):
         """
-        Command that sums two or more given numbers
+        Helper function to validate and parse numeric arguments.
 
         Args:
-            *args (float): Variable length argument list, this means you can have multiple numbers, but must pass 2 numbers.
+            ctx: The command context.
+            args: List of arguments received from the command.
+            operation_name: The name of the operation (for error messages).
+
+        Returns:
+            List of valid numbers or None (if an error occurs).
+        """
+        if len(args) < 2:
+            missing_args_embed = skywizz.messages.missing_argument(
+                expected="At least two numbers",
+                recommendation=f"{operation_name} <number1> <number2> <...>"
+            )
+            await ctx.send(embed=missing_args_embed)
+            return None
+
+        valid_numbers = []
+        for arg in args:
+            try:
+                num = float(arg)
+                valid_numbers.append(num)
+            except ValueError:
+                error_embed = skywizz.messages.invalid_argument(
+                    given_arg=arg, valid_args="5, 4, 10, ..."
+                )
+                await ctx.send(embed=error_embed)
+                return None
+
+        return valid_numbers
+
+    @commands.cooldown(10, 30, commands.BucketType.user)
+    @commands.command(name="sum")
+    async def sum_numbers(self, ctx, *args):
+        """
+        Adds two or more numbers.
 
         Example:
             `!sum 50 90`
@@ -45,88 +73,52 @@ class CalculatorCommands(commands.Cog):
         Usage:
             `sum <number1> <number2> <...>`
         """
-        valid_numbers = []
-        for arg in args:
-            try:
-                num = float(arg)
-                valid_numbers.append(num)
-            except ValueError:
-                error_embed = skywizz.messages.invalid_argument(given_arg=args,
-                                                                valid_args=
-                                                                '5, 4, 10, ...')
-                await ctx.send(embed=error_embed)
-                return
+        valid_numbers = await self._parse_arguments(ctx, args, "sum")
+        if valid_numbers is None:
+            return
 
-        text = str(sum(valid_numbers))
-        embed = embd.newembed(title='Sum Result',
-                              description=f'{ctx.author.mention} {text}')
+        result = sum(valid_numbers)
+        embed = embd.newembed(title="Sum Result", description=f"{ctx.author.mention} {result}")
         await ctx.send(embed=embed)
 
     @commands.cooldown(10, 30, commands.BucketType.user)
-    @commands.command(name='product', aliases=['prod'])
-    async def multiply(self, ctx, *args):
+    @commands.command(name="product", aliases=["prod"])
+    async def multiply_numbers(self, ctx, *args):
         """
-        Command that multiplies two or more numbers
-
-        Args:
-            *args (float): Variable length argument list. This means it receives multiple numbers but must pass 2 numbers minimum.
+        Multiplies two or more numbers.
 
         Example:
             `!product 50 10`
 
         Usage:
             `product <number1> <number2> <...>`
-
         """
-        valid_numbers = []
-        for arg in args:
-            try:
-                num = float(arg)
-                valid_numbers.append(num)
-            except ValueError:
-                error_embed = skywizz.messages.invalid_argument(given_arg=args,
-                                                                valid_args=
-                                                                '5, 4, 10, ...')
-                await ctx.send(embed=error_embed)
-                return
+        valid_numbers = await self._parse_arguments(ctx, args, "product")
+        if valid_numbers is None:
+            return
 
-        text = str(tools.product(valid_numbers))
-        embed = embd.newembed(title='Product Result',
-                              description=f'{ctx.author.mention} {text}')
+        result = tools.product(valid_numbers)
+        embed = embd.newembed(title="Product Result", description=f"{ctx.author.mention} {result}")
         await ctx.send(embed=embed)
 
     @commands.cooldown(10, 30, commands.BucketType.user)
-    @commands.command(name='subtract')
+    @commands.command(name="subtract")
     async def subtract_numbers(self, ctx, *args):
         """
-        Command that subtracts multiple numbers from another
-
-        Parameters:
-            *args (float): Variable length argument list. This means it receives multiple numbers but must receive atleast two.
+        Subtracts multiple numbers from the first number.
 
         Example:
             `!subtract 50 10.5`
 
         Usage:
             `subtract <number1> <number2> <...>`
-
         """
-        valid_numbers = []
-        for arg in args:
-            try:
-                num = float(arg)
-                valid_numbers.append(num)
-            except ValueError:
-                error_embed = skywizz.messages.invalid_argument(given_arg=args,
-                                                                valid_args=
-                                                                '5, 4, 10, ...')
-                await ctx.send(embed=error_embed)
-                return
+        valid_numbers = await self._parse_arguments(ctx, args, "subtract")
+        if valid_numbers is None:
+            return
 
-        text = str(tools.subtract(valid_numbers))
-        embed = embd.newembed(title='Subtraction Result',
-                              description=f'{ctx.author.mention} {text}')
-
+        result = tools.subtract(valid_numbers)
+        embed = embd.newembed(title="Subtraction Result", description=f"{ctx.author.mention} {result}")
         await ctx.send(embed=embed)
 
 

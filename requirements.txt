@@ -37,3 +37,4 @@ tokenize-rt==6.1.0
 tzdata==2025.1
 urllib3==2.3.0
 yarl==1.18.3
+whois==1.20240129.2
