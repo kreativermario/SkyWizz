@@ -1,3 +1,44 @@
+# IDE and editor files
 /.idea
+/.vscode
+
+# Virtual environments
 /venv
-__pycache__
+/.venv
+
+# Build directories and caches
+/mkdocs
+/.github
+/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Dependency and build artifacts
+/dist
+/build
+/.mypy_cache
+/.pytest_cache
+/.tox
+/.coverage
+/.eggs
+*.egg-info
+
+# Docker-related files
+Dockerfile*
+.dockerignore
+
+# Logs and temporary files
+/logs
+*.log
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables and secrets
+.env
+*.env
+.envrc
