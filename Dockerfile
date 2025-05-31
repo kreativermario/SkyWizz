@@ -15,15 +15,13 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
 # Install system packages for building
 RUN apk add --no-cache \
     build-base \
-    libffi-dev \
-    openssl-dev \
-    musl-dev \
-    py3-pip \
     curl \
-    git
-
-# Install Poetry
-RUN pip install --no-cache-dir poetry
+    git \
+    libffi-dev \
+    musl-dev \
+    openssl-dev \
+    py3-pip && \
+    pip install --no-cache-dir poetry
 
 WORKDIR /skywizz
 
@@ -43,15 +41,13 @@ ENV MPLCONFIGDIR="/skywizz/.config/matplotlib"
 # Install runtime dependencies
 RUN apk add --no-cache \
     curl \
-    tzdata \
+    libstdc++ \
     su-exec \
     traceroute \
-    libstdc++ && \
+    tzdata && \
     cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
-    echo "${TIMEZONE}" > /etc/timezone
-
-# Add non-root user
-RUN addgroup -S skywizz && adduser -S -G skywizz skywizz
+    echo "${TIMEZONE}" > /etc/timezone && \
+    addgroup -S skywizz && adduser -S -G skywizz skywizz
 
 WORKDIR /skywizz
 
