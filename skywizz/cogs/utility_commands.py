@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 import skywizz
 import skywizz.tools.embed as embd
@@ -21,10 +20,9 @@ class UtilityCommands(commands.Cog):
         __cog_name__ (str): Command designation for the help command
     """
 
-    def __init__(self, bot, logger, discord_time_start):
+    def __init__(self, bot, logger):
         self.bot = bot
         self.logger = logger
-        self.discord_time_start = discord_time_start
         self.hidden = False
         self.__cog_name__ = "Utility Commands"
         self.logger.info(f"Loaded {self.__cog_name__}")
@@ -135,5 +133,5 @@ class UtilityCommands(commands.Cog):
         await ctx.send(embed=embed)
 
 
-async def setup(bot, logger, discord_time_start):
-    await bot.add_cog(UtilityCommands(bot, logger, discord_time_start))
+async def setup(bot, logger):
+    await bot.add_cog(UtilityCommands(bot, logger))

@@ -1,14 +1,19 @@
-version: '3.8'
 services:
   skywizz:
     build:
       context: .
+      dockerfile: Dockerfile
     volumes:
-      - .:/skywizz:rw
-    environment:
-      - BOT_TOKEN=${BOT_TOKEN}
-      - BOT_PREFIX=${BOT_PREFIX}
-      - BOT_STATUS=${BOT_STATUS}
-      - CONFIG_VERSION=${CONFIG_VERSION}
+      - skywizz-data:/skywizz:rw 
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - skywizz-net
+
 volumes:
   skywizz-data:
+
+networks:
+  skywizz-net:
+    driver: bridge

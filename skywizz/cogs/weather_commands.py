@@ -1,9 +1,7 @@
-import io
 import os
 import matplotlib.pyplot as plt
-import pandas as pd  # Import pandas
+import pandas as pd
 import discord
-import requests
 import emoji
 from discord.ext import commands
 from datetime import datetime
@@ -284,6 +282,7 @@ class WeatherCommands(commands.Cog):
         location_parts = location.split(',')
         if len(location_parts) < 1:
             # Display error message if user does not provide a location
+            self.logger.error("No location provided")
             error_embed = skywizz.specific_error('Please provide a location '
                                                  'to get the forecast')
             await ctx.send(embed=error_embed)
@@ -297,8 +296,9 @@ class WeatherCommands(commands.Cog):
                                                               country_name=country_name)
             city, country, country_code = await tools.reverse_gps(latitude, longitude)
             self.logger.debug(f"RETRIEVED: {city}, {country}, {country_code}")
-        except Exception:
+        except Exception as e:
             # Display error message if API response fails
+            self.logger.error(f"Failed to get coordinates for {city_name}, {country_name} - Error: {e}")
             error_embed = skywizz.error()
             await ctx.send(embed=error_embed)
             return

@@ -1,8 +1,6 @@
-import discord
 import subprocess
 import emoji
 from discord.ext import commands
-from discord.ext.commands import BucketType
 import skywizz
 import skywizz.tools as tools
 import skywizz.tools.embed as embd

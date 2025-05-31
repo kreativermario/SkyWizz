@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 import skywizz
 import skywizz.tools.embed as embd
@@ -28,8 +27,6 @@ class GeneralCommands(commands.Cog):
         self.hidden = False
         self.__cog_name__ = "General Commands"
         self.logger.info(f"Loaded {self.__cog_name__}")
-
-    
 
 
 async def setup(bot, logger):

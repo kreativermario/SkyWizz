@@ -1,23 +1,73 @@
-# Use Ubuntu image
-FROM ubuntu:latest
+# Base image
+FROM python:3.13.3-alpine3.22 AS base
 
-# Install necessary packages including traceroute
-RUN apt-get update && apt-get install -y traceroute python3 python3-pip
+ENV PYTHONFAULTHANDLER=1 \
+    PYTHONHASHSEED=random \
+    PYTHONUNBUFFERED=1
 
-# Set the timezone to Europe/Lisbon
-RUN ln -fs /usr/share/zoneinfo/Europe/Lisbon /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
+# Builder stage
+FROM base AS builder
 
-# Set work dir
+ENV PIP_DEFAULT_TIMEOUT=100 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1
+
+# Install system packages for building
+RUN apk add --no-cache \
+    build-base \
+    curl \
+    git \
+    libffi-dev \
+    musl-dev \
+    openssl-dev \
+    py3-pip && \
+    pip install --no-cache-dir poetry
+
 WORKDIR /skywizz
 
-# Copy requirements
-COPY requirements.txt .
+# Copy dependency files first
+COPY pyproject.toml poetry.lock ./
 
-# Install Python dependencies
-RUN pip install --no-cache-dir --break-system-packages -r requirements.txt
+# Install dependencies
+RUN poetry config virtualenvs.in-project true && \
+    poetry install --no-interaction --no-root
 
-# Copy the rest of the workspace
+# Runtime stage
+FROM python:3.13.3-alpine3.22 AS runtime
+
+ENV TIMEZONE="Europe/Lisbon"
+ENV MPLCONFIGDIR="/skywizz/.config/matplotlib"
+
+# Install runtime dependencies
+RUN apk add --no-cache \
+    curl \
+    libstdc++ \
+    su-exec \
+    traceroute \
+    tzdata && \
+    cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
+    echo "${TIMEZONE}" > /etc/timezone && \
+    addgroup -S skywizz && adduser -S -G skywizz skywizz
+
+WORKDIR /skywizz
+
+# Copy only the virtual environment from builder
+COPY --from=builder /skywizz/.venv ./.venv
+
+# Copy application code
 COPY . .
 
-# Run the bot
-CMD ["python3", "SkyWizz.py"]
+# Create folders and fix permissions
+RUN mkdir -p ./images && \
+    chown -R skywizz:skywizz /skywizz && \
+    chmod -R g=u /skywizz && \
+    chmod -R g+w /skywizz
+
+# Switch to non-privileged user
+USER skywizz
+
+# Set Python path
+ENV PATH="/skywizz/.venv/bin:$PATH" \
+    VIRTUAL_ENV="/skywizz/.venv"
+
+CMD ["python", "SkyWizz.py"]
