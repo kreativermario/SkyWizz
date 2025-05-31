@@ -4,7 +4,6 @@ import socket
 import sys
 from .cogs import *
 from .events import *
-from .setup import *
 from .config import *
 from .messages import *
 from .db import *

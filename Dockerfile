@@ -1,7 +1,5 @@
 # Base image
-ARG TIMEZONE="Europe/Lisbon"
-
-FROM python:3.13.2-slim AS base
+FROM python:3.13.3-alpine3.22 AS base
 
 ENV PYTHONFAULTHANDLER=1 \
     PYTHONHASHSEED=random \
@@ -14,53 +12,66 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     PIP_NO_CACHE_DIR=1
 
-# Install necessary system packages and Poetry
-RUN apt-get update && apt-get install -y --no-install-recommends && \
-    pip install --no-cache-dir poetry
+# Install system packages for building
+RUN apk add --no-cache \
+    build-base \
+    libffi-dev \
+    openssl-dev \
+    musl-dev \
+    py3-pip \
+    curl \
+    git
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry
 
 WORKDIR /skywizz
 
-# Copy dependency files first for better layer caching
+# Copy dependency files first
 COPY pyproject.toml poetry.lock ./
 
+# Install dependencies
 RUN poetry config virtualenvs.in-project true && \
     poetry install --no-interaction --no-root
 
 # Runtime stage
-FROM python:3.13.2-slim AS runtime
+FROM python:3.13.3-alpine3.22 AS runtime
 
+ENV TIMEZONE="Europe/Lisbon"
 ENV MPLCONFIGDIR="/skywizz/.config/matplotlib"
 
-# Install necessary system packages
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl tzdata traceroute && \
-    ln -fs /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
-    dpkg-reconfigure -f noninteractive tzdata && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
+# Install runtime dependencies
+RUN apk add --no-cache \
+    curl \
+    tzdata \
+    su-exec \
+    traceroute \
+    libstdc++ && \
+    cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
+    echo "${TIMEZONE}" > /etc/timezone
 
-# Create non-privileged user
-RUN adduser --system --group --no-create-home skywizz
+# Add non-root user
+RUN addgroup -S skywizz && adduser -S -G skywizz skywizz
 
-# Set work directory
 WORKDIR /skywizz
 
-# Copy only the virtual environment from builder to minimize image size
+# Copy only the virtual environment from builder
 COPY --from=builder /skywizz/.venv ./.venv
 
-# Copy the application code
+# Copy application code
 COPY . .
 
-# Set permissions
-RUN mkdir ./images && \
-    chown -R skywizz:0 /skywizz && \
+# Create folders and fix permissions
+RUN mkdir -p ./images && \
+    chown -R skywizz:skywizz /skywizz && \
     chmod -R g=u /skywizz && \
     chmod -R g+w /skywizz
 
-# Switch to the non-privileged user
-USER skywizz:0
+# Switch to non-privileged user
+USER skywizz
 
-# Update PATH to include the virtual environment
-ENV PATH="/skywizz/.venv/bin:${PATH}" \
+# Set Python path
+ENV PATH="/skywizz/.venv/bin:$PATH" \
     VIRTUAL_ENV="/skywizz/.venv"
 
 CMD ["python", "SkyWizz.py"]

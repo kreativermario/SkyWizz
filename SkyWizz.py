@@ -15,11 +15,22 @@ from skywizz.logger import logger
 
 # Load environment variables
 env_path = join(dirname(__file__), '.env')
-if not os.path.exists(env_path):
-    logger.warning("Unable to find .env file. Running setup.py...")
-    skywizz.setup.__init__()  # Run setup.py if .env is missing
-else:
-    load_dotenv(env_path)
+load_dotenv(env_path, override=False)
+
+# Check for required environment variables
+required_env_vars = ['CONFIG_VERSION', 'BOT_TOKEN', 'BOT_PREFIX', 'BOT_STATUS', 'PYTHON_ENV', 'LOG_LEVEL', 'TIMEZONE']
+
+missing_vars = [var for var in required_env_vars if not os.getenv(var)]
+
+if missing_vars:
+    logger.error(f"Missing environment variables: {', '.join(missing_vars)}")
+    logger.error("Please define them via .env or system environment variables.")
+    quit(1)
+
+# Validate Configuration
+if os.getenv('CONFIG_VERSION') != skywizz.config_version():
+    logger.error("Incompatible CONFIG_VERSION. Please update your .env or environment config.")
+    quit(2)
 
 # Validate Configuration
 if os.getenv('CONFIG_VERSION') != skywizz.config_version():
