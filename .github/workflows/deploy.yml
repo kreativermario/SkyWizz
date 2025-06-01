@@ -80,7 +80,7 @@ jobs:
       id: check_stack
       uses: fjogeleit/http-request-action@v1
       with:
-        url: ${{ secrets.PORTAINER_URL }}/api/stacks?filters=%7B%22EndpointID%22%3A%22${{ env.PORTAINER_ENDPOINT_ID }}%22%7D
+        url: ${{ secrets.PORTAINER_URL }}/api/stacks?filters=%7B%22EndpointID%22%3A9%7D
         method: GET
         contentType: application/json
         customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
