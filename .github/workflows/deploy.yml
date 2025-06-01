@@ -69,22 +69,26 @@ jobs:
       run: |
         sed -i "s|REPLACE_IMAGE_NAME|${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.image_tag }}|g" docker-compose.prod.yml
 
-    - name: Deploy Stack
-      uses: kgierke/portainer-stack-deployment@v1
+    - name: Deploy Stack to Portainer
+      uses: fjogeleit/http-request-action@v1
       with:
-        portainer-url: ${{ secrets.PORTAINER_URL }}
-        portainer-username: ${{ secrets.PORTAINER_USERNAME }}
-        portainer-password: ${{ secrets.PORTAINER_PASSWORD }}
-        portainer-endpoint: ${{ env.PORTAINER_ENDPOINT_ID }}
-        name: ${{ env.PORTAINER_STACK_NAME }}
-        file: docker-compose.prod.yml
-        variables: >-
+        url: ${{ secrets.PORTAINER_URL }}/api/stacks/create/standalone/file?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}
+        method: POST
+        contentType: multipart/form-data
+        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_TOKEN }}"}'
+        files: |
+          file=./docker-compose.prod.yml
+        # Note: this action doesn’t support multipart form upload, so we encode the compose file in base64 instead:
+        data: |
           {
-            "CONFIG_VERSION": "${{ env.CONFIG_VERSION }}",
-            "BOT_TOKEN": "${{ secrets.DISCORD_BOT_TOKEN }}",
-            "BOT_PREFIX": "${{ env.BOT_PREFIX }}",
-            "BOT_STATUS": "${{ env.BOT_STATUS }}",
-            "PYTHON_ENV": "${{ env.PYTHON_ENV }}",
-            "LOG_LEVEL": "${{ env.LOG_LEVEL }}",
-            "TIMEZONE": "${{ env.TIMEZONE }}"
+            "Name": "${{ env.PORTAINER_STACK_NAME }}",
+            "Env": [
+              {"name": "CONFIG_VERSION", "value": "${{ env.CONFIG_VERSION }}"},
+              {"name": "BOT_TOKEN", "value": "${{ secrets.DISCORD_BOT_TOKEN }}"},
+              {"name": "BOT_PREFIX", "value": "${{ env.BOT_PREFIX }}"},
+              {"name": "BOT_STATUS", "value": "${{ env.BOT_STATUS }}"},
+              {"name": "PYTHON_ENV", "value": "${{ env.PYTHON_ENV }}"},
+              {"name": "LOG_LEVEL", "value": "${{ env.LOG_LEVEL }}"},
+              {"name": "TIMEZONE", "value": "${{ env.TIMEZONE }}"}
+            ]
           }
