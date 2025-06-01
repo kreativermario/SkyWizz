@@ -97,5 +97,5 @@ jobs:
             ],
             "name": "${{ env.PORTAINER_STACK_NAME }}",
             "fromAppTemplate": false,
-            "stackFileContent": "${{ env.COMPOSE_CONTENT }}"
+            "stackFileContent": ${{ env.COMPOSE_CONTENT }}
           }
