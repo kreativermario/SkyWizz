@@ -12,7 +12,8 @@ on:
         default: "dev"
 
 env:
-  IMAGE_NAME: ${{ secrets.HARBOR_REGISTRY_URL }}/skywizz/skywizz
+  HARBOR_REGISTRY_URL: "harbor.local.guacamoleninja.com"
+  IMAGE_NAME: "harbor.local.guacamoleninja.com/skywizz/skywizz"
   PORTAINER_ENDPOINT_ID: 9
   PORTAINER_STACK_NAME: skywizz-dev
   CONFIG_VERSION: 0.1
@@ -43,7 +44,7 @@ jobs:
     - name: Log in to Harbor
       uses: docker/login-action@v3
       with:
-        registry: ${{ secrets.HARBOR_REGISTRY_URL }}
+        registry: ${{ env.HARBOR_REGISTRY_URL }}
         username: ${{ secrets.HARBOR_USERNAME }}
         password: ${{ secrets.HARBOR_PASSWORD }}
 
