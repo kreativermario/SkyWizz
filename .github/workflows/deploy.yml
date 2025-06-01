@@ -70,20 +70,25 @@ jobs:
       run: |
         sed -i "s|REPLACE_IMAGE_NAME|${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.image_tag }}|g" docker-compose.prod.yml
 
-    - name: Deploy Stack to Portainer
+    - name: Read docker-compose file content
+      id: read_compose
+      run: |
+        # Read the compose file and escape newlines and quotes for JSON safely
+        COMPOSE_CONTENT=$(cat docker-compose.prod.yml | python3 -c "import json,sys; print(json.dumps(sys.stdin.read()))")
+        echo "COMPOSE_CONTENT=$COMPOSE_CONTENT" >> $GITHUB_ENV
+
+    - name: Deploy Stack to Portainer (using /stacks/create/standalone/string)
       uses: fjogeleit/http-request-action@v1
       with:
-        url: ${{ secrets.PORTAINER_URL }}/api/stacks/create/standalone/file?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}
+        url: ${{ secrets.PORTAINER_URL }}/api/stacks/create/standalone/string?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}
         method: POST
-        contentType: multipart/form-data
+        contentType: application/json
         customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
-        files: |
-          file=./docker-compose.prod.yml
-        # Note: this action doesn’t support multipart form upload, so we encode the compose file in base64 instead:
         data: |
           {
-            "Name": "${{ env.PORTAINER_STACK_NAME }}",
-            "Env": [
+            "name": "${{ env.PORTAINER_STACK_NAME }}",
+            "stackFileContent": ${{ env.COMPOSE_CONTENT }},
+            "env": [
               {"name": "CONFIG_VERSION", "value": "${{ env.CONFIG_VERSION }}"},
               {"name": "BOT_TOKEN", "value": "${{ secrets.DISCORD_BOT_TOKEN }}"},
               {"name": "BOT_PREFIX", "value": "${{ env.BOT_PREFIX }}"},
