@@ -3,8 +3,6 @@ services:
     image: REPLACE_IMAGE_NAME
     volumes:
       - skywizz-data:/skywizz:rw 
-    env_file:
-      - .env
     restart: unless-stopped
     networks:
       - skywizz-net
