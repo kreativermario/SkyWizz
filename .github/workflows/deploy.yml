@@ -70,11 +70,11 @@ jobs:
       run: |
         sed -i "s|REPLACE_IMAGE_NAME|${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.image_tag }}|g" docker-compose.prod.yml
 
-    - name: Read docker-compose file content
+    - name: Read docker-compose file content safely
       id: read_compose
       run: |
-        CONTENT=$(cat docker-compose.prod.yml | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
-        echo "COMPOSE_CONTENT=\"$CONTENT\"" >> $GITHUB_ENV
+        CONTENT=$(jq -Rs '.' < docker-compose.prod.yml)
+        echo "COMPOSE_CONTENT=$CONTENT" >> $GITHUB_ENV
 
     - name: Deploy Stack to Portainer (using /stacks/create/standalone/string)
       uses: fjogeleit/http-request-action@v1
