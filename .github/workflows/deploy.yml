@@ -60,6 +60,7 @@ jobs:
   deploy:
     runs-on: self-hosted
     environment: development
+    needs: build-and-push
     
     steps:
     - name: Clone Repository
@@ -75,7 +76,7 @@ jobs:
         url: ${{ secrets.PORTAINER_URL }}/api/stacks/create/standalone/file?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}
         method: POST
         contentType: multipart/form-data
-        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_TOKEN }}"}'
+        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
         files: |
           file=./docker-compose.prod.yml
         # Note: this action doesn’t support multipart form upload, so we encode the compose file in base64 instead:
