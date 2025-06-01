@@ -76,6 +76,32 @@ jobs:
         CONTENT=$(jq -Rs '.' < docker-compose.prod.yml)
         echo "COMPOSE_CONTENT=$CONTENT" >> $GITHUB_ENV
 
+    - name: Check if stack exists
+      id: check_stack
+      uses: fjogeleit/http-request-action@v1
+      with:
+        url: ${{ secrets.PORTAINER_URL }}/api/stacks?filters=%7B%22EndpointID%22%3A%22${{ env.PORTAINER_ENDPOINT_ID }}%22%7D
+        method: GET
+        contentType: application/json
+        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
+        timeout: 30000
+
+    - name: Extract stack ID if stack exists
+      id: extract_stack_id
+      run: |
+        echo "Response: ${{ steps.check_stack.outputs.response }}"
+        STACK_ID=$(echo '${{ steps.check_stack.outputs.response }}' | jq -r '.[] | select(.Name=="skywizz-dev") | .Id')
+        echo "stack_id=$STACK_ID" >> $GITHUB_OUTPUT
+    
+    - name: Delete stack if exists
+      if: steps.extract_stack_id.outputs.stack_id != ''
+      uses: fjogeleit/http-request-action@v1
+      with:
+        url: ${{ secrets.PORTAINER_URL }}/api/stacks/${{ steps.extract_stack_id.outputs.stack_id }}?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}
+        method: DELETE
+        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
+        timeout: 10000
+
     - name: Deploy Stack to Portainer (using /stacks/create/standalone/string)
       uses: fjogeleit/http-request-action@v1
       with:
