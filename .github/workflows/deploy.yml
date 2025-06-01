@@ -84,10 +84,9 @@ jobs:
         method: POST
         contentType: application/json
         customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
+        timeout: 30000
         data: |
           {
-            "name": "${{ env.PORTAINER_STACK_NAME }}",
-            "stackFileContent": ${{ env.COMPOSE_CONTENT }},
             "env": [
               {"name": "CONFIG_VERSION", "value": "${{ env.CONFIG_VERSION }}"},
               {"name": "BOT_TOKEN", "value": "${{ secrets.DISCORD_BOT_TOKEN }}"},
@@ -96,5 +95,8 @@ jobs:
               {"name": "PYTHON_ENV", "value": "${{ env.PYTHON_ENV }}"},
               {"name": "LOG_LEVEL", "value": "${{ env.LOG_LEVEL }}"},
               {"name": "TIMEZONE", "value": "${{ env.TIMEZONE }}"}
-            ]
+            ],
+            "name": "${{ env.PORTAINER_STACK_NAME }}",
+            "fromAppTemplate": false,
+            "stackFileContent": ${{ env.COMPOSE_CONTENT }},
           }
