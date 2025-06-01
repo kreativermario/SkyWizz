@@ -73,9 +73,8 @@ jobs:
     - name: Read docker-compose file content
       id: read_compose
       run: |
-        # Read the compose file and escape newlines and quotes for JSON safely
-        COMPOSE_CONTENT=$(cat docker-compose.prod.yml | python3 -c "import json,sys; print(json.dumps(sys.stdin.read()))")
-        echo "COMPOSE_CONTENT=$COMPOSE_CONTENT" >> $GITHUB_ENV
+        CONTENT=$(cat docker-compose.prod.yml | sed ':a;N;$!ba;s/\n/\\n/g' | sed 's/"/\\"/g')
+        echo "COMPOSE_CONTENT=\"$CONTENT\"" >> $GITHUB_ENV
 
     - name: Deploy Stack to Portainer (using /stacks/create/standalone/string)
       uses: fjogeleit/http-request-action@v1
@@ -98,5 +97,5 @@ jobs:
             ],
             "name": "${{ env.PORTAINER_STACK_NAME }}",
             "fromAppTemplate": false,
-            "stackFileContent": ${{ env.COMPOSE_CONTENT }},
+            "stackFileContent": "${{ env.COMPOSE_CONTENT }}"
           }
