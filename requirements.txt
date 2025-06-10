@@ -31,7 +31,7 @@ python-dotenv==1.0.1
 python-whois==0.9.5
 pytz==2025.1
 pyupgrade==3.19.0
-requests==2.32.3
+requests==2.32.4
 six==1.17.0
 tokenize-rt==6.1.0
 tzdata==2025.1
