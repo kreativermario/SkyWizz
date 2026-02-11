@@ -21,7 +21,7 @@ multidict==6.1.0
 numpy==2.2.3
 packaging==24.2
 pandas==2.2.3
-pillow==11.1.0
+pillow==12.1.1
 pip-autoremove==0.10.0
 pip-tools==7.4.1
 pyparsing==3.2.1
