@@ -84,8 +84,8 @@ jobs:
           secretId: ${{ secrets.HCP_VAULT_SECRET_ID }}
           secrets: |
             ${{ env.VAULT_PORTAINER_PATH }} api_key | PORTAINER_API_TOKEN ;
-            ${{ env.VAULT_PORTAINER_PATH }} PORTAINER_URL | PORTAINER_URL ;
-            ${{ env.VAULT_PORTAINER_PATH }} PORTAINER_ENDPOINT_ID | PORTAINER_ENDPOINT_ID ;
+            ${{ env.VAULT_PATH }} PORTAINER_URL | PORTAINER_URL ;
+            ${{ env.VAULT_PATH }} PORTAINER_ENDPOINT_ID | PORTAINER_ENDPOINT_ID ;
             ${{ env.VAULT_PATH }} DISCORD_BOT_TOKEN | BOT_TOKEN ;
             ${{ env.VAULT_PATH }} DISCORD_CLIENT_ID | CLIENT_ID ;
             ${{ env.VAULT_PATH }} POSTGRES_USER | POSTGRES_USER ;
