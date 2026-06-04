@@ -126,7 +126,7 @@ jobs:
           method: GET
           contentType: application/json
           customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
-          timeout: 60000
+          timeout: 300000
 
       - name: Extract stack ID if stack exists
         id: extract_stack_id
@@ -146,7 +146,7 @@ jobs:
           method: PUT
           contentType: application/json
           customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
-          timeout: 60000
+          timeout: 300000
           data: |
             {
               "env": [
@@ -171,7 +171,7 @@ jobs:
           method: POST
           contentType: application/json
           customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
-          timeout: 60000
+          timeout: 300000
           data: |
             {
               "env": [
