@@ -1,1 +1,0 @@
-::: skywizz.cogs.weather_commands
