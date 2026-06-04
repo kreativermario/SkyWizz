@@ -15,7 +15,7 @@ jobs:
     runs-on: self-hosted
     environment: development
     outputs:
-      image: ${{ steps.meta.outputs.image }}
+      tag: ${{ steps.meta.outputs.tag }}
 
     steps:
       - uses: actions/checkout@v6.0.3
@@ -35,8 +35,10 @@ jobs:
 
       - name: Get image tag
         id: meta
+        env:
+          HARBOR_REGISTRY_URL: ${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}
         run: |
-          REGISTRY=$(echo "${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}" | tr -d '\n\r' | xargs)
+          REGISTRY=$(echo "$HARBOR_REGISTRY_URL" | tr -d '\n\r' | xargs)
           REGISTRY="${REGISTRY#http://}"
           REGISTRY="${REGISTRY#https://}"
           REGISTRY="${REGISTRY%/}"
@@ -44,7 +46,9 @@ jobs:
             echo "HARBOR_REGISTRY_URL is empty after normalization." >&2
             exit 1
           fi
-          echo "image=$REGISTRY/skywizz/skywizz-bot:$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          TAG=$(git rev-parse --short HEAD)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "image=$REGISTRY/skywizz/skywizz-bot:$TAG" >> "$GITHUB_OUTPUT"
           echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Harbor
@@ -86,12 +90,24 @@ jobs:
             ${{ env.VAULT_PORTAINER_PATH }} api_key | PORTAINER_API_TOKEN ;
             ${{ env.VAULT_PATH }} PORTAINER_URL | PORTAINER_URL ;
             ${{ env.VAULT_PATH }} PORTAINER_ENDPOINT_ID | PORTAINER_ENDPOINT_ID ;
+            ${{ env.VAULT_PATH }} HARBOR_REGISTRY_URL | HARBOR_REGISTRY_URL ;
             ${{ env.VAULT_PATH }} DISCORD_BOT_TOKEN | BOT_TOKEN ;
             ${{ env.VAULT_PATH }} DISCORD_CLIENT_ID | CLIENT_ID ;
             ${{ env.VAULT_PATH }} POSTGRES_USER | POSTGRES_USER ;
             ${{ env.VAULT_PATH }} POSTGRES_PASSWORD | POSTGRES_PASSWORD ;
             ${{ env.VAULT_PATH }} POSTGRES_DB | POSTGRES_DB ;
             ${{ env.VAULT_PATH }} TIMEZONE | TIMEZONE
+
+      - name: Resolve image ref
+        id: image
+        env:
+          HARBOR_REGISTRY_URL: ${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}
+        run: |
+          REGISTRY=$(echo "$HARBOR_REGISTRY_URL" | tr -d '\n\r' | xargs)
+          REGISTRY="${REGISTRY#http://}"
+          REGISTRY="${REGISTRY#https://}"
+          REGISTRY="${REGISTRY%/}"
+          echo "ref=$REGISTRY/skywizz/skywizz-bot:${{ needs.build-and-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
 
       - name: Read compose file
         id: compose
@@ -109,7 +125,7 @@ jobs:
       - name: Update existing stack
         if: steps.stack.outputs.id != ''
         env:
-          BOT_IMAGE: ${{ needs.build-and-push.outputs.image }}
+          BOT_IMAGE: ${{ steps.image.outputs.ref }}
           BOT_TOKEN: ${{ steps.vault.outputs.BOT_TOKEN }}
           CLIENT_ID: ${{ steps.vault.outputs.CLIENT_ID }}
           POSTGRES_USER: ${{ steps.vault.outputs.POSTGRES_USER }}
@@ -150,7 +166,7 @@ jobs:
       - name: Create new stack
         if: steps.stack.outputs.id == ''
         env:
-          BOT_IMAGE: ${{ needs.build-and-push.outputs.image }}
+          BOT_IMAGE: ${{ steps.image.outputs.ref }}
           BOT_TOKEN: ${{ steps.vault.outputs.BOT_TOKEN }}
           CLIENT_ID: ${{ steps.vault.outputs.CLIENT_ID }}
           POSTGRES_USER: ${{ steps.vault.outputs.POSTGRES_USER }}
