@@ -29,7 +29,7 @@ export const server: Command = {
       .setColor(0x5865f2)
       .setThumbnail(guild.iconURL())
       .addFields(
-        { name: "Owner", value: owner.user.tag, inline: true },
+        { name: "Owner", value: owner.user.username, inline: true },
         { name: "Members", value: guild.memberCount.toString(), inline: true },
         {
           name: "Created",

@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Events, MessageFlags } from "discord.js";
+import { Events, MessageFlags, type InteractionReplyOptions } from "discord.js";
 import { client } from "./client.js";
 import { commands } from "./commands/index.js";
 import { prisma } from "./db/client.js";
@@ -18,7 +18,7 @@ process.on("SIGTERM", () => shutdown(0));
 process.on("SIGINT", () => shutdown(0));
 
 client.once(Events.ClientReady, (c) => {
-  console.log(`Logged in as ${c.user.tag}`);
+  console.log(`Logged in as ${c.user.username}`);
 });
 
 client.on(Events.GuildCreate, (guild) => {
@@ -39,11 +39,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
     await command.execute(interaction);
   } catch (error) {
     console.error(error);
-    const msg = { content: "Something went wrong.", flags: MessageFlags.Ephemeral as any };
+    const options: InteractionReplyOptions = { content: "Something went wrong.", flags: MessageFlags.Ephemeral };
     if (interaction.replied || interaction.deferred) {
-      await interaction.followUp(msg);
+      await interaction.followUp(options);
     } else {
-      await interaction.reply(msg);
+      await interaction.reply(options);
     }
   }
 });
