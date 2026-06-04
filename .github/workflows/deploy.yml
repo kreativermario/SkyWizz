@@ -5,6 +5,9 @@ on:
     branches: ["dev"]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   STACK_NAME: skywizz-bot
   VAULT_PATH: automation/data/skywizz
