@@ -20,4 +20,6 @@ ENV NODE_ENV=production
 COPY --from=builder --chown=65532:65532 /app/dist ./dist
 COPY --from=builder --chown=65532:65532 /app/node_modules ./node_modules
 COPY --from=builder --chown=65532:65532 /app/package.json ./package.json
+COPY --from=builder --chown=65532:65532 /app/prisma ./prisma
+COPY --from=builder --chown=65532:65532 /app/prisma.config.ts ./prisma.config.ts
 CMD ["dist/start.js"]
