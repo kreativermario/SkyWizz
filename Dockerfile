@@ -1,73 +1,24 @@
-# Base image
-FROM python:3.13.3-alpine3.22 AS base
+FROM node:22-alpine AS base
+RUN corepack enable
 
-ENV PYTHONFAULTHANDLER=1 \
-    PYTHONHASHSEED=random \
-    PYTHONUNBUFFERED=1
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# Builder stage
 FROM base AS builder
-
-ENV PIP_DEFAULT_TIMEOUT=100 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
-
-# Install system packages for building
-RUN apk add --no-cache \
-    build-base \
-    curl \
-    git \
-    libffi-dev \
-    musl-dev \
-    openssl-dev \
-    py3-pip && \
-    pip install --no-cache-dir poetry
-
-WORKDIR /skywizz
-
-# Copy dependency files first
-COPY pyproject.toml poetry.lock ./
-
-# Install dependencies
-RUN poetry config virtualenvs.in-project true && \
-    poetry install --no-interaction --no-root
-
-# Runtime stage
-FROM python:3.13.3-alpine3.22 AS runtime
-
-ENV TIMEZONE="Europe/Lisbon"
-ENV MPLCONFIGDIR="/skywizz/.config/matplotlib"
-
-# Install runtime dependencies
-RUN apk add --no-cache \
-    curl \
-    libstdc++ \
-    su-exec \
-    traceroute \
-    tzdata && \
-    cp /usr/share/zoneinfo/${TIMEZONE} /etc/localtime && \
-    echo "${TIMEZONE}" > /etc/timezone && \
-    addgroup -S skywizz && adduser -S -G skywizz skywizz
-
-WORKDIR /skywizz
-
-# Copy only the virtual environment from builder
-COPY --from=builder /skywizz/.venv ./.venv
-
-# Copy application code
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN pnpm db:generate
+RUN pnpm build
+RUN pnpm prune --prod
 
-# Create folders and fix permissions
-RUN mkdir -p ./images && \
-    chown -R skywizz:skywizz /skywizz && \
-    chmod -R g=u /skywizz && \
-    chmod -R g+w /skywizz
-
-# Switch to non-privileged user
+FROM node:22-alpine AS runner
+WORKDIR /app
+RUN addgroup -S skywizz && adduser -S skywizz -G skywizz
+COPY --from=builder --chown=skywizz:skywizz /app/dist ./dist
+COPY --from=builder --chown=skywizz:skywizz /app/node_modules ./node_modules
+COPY --from=builder --chown=skywizz:skywizz /app/package.json ./package.json
 USER skywizz
-
-# Set Python path
-ENV PATH="/skywizz/.venv/bin:$PATH" \
-    VIRTUAL_ENV="/skywizz/.venv"
-
-CMD ["python", "SkyWizz.py"]
+CMD ["node", "dist/index.js"]

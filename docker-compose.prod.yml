@@ -1,24 +1,16 @@
-version: '3.8'
 services:
-  skywizz:
-    image: REPLACE_IMAGE_NAME
-    volumes:
-      - skywizz-data:/skywizz:rw 
-    restart: unless-stopped
+  bot:
+    image: ${BOT_IMAGE}
     environment:
-      CONFIG_VERSION: "${CONFIG_VERSION}"
-      BOT_TOKEN: "${BOT_TOKEN}"
-      BOT_PREFIX: "${BOT_PREFIX}"
-      BOT_STATUS: "${BOT_STATUS}"
-      PYTHON_ENV: "${PYTHON_ENV}"
-      LOG_LEVEL: "${LOG_LEVEL}"
-      TIMEZONE: "${TIMEZONE}"
+      BOT_TOKEN: ${BOT_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      DATABASE_URL: ${DATABASE_URL}
+      NODE_ENV: production
+      TIMEZONE: ${TIMEZONE:-UTC}
     networks:
-      - skywizz-net
-
-volumes:
-  skywizz-data:
+      - skywizz-data
+    restart: unless-stopped
 
 networks:
-  skywizz-net:
-    driver: bridge
+  skywizz-data:
+    external: true

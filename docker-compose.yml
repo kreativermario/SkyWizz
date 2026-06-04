@@ -1,19 +1,25 @@
 services:
-  skywizz:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - skywizz-data:/skywizz:rw 
-    env_file:
-      - .env
+  bot:
+    build: .
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
-    networks:
-      - skywizz-net
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: skywizz
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: skywizz
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skywizz"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
-  skywizz-data:
-
-networks:
-  skywizz-net:
-    driver: bridge
+  postgres_data:
