@@ -1,127 +1,103 @@
-name: Build & Deploy Docker Compose (Dev)
+name: Deploy
 
 on:
   push:
     branches: ["dev"]
-
   workflow_dispatch:
-    inputs:
-      BRANCH:
-        description: "Branch to build"
-        required: true
-        default: "dev"
 
 env:
-  IMAGE_NAME: ${{ secrets.HARBOR_REGISTRY_URL }}/skywizz/skywizz
-  PORTAINER_ENDPOINT_ID: 9
-  PORTAINER_STACK_NAME: skywizz-dev
-  CONFIG_VERSION: 0.1
-  BOT_PREFIX: "!"
-  BOT_STATUS: "Use !help by default - Powered By SkyWizz.py"
-  PYTHON_ENV: "development"
-  LOG_LEVEL: "INFO"
-  TIMEZONE: "Europe/Lisbon"
+  STACK_NAME: skywizz-bot
+  PORTAINER_ENDPOINT_ID: "9"
 
 jobs:
   build-and-push:
     runs-on: self-hosted
     environment: development
-
     outputs:
-      image_tag: ${{ steps.get-sha.outputs.sha }}
+      image: ${{ steps.meta.outputs.image }}
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      with:
-        ref: ${{ github.event.inputs.BRANCH || github.ref_name }}
+      - uses: actions/checkout@v4
 
-    - name: Get short commit SHA
-      id: get-sha
-      run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Get image tag
+        id: meta
+        run: echo "image=${{ secrets.HARBOR_REGISTRY_URL }}/skywizz/skywizz-bot:$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
-    - name: Log in to Harbor
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ secrets.HARBOR_REGISTRY_URL }}
-        username: ${{ secrets.HARBOR_USERNAME }}
-        password: ${{ secrets.HARBOR_PASSWORD }}
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.HARBOR_REGISTRY_URL }}
+          username: ${{ secrets.HARBOR_USERNAME }}
+          password: ${{ secrets.HARBOR_PASSWORD }}
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: ${{ env.IMAGE_NAME }}:${{ steps.get-sha.outputs.sha }}
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
   deploy:
     runs-on: self-hosted
     environment: development
     needs: build-and-push
-    
+
     steps:
-    - name: Clone Repository
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-    - name: Replace image placeholder in docker-compose.prod.yml
-      run: |
-        sed -i "s|REPLACE_IMAGE_NAME|${{ env.IMAGE_NAME }}:${{ needs.build-and-push.outputs.image_tag }}|g" docker-compose.prod.yml
+      - name: Read compose file
+        id: compose
+        run: echo "content=$(jq -Rs '.' < docker-compose.prod.yml)" >> "$GITHUB_OUTPUT"
 
-    - name: Read docker-compose file content safely
-      id: read_compose
-      run: |
-        CONTENT=$(jq -Rs '.' < docker-compose.prod.yml)
-        echo "COMPOSE_CONTENT=$CONTENT" >> $GITHUB_ENV
+      - name: Get stack ID if it exists
+        id: stack
+        run: |
+          ID=$(curl -sf \
+            -H "X-API-Key: ${{ secrets.PORTAINER_API_TOKEN }}" \
+            "${{ secrets.PORTAINER_URL }}/api/stacks" | \
+            jq -r --arg name "$STACK_NAME" '.[] | select(.Name == $name) | .Id // empty')
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
 
-    - name: Check if stack exists
-      id: check_stack
-      uses: fjogeleit/http-request-action@v1
-      with:
-        url: ${{ secrets.PORTAINER_URL }}/api/stacks?filters=%7B%22EndpointID%22%3A9%7D
-        method: GET
-        contentType: application/json
-        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
-        timeout: 30000
+      - name: Update existing stack
+        if: steps.stack.outputs.id != ''
+        run: |
+          curl -sf -X PUT \
+            -H "X-API-Key: ${{ secrets.PORTAINER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.PORTAINER_URL }}/api/stacks/${{ steps.stack.outputs.id }}?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}" \
+            -d "{
+              \"stackFileContent\": ${{ steps.compose.outputs.content }},
+              \"env\": [
+                {\"name\": \"BOT_IMAGE\", \"value\": \"${{ needs.build-and-push.outputs.image }}\"},
+                {\"name\": \"BOT_TOKEN\", \"value\": \"${{ secrets.DISCORD_BOT_TOKEN }}\"},
+                {\"name\": \"CLIENT_ID\", \"value\": \"${{ secrets.DISCORD_CLIENT_ID }}\"},
+                {\"name\": \"DATABASE_URL\", \"value\": \"${{ secrets.DATABASE_URL }}\"},
+                {\"name\": \"TIMEZONE\", \"value\": \"${{ vars.TIMEZONE }}\"}
+              ],
+              \"prune\": true,
+              \"pullImage\": true
+            }"
 
-    - name: Extract stack ID if stack exists
-      id: extract_stack_id
-      run: |
-        echo "Response: ${{ steps.check_stack.outputs.response }}"
-        STACK_ID=$(echo '${{ steps.check_stack.outputs.response }}' | jq -r '.[] | select(.Name=="skywizz-dev") | .Id')
-        echo "stack_id=$STACK_ID" >> $GITHUB_OUTPUT
-    
-    - name: Delete stack if exists
-      if: steps.extract_stack_id.outputs.stack_id != ''
-      uses: fjogeleit/http-request-action@v1
-      with:
-        url: ${{ secrets.PORTAINER_URL }}/api/stacks/${{ steps.extract_stack_id.outputs.stack_id }}?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}
-        method: DELETE
-        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
-        timeout: 10000
-
-    - name: Deploy Stack to Portainer (using /stacks/create/standalone/string)
-      uses: fjogeleit/http-request-action@v1
-      with:
-        url: ${{ secrets.PORTAINER_URL }}/api/stacks/create/standalone/string?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}
-        method: POST
-        contentType: application/json
-        customHeaders: '{"X-API-Key": "${{ secrets.PORTAINER_API_TOKEN }}"}'
-        timeout: 30000
-        data: |
-          {
-            "env": [
-              {"name": "CONFIG_VERSION", "value": "${{ env.CONFIG_VERSION }}"},
-              {"name": "BOT_TOKEN", "value": "${{ secrets.DISCORD_BOT_TOKEN }}"},
-              {"name": "BOT_PREFIX", "value": "${{ env.BOT_PREFIX }}"},
-              {"name": "BOT_STATUS", "value": "${{ env.BOT_STATUS }}"},
-              {"name": "PYTHON_ENV", "value": "${{ env.PYTHON_ENV }}"},
-              {"name": "LOG_LEVEL", "value": "${{ env.LOG_LEVEL }}"},
-              {"name": "TIMEZONE", "value": "${{ env.TIMEZONE }}"}
-            ],
-            "name": "${{ env.PORTAINER_STACK_NAME }}",
-            "fromAppTemplate": false,
-            "stackFileContent": ${{ env.COMPOSE_CONTENT }}
-          }
+      - name: Create new stack
+        if: steps.stack.outputs.id == ''
+        run: |
+          curl -sf -X POST \
+            -H "X-API-Key: ${{ secrets.PORTAINER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ secrets.PORTAINER_URL }}/api/stacks/create/standalone/string?endpointId=${{ env.PORTAINER_ENDPOINT_ID }}" \
+            -d "{
+              \"name\": \"$STACK_NAME\",
+              \"stackFileContent\": ${{ steps.compose.outputs.content }},
+              \"env\": [
+                {\"name\": \"BOT_IMAGE\", \"value\": \"${{ needs.build-and-push.outputs.image }}\"},
+                {\"name\": \"BOT_TOKEN\", \"value\": \"${{ secrets.DISCORD_BOT_TOKEN }}\"},
+                {\"name\": \"CLIENT_ID\", \"value\": \"${{ secrets.DISCORD_CLIENT_ID }}\"},
+                {\"name\": \"DATABASE_URL\", \"value\": \"${{ secrets.DATABASE_URL }}\"},
+                {\"name\": \"TIMEZONE\", \"value\": \"${{ vars.TIMEZONE }}\"}
+              ]
+            }"
