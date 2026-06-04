@@ -1,0 +1,189 @@
+name: Deploy
+
+on:
+  push:
+    branches: ["dev"]
+  workflow_dispatch:
+
+env:
+  STACK_NAME: skywizz-bot
+  VAULT_PATH: automation/data/skywizz
+  VAULT_PORTAINER_PATH: automation/data/portainer
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted
+    environment: development
+    outputs:
+      image: ${{ steps.meta.outputs.image }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load Harbor credentials from Vault
+        id: vault
+        uses: hashicorp/vault-action@v3.4.0
+        with:
+          url: ${{ secrets.HCP_VAULT_ADDR }}
+          method: approle
+          roleId: ${{ secrets.HCP_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.HCP_VAULT_SECRET_ID }}
+          secrets: |
+            ${{ env.VAULT_PATH }} HARBOR_REGISTRY_URL | HARBOR_REGISTRY_URL ;
+            ${{ env.VAULT_PATH }} HARBOR_USERNAME | HARBOR_USERNAME ;
+            ${{ env.VAULT_PATH }} HARBOR_PASSWORD | HARBOR_PASSWORD
+
+      - name: Get image tag
+        id: meta
+        run: |
+          REGISTRY=$(echo "${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}" | tr -d '\n\r' | xargs)
+          REGISTRY="${REGISTRY#http://}"
+          REGISTRY="${REGISTRY#https://}"
+          REGISTRY="${REGISTRY%/}"
+          if [ -z "$REGISTRY" ]; then
+            echo "HARBOR_REGISTRY_URL is empty after normalization." >&2
+            exit 1
+          fi
+          echo "image=$REGISTRY/skywizz/skywizz-bot:$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+          echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Harbor
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ steps.meta.outputs.registry }}
+          username: ${{ steps.vault.outputs.HARBOR_USERNAME }}
+          password: ${{ steps.vault.outputs.HARBOR_PASSWORD }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    runs-on: self-hosted
+    environment: development
+    needs: build-and-push
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Load deploy secrets from Vault
+        id: vault
+        uses: hashicorp/vault-action@v3.4.0
+        with:
+          url: ${{ secrets.HCP_VAULT_ADDR }}
+          method: approle
+          roleId: ${{ secrets.HCP_VAULT_ROLE_ID }}
+          secretId: ${{ secrets.HCP_VAULT_SECRET_ID }}
+          secrets: |
+            ${{ env.VAULT_PORTAINER_PATH }} api_key | PORTAINER_API_TOKEN ;
+            ${{ env.VAULT_PORTAINER_PATH }} url | PORTAINER_URL ;
+            ${{ env.VAULT_PORTAINER_PATH }} endpoint_id | PORTAINER_ENDPOINT_ID ;
+            ${{ env.VAULT_PATH }} DISCORD_BOT_TOKEN | BOT_TOKEN ;
+            ${{ env.VAULT_PATH }} DISCORD_CLIENT_ID | CLIENT_ID ;
+            ${{ env.VAULT_PATH }} POSTGRES_USER | POSTGRES_USER ;
+            ${{ env.VAULT_PATH }} POSTGRES_PASSWORD | POSTGRES_PASSWORD ;
+            ${{ env.VAULT_PATH }} POSTGRES_DB | POSTGRES_DB ;
+            ${{ env.VAULT_PATH }} TIMEZONE | TIMEZONE
+
+      - name: Read compose file
+        id: compose
+        run: echo "content=$(jq -Rs '.' < docker-compose.prod.yml)" >> "$GITHUB_OUTPUT"
+
+      - name: Get stack ID if it exists
+        id: stack
+        run: |
+          ID=$(curl -sf \
+            -H "X-API-Key: ${{ steps.vault.outputs.PORTAINER_API_TOKEN }}" \
+            "${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks?filters=%7B%22EndpointID%22%3A${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}%7D" | \
+            jq -r --arg name "$STACK_NAME" '.[] | select(.Name == $name) | .Id // empty')
+          echo "id=$ID" >> "$GITHUB_OUTPUT"
+
+      - name: Update existing stack
+        if: steps.stack.outputs.id != ''
+        env:
+          BOT_IMAGE: ${{ needs.build-and-push.outputs.image }}
+          BOT_TOKEN: ${{ steps.vault.outputs.BOT_TOKEN }}
+          CLIENT_ID: ${{ steps.vault.outputs.CLIENT_ID }}
+          POSTGRES_USER: ${{ steps.vault.outputs.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ steps.vault.outputs.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ steps.vault.outputs.POSTGRES_DB }}
+          TIMEZONE: ${{ steps.vault.outputs.TIMEZONE }}
+          COMPOSE_CONTENT: ${{ steps.compose.outputs.content }}
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg stackFileContent "$COMPOSE_CONTENT" \
+            --arg botImage "$BOT_IMAGE" \
+            --arg botToken "$BOT_TOKEN" \
+            --arg clientId "$CLIENT_ID" \
+            --arg pgUser "$POSTGRES_USER" \
+            --arg pgPassword "$POSTGRES_PASSWORD" \
+            --arg pgDb "$POSTGRES_DB" \
+            --arg timezone "$TIMEZONE" \
+            '{
+              stackFileContent: $stackFileContent,
+              env: [
+                {name: "BOT_IMAGE", value: $botImage},
+                {name: "BOT_TOKEN", value: $botToken},
+                {name: "CLIENT_ID", value: $clientId},
+                {name: "POSTGRES_USER", value: $pgUser},
+                {name: "POSTGRES_PASSWORD", value: $pgPassword},
+                {name: "POSTGRES_DB", value: $pgDb},
+                {name: "TIMEZONE", value: $timezone}
+              ],
+              prune: true,
+              pullImage: true
+            }')
+          curl -sf -X PUT \
+            -H "X-API-Key: ${{ steps.vault.outputs.PORTAINER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/${{ steps.stack.outputs.id }}?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}" \
+            -d "$PAYLOAD"
+
+      - name: Create new stack
+        if: steps.stack.outputs.id == ''
+        env:
+          BOT_IMAGE: ${{ needs.build-and-push.outputs.image }}
+          BOT_TOKEN: ${{ steps.vault.outputs.BOT_TOKEN }}
+          CLIENT_ID: ${{ steps.vault.outputs.CLIENT_ID }}
+          POSTGRES_USER: ${{ steps.vault.outputs.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ steps.vault.outputs.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ steps.vault.outputs.POSTGRES_DB }}
+          TIMEZONE: ${{ steps.vault.outputs.TIMEZONE }}
+          COMPOSE_CONTENT: ${{ steps.compose.outputs.content }}
+        run: |
+          PAYLOAD=$(jq -n \
+            --arg name "$STACK_NAME" \
+            --arg stackFileContent "$COMPOSE_CONTENT" \
+            --arg botImage "$BOT_IMAGE" \
+            --arg botToken "$BOT_TOKEN" \
+            --arg clientId "$CLIENT_ID" \
+            --arg pgUser "$POSTGRES_USER" \
+            --arg pgPassword "$POSTGRES_PASSWORD" \
+            --arg pgDb "$POSTGRES_DB" \
+            --arg timezone "$TIMEZONE" \
+            '{
+              name: $name,
+              stackFileContent: $stackFileContent,
+              env: [
+                {name: "BOT_IMAGE", value: $botImage},
+                {name: "BOT_TOKEN", value: $botToken},
+                {name: "CLIENT_ID", value: $clientId},
+                {name: "POSTGRES_USER", value: $pgUser},
+                {name: "POSTGRES_PASSWORD", value: $pgPassword},
+                {name: "POSTGRES_DB", value: $pgDb},
+                {name: "TIMEZONE", value: $timezone}
+              ]
+            }')
+          curl -sf -X POST \
+            -H "X-API-Key: ${{ steps.vault.outputs.PORTAINER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            "${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/create/standalone/string?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}" \
+            -d "$PAYLOAD"

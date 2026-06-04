@@ -1,23 +1,31 @@
-# Use Ubuntu image
-FROM ubuntu:latest
+FROM node:24-alpine AS base
+RUN corepack enable
 
-# Install necessary packages including traceroute
-RUN apt-get update && apt-get install -y traceroute python3 python3-pip
+FROM base AS deps
+WORKDIR /app
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
 
-# Set the timezone to Europe/Lisbon
-RUN ln -fs /usr/share/zoneinfo/Europe/Lisbon /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
-
-# Set work dir
-WORKDIR /skywizz
-
-# Copy requirements
-COPY requirements.txt .
-
-# Install Python dependencies
-RUN pip install --no-cache-dir --break-system-packages -r requirements.txt
-
-# Copy the rest of the workspace
+FROM base AS dev
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN pnpm db:generate
 
-# Run the bot
-CMD ["python3", "SkyWizz.py"]
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+RUN pnpm db:generate
+RUN pnpm build
+RUN pnpm prune --prod
+
+FROM gcr.io/distroless/nodejs24-debian12:nonroot AS runner
+WORKDIR /app
+ENV NODE_ENV=production
+COPY --from=builder --chown=65532:65532 /app/dist ./dist
+COPY --from=builder --chown=65532:65532 /app/node_modules ./node_modules
+COPY --from=builder --chown=65532:65532 /app/package.json ./package.json
+COPY --from=builder --chown=65532:65532 /app/prisma ./prisma
+COPY --from=builder --chown=65532:65532 /app/prisma.config.ts ./prisma.config.ts
+CMD ["dist/start.js"]
