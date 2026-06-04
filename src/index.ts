@@ -4,6 +4,7 @@ import { client } from "./client.js";
 import { commands } from "./commands/index.js";
 import { prisma } from "./db/client.js";
 import { upsertGuild, markGuildLeft } from "./db/guild.js";
+import { registerCommands } from "./register-commands.js";
 
 const startedAt = new Date();
 export { startedAt };
@@ -17,7 +18,8 @@ async function shutdown(code: number = 0): Promise<never> {
 process.on("SIGTERM", () => shutdown(0));
 process.on("SIGINT", () => shutdown(0));
 
-client.once(Events.ClientReady, (c) => {
+client.once(Events.ClientReady, async (c) => {
+  await registerCommands().catch(console.error);
   console.log(`Logged in as ${c.user.username}`);
 });
 
