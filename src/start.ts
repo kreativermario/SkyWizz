@@ -4,7 +4,7 @@ import { createRequire } from "node:module";
 const require = createRequire(import.meta.url);
 const prismaCli = require.resolve("prisma/build/index.js");
 
-execFileSync(process.execPath, [prismaCli, "db", "push", "--skip-generate", "--accept-data-loss"], {
+execFileSync(process.execPath, [prismaCli, "db", "push", "--accept-data-loss"], {
   stdio: "inherit",
   env: process.env,
 });
