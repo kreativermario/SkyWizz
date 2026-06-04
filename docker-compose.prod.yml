@@ -1,24 +1,32 @@
-version: '3.8'
 services:
-  skywizz:
-    image: REPLACE_IMAGE_NAME
-    volumes:
-      - skywizz-data:/skywizz:rw 
-    restart: unless-stopped
+  bot:
+    image: ${BOT_IMAGE}
     environment:
-      CONFIG_VERSION: "${CONFIG_VERSION}"
-      BOT_TOKEN: "${BOT_TOKEN}"
-      BOT_PREFIX: "${BOT_PREFIX}"
-      BOT_STATUS: "${BOT_STATUS}"
-      PYTHON_ENV: "${PYTHON_ENV}"
-      LOG_LEVEL: "${LOG_LEVEL}"
-      TIMEZONE: "${TIMEZONE}"
-    networks:
-      - skywizz-net
+      BOT_TOKEN: ${BOT_TOKEN}
+      CLIENT_ID: ${CLIENT_ID}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      NODE_ENV: production
+      TIMEZONE: ${TIMEZONE:-UTC}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
 volumes:
-  skywizz-data:
-
-networks:
-  skywizz-net:
-    driver: bridge
+  postgres_data:

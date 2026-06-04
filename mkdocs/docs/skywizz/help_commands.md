@@ -1,1 +1,0 @@
-::: skywizz.cogs.help_commands

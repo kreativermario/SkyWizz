@@ -1,0 +1,24 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Guild {
+  id       String      @id
+  name     String
+  joinedAt DateTime    @default(now())
+  leftAt   DateTime?
+  config   GuildConfig?
+}
+
+model GuildConfig {
+  guildId   String   @id
+  prefix    String   @default("!")
+  timezone  String   @default("UTC")
+  updatedAt DateTime @updatedAt
+
+  guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}

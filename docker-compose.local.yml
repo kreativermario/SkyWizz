@@ -1,11 +1,13 @@
 services:
   bot:
-    build: .
+    build:
+      context: .
+      target: dev
     env_file: .env
     depends_on:
       postgres:
         condition: service_healthy
-    restart: unless-stopped
+    command: node_modules/.bin/tsx src/start.ts
 
   postgres:
     image: postgres:17-alpine
@@ -13,6 +15,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-skywizz}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-skywizz}
+    ports:
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
