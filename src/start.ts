@@ -6,7 +6,7 @@ const prismaCli = require.resolve("prisma/build/index.js");
 
 execFileSync(process.execPath, [prismaCli, "db", "push", "--accept-data-loss"], {
   stdio: "inherit",
-  env: process.env,
+  env: { PATH: process.env.PATH, DATABASE_URL: process.env.DATABASE_URL },
 });
 
 await import("./index.js");

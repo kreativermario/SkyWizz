@@ -40,7 +40,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
   try {
     await command.execute(interaction);
   } catch (error) {
-    console.error(error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error(`Command error [${interaction.commandName}]: ${msg}`);
     const options: InteractionReplyOptions = { content: "Something went wrong.", flags: MessageFlags.Ephemeral };
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp(options);
@@ -55,6 +56,7 @@ async function main() {
 }
 
 main().catch(async (error) => {
-  console.error(error);
+  const msg = error instanceof Error ? error.message : String(error);
+  console.error(`Fatal: ${msg}`);
   await shutdown(1);
 });

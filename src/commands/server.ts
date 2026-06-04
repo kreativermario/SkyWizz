@@ -7,6 +7,7 @@ import {
 } from "discord.js";
 import type { Command } from "./index.js";
 
+
 export const server: Command = {
   data: new SlashCommandBuilder()
     .setName("server")
@@ -22,14 +23,12 @@ export const server: Command = {
     }
 
     const guild = interaction.guild;
-    const owner = await guild.fetchOwner();
 
     const embed = new EmbedBuilder()
       .setTitle(guild.name)
       .setColor(0x5865f2)
       .setThumbnail(guild.iconURL())
       .addFields(
-        { name: "Owner", value: owner.user.username, inline: true },
         { name: "Members", value: guild.memberCount.toString(), inline: true },
         {
           name: "Created",
