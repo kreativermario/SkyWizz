@@ -10,7 +10,7 @@ export async function upsertGuild(id: string, name: string): Promise<Guild> {
 }
 
 export async function markGuildLeft(id: string): Promise<void> {
-  await prisma.guild.update({
+  await prisma.guild.updateMany({
     where: { id },
     data: { leftAt: new Date() },
   });

@@ -74,7 +74,7 @@ export const config: Command = {
       const prefix = interaction.options.getString("prefix");
       const timezone = interaction.options.getString("timezone");
 
-      if (!prefix && !timezone) {
+      if (prefix === null && timezone === null) {
         await interaction.reply({
           content: "Provide at least one option to update.",
           flags: MessageFlags.Ephemeral,

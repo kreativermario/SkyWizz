@@ -21,4 +21,4 @@ COPY --from=builder --chown=skywizz:skywizz /app/dist ./dist
 COPY --from=builder --chown=skywizz:skywizz /app/node_modules ./node_modules
 COPY --from=builder --chown=skywizz:skywizz /app/package.json ./package.json
 USER skywizz
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/start.js"]
