@@ -1,0 +1,39 @@
+services:
+  bot:
+    build:
+      context: .
+      target: dev
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: node_modules/.bin/tsx src/start.ts
+
+  deployer:
+    build:
+      context: .
+      target: dev
+    env_file: .env
+    command: node_modules/.bin/tsx src/deploy-commands.ts
+    profiles:
+      - deploy
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-skywizz}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-skywizz}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  postgres_data:
