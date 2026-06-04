@@ -69,7 +69,9 @@ jobs:
           BOT_IMAGE: ${{ needs.build-and-push.outputs.image }}
           BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TIMEZONE: ${{ vars.TIMEZONE }}
           COMPOSE_CONTENT: ${{ steps.compose.outputs.content }}
         run: |
@@ -78,7 +80,9 @@ jobs:
             --arg botImage "$BOT_IMAGE" \
             --arg botToken "$BOT_TOKEN" \
             --arg clientId "$CLIENT_ID" \
-            --arg dbUrl "$DATABASE_URL" \
+            --arg pgUser "$POSTGRES_USER" \
+            --arg pgPassword "$POSTGRES_PASSWORD" \
+            --arg pgDb "$POSTGRES_DB" \
             --arg timezone "$TIMEZONE" \
             '{
               stackFileContent: $stackFileContent,
@@ -86,7 +90,9 @@ jobs:
                 {name: "BOT_IMAGE", value: $botImage},
                 {name: "BOT_TOKEN", value: $botToken},
                 {name: "CLIENT_ID", value: $clientId},
-                {name: "DATABASE_URL", value: $dbUrl},
+                {name: "POSTGRES_USER", value: $pgUser},
+                {name: "POSTGRES_PASSWORD", value: $pgPassword},
+                {name: "POSTGRES_DB", value: $pgDb},
                 {name: "TIMEZONE", value: $timezone}
               ],
               prune: true,
@@ -104,7 +110,9 @@ jobs:
           BOT_IMAGE: ${{ needs.build-and-push.outputs.image }}
           BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
           CLIENT_ID: ${{ secrets.DISCORD_CLIENT_ID }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
           TIMEZONE: ${{ vars.TIMEZONE }}
           COMPOSE_CONTENT: ${{ steps.compose.outputs.content }}
         run: |
@@ -114,7 +122,9 @@ jobs:
             --arg botImage "$BOT_IMAGE" \
             --arg botToken "$BOT_TOKEN" \
             --arg clientId "$CLIENT_ID" \
-            --arg dbUrl "$DATABASE_URL" \
+            --arg pgUser "$POSTGRES_USER" \
+            --arg pgPassword "$POSTGRES_PASSWORD" \
+            --arg pgDb "$POSTGRES_DB" \
             --arg timezone "$TIMEZONE" \
             '{
               name: $name,
@@ -123,7 +133,9 @@ jobs:
                 {name: "BOT_IMAGE", value: $botImage},
                 {name: "BOT_TOKEN", value: $botToken},
                 {name: "CLIENT_ID", value: $clientId},
-                {name: "DATABASE_URL", value: $dbUrl},
+                {name: "POSTGRES_USER", value: $pgUser},
+                {name: "POSTGRES_PASSWORD", value: $pgPassword},
+                {name: "POSTGRES_DB", value: $pgDb},
                 {name: "TIMEZONE", value: $timezone}
               ]
             }')

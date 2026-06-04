@@ -4,13 +4,29 @@ services:
     environment:
       BOT_TOKEN: ${BOT_TOKEN}
       CLIENT_ID: ${CLIENT_ID}
-      DATABASE_URL: ${DATABASE_URL}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
       NODE_ENV: production
       TIMEZONE: ${TIMEZONE:-UTC}
-    networks:
-      - skywizz-data
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
-networks:
-  skywizz-data:
-    external: true
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $POSTGRES_DB -U $POSTGRES_USER"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
