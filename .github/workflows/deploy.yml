@@ -112,97 +112,78 @@ jobs:
           REGISTRY="${REGISTRY%/}"
           echo "ref=$REGISTRY/skywizz/skywizz-bot:${{ needs.build-and-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
 
-      - name: Read compose file
-        id: compose
-        run: echo "content=$(jq -Rs '.' < docker-compose.prod.yml)" >> "$GITHUB_OUTPUT"
-
-      - name: Get stack ID if it exists
-        id: stack
+      - name: Read docker-compose file content safely
+        id: read_compose
         run: |
-          ID=$(curl -sf \
-            -H "X-API-Key: ${{ steps.vault.outputs.PORTAINER_API_TOKEN }}" \
-            "${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks?filters=%7B%22EndpointID%22%3A${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}%7D" | \
-            jq -r --arg name "$STACK_NAME" '.[] | select(.Name == $name) | .Id // empty')
-          echo "id=$ID" >> "$GITHUB_OUTPUT"
+          CONTENT=$(jq -Rs '.' < docker-compose.prod.yml)
+          echo "COMPOSE_CONTENT=$CONTENT" >> $GITHUB_ENV
 
-      - name: Update existing stack
-        if: steps.stack.outputs.id != ''
-        env:
-          BOT_IMAGE: ${{ steps.image.outputs.ref }}
-          BOT_TOKEN: ${{ steps.vault.outputs.BOT_TOKEN }}
-          CLIENT_ID: ${{ steps.vault.outputs.CLIENT_ID }}
-          POSTGRES_USER: ${{ steps.vault.outputs.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ steps.vault.outputs.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ steps.vault.outputs.POSTGRES_DB }}
-          TIMEZONE: ${{ steps.vault.outputs.TIMEZONE }}
-          COMPOSE_CONTENT: ${{ steps.compose.outputs.content }}
+      - name: Check if stack exists
+        id: check_stack
+        uses: fjogeleit/http-request-action@v2
+        with:
+          url: ${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks
+          method: GET
+          contentType: application/json
+          customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
+          timeout: 60000
+
+      - name: Extract stack ID if stack exists
+        id: extract_stack_id
         run: |
-          PAYLOAD=$(jq -n \
-            --arg stackFileContent "$COMPOSE_CONTENT" \
-            --arg botImage "$BOT_IMAGE" \
-            --arg botToken "$BOT_TOKEN" \
-            --arg clientId "$CLIENT_ID" \
-            --arg pgUser "$POSTGRES_USER" \
-            --arg pgPassword "$POSTGRES_PASSWORD" \
-            --arg pgDb "$POSTGRES_DB" \
-            --arg timezone "$TIMEZONE" \
-            '{
-              stackFileContent: $stackFileContent,
-              env: [
-                {name: "BOT_IMAGE", value: $botImage},
-                {name: "BOT_TOKEN", value: $botToken},
-                {name: "CLIENT_ID", value: $clientId},
-                {name: "POSTGRES_USER", value: $pgUser},
-                {name: "POSTGRES_PASSWORD", value: $pgPassword},
-                {name: "POSTGRES_DB", value: $pgDb},
-                {name: "TIMEZONE", value: $timezone}
+          STACK_ID=$(echo '${{ steps.check_stack.outputs.response }}' | jq -r 'first(.[] | select(.Name=="${{ env.STACK_NAME }}" and (.EndpointId|tostring)=="${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}") | .Id) // ""' | tr -d '\r\n')
+          {
+            echo "stack_id<<EOF"
+            echo "$STACK_ID"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update existing stack in Portainer
+        if: steps.extract_stack_id.outputs.stack_id != ''
+        uses: fjogeleit/http-request-action@v2
+        with:
+          url: ${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/${{ steps.extract_stack_id.outputs.stack_id }}?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}&method=string
+          method: PUT
+          contentType: application/json
+          customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
+          timeout: 60000
+          data: |
+            {
+              "env": [
+                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.ref }}"},
+                {"name": "BOT_TOKEN", "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
+                {"name": "CLIENT_ID", "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
+                {"name": "POSTGRES_USER", "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
+                {"name": "POSTGRES_PASSWORD", "value": "${{ steps.vault.outputs.POSTGRES_PASSWORD }}"},
+                {"name": "POSTGRES_DB", "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
+                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"}
               ],
-              prune: true,
-              pullImage: true
-            }')
-          curl -sf -X PUT \
-            -H "X-API-Key: ${{ steps.vault.outputs.PORTAINER_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            "${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/${{ steps.stack.outputs.id }}?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}" \
-            -d "$PAYLOAD"
+              "stackFileContent": ${{ env.COMPOSE_CONTENT }},
+              "prune": true,
+              "pullImage": true
+            }
 
-      - name: Create new stack
-        if: steps.stack.outputs.id == ''
-        env:
-          BOT_IMAGE: ${{ steps.image.outputs.ref }}
-          BOT_TOKEN: ${{ steps.vault.outputs.BOT_TOKEN }}
-          CLIENT_ID: ${{ steps.vault.outputs.CLIENT_ID }}
-          POSTGRES_USER: ${{ steps.vault.outputs.POSTGRES_USER }}
-          POSTGRES_PASSWORD: ${{ steps.vault.outputs.POSTGRES_PASSWORD }}
-          POSTGRES_DB: ${{ steps.vault.outputs.POSTGRES_DB }}
-          TIMEZONE: ${{ steps.vault.outputs.TIMEZONE }}
-          COMPOSE_CONTENT: ${{ steps.compose.outputs.content }}
-        run: |
-          PAYLOAD=$(jq -n \
-            --arg name "$STACK_NAME" \
-            --arg stackFileContent "$COMPOSE_CONTENT" \
-            --arg botImage "$BOT_IMAGE" \
-            --arg botToken "$BOT_TOKEN" \
-            --arg clientId "$CLIENT_ID" \
-            --arg pgUser "$POSTGRES_USER" \
-            --arg pgPassword "$POSTGRES_PASSWORD" \
-            --arg pgDb "$POSTGRES_DB" \
-            --arg timezone "$TIMEZONE" \
-            '{
-              name: $name,
-              stackFileContent: $stackFileContent,
-              env: [
-                {name: "BOT_IMAGE", value: $botImage},
-                {name: "BOT_TOKEN", value: $botToken},
-                {name: "CLIENT_ID", value: $clientId},
-                {name: "POSTGRES_USER", value: $pgUser},
-                {name: "POSTGRES_PASSWORD", value: $pgPassword},
-                {name: "POSTGRES_DB", value: $pgDb},
-                {name: "TIMEZONE", value: $timezone}
-              ]
-            }')
-          curl -sf -X POST \
-            -H "X-API-Key: ${{ steps.vault.outputs.PORTAINER_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            "${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/create/standalone/string?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}" \
-            -d "$PAYLOAD"
+      - name: Deploy Stack to Portainer (create new)
+        if: steps.extract_stack_id.outputs.stack_id == ''
+        uses: fjogeleit/http-request-action@v2
+        with:
+          url: ${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/create/standalone/string?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}
+          method: POST
+          contentType: application/json
+          customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
+          timeout: 60000
+          data: |
+            {
+              "env": [
+                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.ref }}"},
+                {"name": "BOT_TOKEN", "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
+                {"name": "CLIENT_ID", "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
+                {"name": "POSTGRES_USER", "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
+                {"name": "POSTGRES_PASSWORD", "value": "${{ steps.vault.outputs.POSTGRES_PASSWORD }}"},
+                {"name": "POSTGRES_DB", "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
+                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"}
+              ],
+              "name": "${{ env.STACK_NAME }}",
+              "fromAppTemplate": false,
+              "stackFileContent": ${{ env.COMPOSE_CONTENT }}
+            }
