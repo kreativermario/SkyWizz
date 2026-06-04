@@ -1,14 +1,14 @@
 # https://github.com/babel/babel/blob/main/.github/ISSUE_TEMPLATE/feature_request.yml
 name: "🚀 Feature Request"
-description: "I have a specific suggestion for SkyWizz!"
+description: "I have a specific suggestion for guacamoleninja-bot!"
 labels: ["needs triage", "Enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        **Thanks for taking the time to suggest a new feature!** Please make sure you read our [issue guidelines](https://github.com/kreativermario/SkyWizz/blob/master/.github/CONTRIBUTING.md) first, then fill out the fields below.
+        **Thanks for taking the time to suggest a new feature!** Please make sure you read our [issue guidelines](https://github.com/guacamoleninja/guacamoleninja-bot/blob/main/.github/CONTRIBUTING.md) first, then fill out the fields below.
 
-        If you feel an open-ended discussion with the community and Theos maintainers would be more suitable to forming the right details for your feature request, you can post in [Discussions](https://github.com/kreativermario/SkyWizz/discussions) instead.
+        If you feel an open-ended discussion with the community and maintainers would be more suitable to forming the right details for your feature request, you can post in [Discussions](https://github.com/guacamoleninja/guacamoleninja-bot/discussions) instead.
 
   - type: textarea
     attributes:
@@ -28,9 +28,9 @@ body:
     attributes:
       label: "Describe any alternatives you’ve considered"
       description: |
-        Can SkyWizz already do this, but in a less convenient way?
-        Can you do this using other tools?
-        Do other Python packages or APIs have a feature for this?
+        Can guacamoleninja-bot already do this, but in a less convenient way?
+        Can you do this using other tools or bots?
+        Do other Discord bots or APIs have a feature for this?
 
   - type: textarea
     attributes:

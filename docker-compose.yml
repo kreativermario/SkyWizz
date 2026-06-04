@@ -10,9 +10,9 @@ services:
   postgres:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-skywizz}
+      POSTGRES_USER: ${POSTGRES_USER:-guacamoleninja}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: ${POSTGRES_DB:-skywizz}
+      POSTGRES_DB: ${POSTGRES_DB:-guacamoleninja}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:

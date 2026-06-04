@@ -9,8 +9,8 @@ permissions:
   contents: read
 
 env:
-  STACK_NAME: skywizz-bot
-  VAULT_PATH: automation/data/skywizz
+  STACK_NAME: guacamoleninja-bot
+  VAULT_PATH: automation/data/guacamoleninja-bot
   VAULT_PORTAINER_PATH: automation/data/portainer
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
           fi
           TAG=$(git rev-parse --short HEAD)
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "image=$REGISTRY/skywizz/skywizz-bot:$TAG" >> "$GITHUB_OUTPUT"
+          echo "image=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG" >> "$GITHUB_OUTPUT"
           echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Harbor
@@ -110,7 +110,7 @@ jobs:
           REGISTRY="${REGISTRY#http://}"
           REGISTRY="${REGISTRY#https://}"
           REGISTRY="${REGISTRY%/}"
-          echo "ref=$REGISTRY/skywizz/skywizz-bot:${{ needs.build-and-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
+          echo "ref=$REGISTRY/guacamoleninja/guacamoleninja-bot:${{ needs.build-and-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
 
       - name: Read docker-compose file content safely
         id: read_compose

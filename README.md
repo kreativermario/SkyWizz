@@ -1,118 +1,51 @@
-![banner](https://i.pinimg.com/originals/c8/4c/7a/c84c7a80e66b988dafe267d67bea6d85.jpg)
-<p align="center">
-    <a href="https://github.com/kreativermario/SkyWizz/blob/main/LICENSE">
-        <img src="https://img.shields.io/github/license/kreativermario/SkyWizz.svg"
-        alt="GitHub License">
-    </a>
-    <a href="https://github.com/kreativermario/SkyWizz/stargazers">
-        <img src="https://img.shields.io/github/stars/kreativermario/SkyWizz.svg"
-        alt="GitHub Stars">
-    </a>
-    <a href="https://github.com/kreativermario/SkyWizz/forks">
-        <img src="https://img.shields.io/github/forks/kreativermario/SkyWizz.svg"
-        alt="GitHub Forks">
-    </a>
-    <a href="https://github.com/kreativermario/SkyWizz/pulls">
-        <img src="https://img.shields.io/github/issues-pr/kreativermario/SkyWizz.svg"
-        alt="GitHub Open Pull Requests">
-    </a>
-    <a href="https://github.com/kreativermario/SkyWizz/pulls?q=is%3Apr+is%3Aclosed">
-        <img src="https://img.shields.io/github/issues-pr-closed/kreativermario/SkyWizz.svg"
-        alt="GitHub Closed Pull Requests">
-    </a>
-    <a href="https://github.com/kreativermario/SkyWizz/issues">
-        <img src="https://img.shields.io/github/issues/kreativermario/SkyWizz.svg"
-        alt="GitHub Issues">
-    </a>
-    <a href="">
-        <img src="https://sonarcloud.io/api/project_badges/measure?project=kreativermario_SkyWizz&metric=alert_status">
-        <alt="Sonarcloud Quality Gate">
-    </a>
-    <a href="https://github.com/kreativermario/SkyWizz/stargazers">
-        <img src="https://img.shields.io/github/stars/kreativermario/SkyWizz.svg"
-        alt="GitHub Stars">
-    </a>
-    <a href="https://github.com/kreativermario/">
-        <img src="https://img.shields.io/github/followers/kreativermario.svg?style=social&label=Follow&maxAge=2592000"
-        alt="GitHub Follow">
-    </a>
-</p>
+# guacamoleninja-bot
 
-# ✈️🧙‍♂️ SkyWizz 
+A Discord bot built with discord.js v14, TypeScript, Node.js 24, and PostgreSQL via Prisma 7.
 
-SkyWizz is a side project aimed at improving my current Python and software development 
-skills. The project consists in a Discord bot that uses various APIs to provide users
-with interesting, useful and fun commands.
-It is also a project to help me learn how to use APIs.
+## Requirements
 
-## ⚠️ Warning
-The API used for the aviation functions is no longer free 
-and we can not afford to pay for it so these functions 
-are now deprecated and not available to use. 
-Sorry for the inconvenience caused.
+- [Node.js 24](https://nodejs.org/)
+- [pnpm](https://pnpm.io/)
+- [Docker](https://www.docker.com/) + Docker Compose
 
-## Table of Contents
-- [Features](#features)
-- [Dependencies](#dependencies)
-- [Installation](#installation)
-- [Contributions](#contributions)
-- [License](#license)
-
-## Features
-
-- [X] Simple networking functions such as whois, traceroute, ping.
-- [X] Captioning images
-- [X] Setup script that creates .env configuration
-- [ ] Weather functions - in development
-  - [X] Simple daily weather forecast (current day)
-  - [ ] Daily forecast by time (current day)
-  - [ ] Weekly forecast
-- [ ] Stock market functions
-- [ ] Basic server functions (current member count, bots, age)
-
-
-## Dependencies
-
-The project uses the following dependencies:
-
-- Python 3.x
-
-## Installation
+## Local Development
 
 1. Clone the repository:
 
-  ```bash
-  git clone https://github.com/kreativermario/SkyWizz.git
-  ```
+   ```bash
+   git clone https://github.com/guacamoleninja/guacamoleninja-bot.git
+   cd guacamoleninja-bot
+   ```
 
-2. Install the dependencies:
+2. Copy the example environment file and fill in your values:
 
-  ```bash
-  pip install -r requirements.txt
-  ```
-  
-3. Run the bot, make sure you are in the correct folder.
-  ```bash
-  python SkyWizz.py
-  ```
-  or
-  ```bash
-  python3 SkyWizz.py
-  ```
+   ```bash
+   cp .env.example .env
+   ```
 
-## Documentation
-There is detailed documentation [here](https://kreativermario.github.io/SkyWizz/).
-If the documentation is outdated, feel free to contribute!
-  
+3. Start the bot and database locally:
 
-## Contributions
-Contributions are welcome! If you want to contribute to the project, you can:
+   ```bash
+   docker compose -f docker-compose.local.yml up
+   ```
 
-  - Open an issue.
-  - Fork the repository, make changes, and submit a pull request.
+## Commands
+
+| Command | Description |
+|---|---|
+| `/uptime` | Shows how long the bot has been running |
+| `/server` | Displays information about the current server |
+| `/config view` | View the current server configuration |
+| `/config set` | Update a server configuration value |
+
+## Deployment
+
+Deployment is handled automatically via GitHub Actions on every push to the `dev` branch. The pipeline:
+
+1. Pulls secrets from HashiCorp Vault (Harbor registry credentials, bot token, database credentials)
+2. Builds and pushes a Docker image to the Harbor registry
+3. Deploys or updates the stack in Portainer via its API
 
 ## License
-This project is licensed under the MIT License.
 
-
-
+This project is licensed under the [MIT License](LICENSE).
