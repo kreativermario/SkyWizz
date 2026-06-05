@@ -4,6 +4,7 @@ import { client } from "./client.js";
 import { commands } from "./commands/index.js";
 import { prisma } from "./db/client.js";
 import { upsertGuild, markGuildLeft, getConfig } from "./db/guild.js";
+import { getWelcomeConfig } from "./db/welcome.js";
 import { registerCommands } from "./register-commands.js";
 import { logger } from "./logger.js";
 
@@ -49,6 +50,29 @@ client.on(Events.GuildDelete, (guild) => {
   );
 });
 
+/**
+ * GuildMemberAdd — sends a welcome message when a new member joins.
+ * NOTE: GuildMembers is a privileged intent — it must be enabled in the Discord Developer Portal
+ * under Bot > Privileged Gateway Intents before this handler will fire.
+ */
+client.on(Events.GuildMemberAdd, async (member) => {
+  const config = await getWelcomeConfig(member.guild.id).catch(() => null);
+  if (!config?.enabled || !config.channelId) return;
+
+  const channel = member.guild.channels.cache.get(config.channelId);
+  if (!channel?.isTextBased()) return;
+
+  const msg = config.message
+    .replace(/\{user\}/g, `<@${member.id}>`)
+    .replace(/\{username\}/g, member.user.username)
+    .replace(/\{server\}/g, member.guild.name)
+    .replace(/\{memberCount\}/g, member.guild.memberCount.toString());
+
+  await channel.send(msg).catch((err) =>
+    logger.error("bot", "welcome message failed", { guildId: member.guild.id, err: String(err) })
+  );
+});
+
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
@@ -78,6 +102,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
       guildId: interaction.guildId ?? "dm",
       ms: Date.now() - t,
     });
+    if (interaction.guildId) {
+      prisma.commandUsage.create({
+        data: { guildId: interaction.guildId, commandName: interaction.commandName, userId: interaction.user.id },
+      }).catch((err) => logger.error("cmd", "usage log failed", { err: String(err) }));
+    }
   } catch (error) {
     logger.error("cmd", "execution failed", {
       command: interaction.commandName,

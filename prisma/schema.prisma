@@ -7,12 +7,15 @@ datasource db {
 }
 
 model Guild {
-  id       String      @id
-  name     String
-  iconHash String?
-  joinedAt DateTime    @default(now())
-  leftAt   DateTime?
-  config   GuildConfig?
+  id            String         @id
+  name          String
+  iconHash      String?
+  joinedAt      DateTime       @default(now())
+  leftAt        DateTime?
+  config        GuildConfig?
+  welcomeConfig WelcomeConfig?
+  commandUsage  CommandUsage[]
+  auditLogs     AuditLog[]
 }
 
 model GuildConfig {
@@ -23,4 +26,38 @@ model GuildConfig {
   updatedAt        DateTime @updatedAt
 
   guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model WelcomeConfig {
+  guildId   String   @id
+  enabled   Boolean  @default(false)
+  channelId String   @default("")
+  message   String   @default("Welcome {user} to **{server}**! You are member #{memberCount}.")
+  updatedAt DateTime @updatedAt
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+}
+
+model CommandUsage {
+  id          String   @id @default(cuid())
+  guildId     String
+  commandName String
+  userId      String
+  executedAt  DateTime @default(now())
+  guild       Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, executedAt])
+  @@index([guildId, commandName])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  guildId   String
+  actorId   String
+  actorName String
+  action    String
+  changes   Json
+  createdAt DateTime @default(now())
+  guild     Guild    @relation(fields: [guildId], references: [id], onDelete: Cascade)
+
+  @@index([guildId, createdAt])
 }

@@ -2,9 +2,12 @@ import { createServer, type IncomingMessage, type ServerResponse, type Server } 
 import { randomUUID } from "node:crypto";
 import { prisma } from "../db/client.js";
 import { logger } from "../logger.js";
+import { getWelcomeConfig, upsertWelcomeConfig } from "../db/welcome.js";
+import { createAuditLog } from "../db/audit.js";
 
 const PORT         = Number(process.env.BOT_API_PORT ?? 3002);
 const API_SECRET   = process.env.BOT_API_SECRET ?? "";
+const BOT_TOKEN    = process.env.BOT_TOKEN ?? "";
 const MAX_BODY_BYTES = 8_192;
 
 // ── Rate limiter (sliding window, in-memory) ─────────────
@@ -145,7 +148,7 @@ export function startApiServer(): Server {
       if (method === "GET" && seg0 === "guilds" && guildId && !seg2) {
         const guild = await prisma.guild.findUnique({
           where: { id: guildId },
-          include: { config: true },
+          include: { config: true, welcomeConfig: true },
         });
         if (!guild || guild.leftAt !== null) {
           return send(res, 404, { error: "Guild not found" }, requestId);
@@ -172,6 +175,9 @@ export function startApiServer(): Server {
           return send(res, 400, { error: msg }, requestId);
         }
 
+        const actorId   = typeof body.actorId   === "string" ? body.actorId   : undefined;
+        const actorName = typeof body.actorName  === "string" ? body.actorName : "Unknown";
+
         const data: {
           prefix?: string;
           timezone?: string;
@@ -188,12 +194,141 @@ export function startApiServer(): Server {
           data.disabledCommands = body.disabledCommands as string[];
         }
 
+        // Fetch current config to compute changes for audit log
+        const prevConfig = await prisma.guildConfig.findUnique({ where: { guildId } });
+
         const config = await prisma.guildConfig.upsert({
           where: { guildId },
           update: data,
           create: { guildId, ...data },
         });
+
+        if (actorId) {
+          const changes: Record<string, [unknown, unknown]> = {};
+          if (data.prefix !== undefined && data.prefix !== (prevConfig?.prefix ?? "!")) {
+            changes.prefix = [prevConfig?.prefix ?? "!", data.prefix];
+          }
+          if (data.timezone !== undefined && data.timezone !== (prevConfig?.timezone ?? "UTC")) {
+            changes.timezone = [prevConfig?.timezone ?? "UTC", data.timezone];
+          }
+          if (data.disabledCommands !== undefined) {
+            changes.disabledCommands = [prevConfig?.disabledCommands ?? [], data.disabledCommands];
+          }
+          createAuditLog(guildId, actorId, actorName, "config.update", changes).catch((err) =>
+            logger.error("api", "audit log failed", { err: String(err) })
+          );
+        }
+
         return send(res, 200, { config }, requestId);
+      }
+
+      // GET /guilds/:id/welcome
+      if (method === "GET" && seg0 === "guilds" && guildId && seg2 === "welcome") {
+        const welcomeConfig = await getWelcomeConfig(guildId);
+        return send(res, 200, { welcomeConfig }, requestId);
+      }
+
+      // GET /guilds/:id/channels
+      if (method === "GET" && seg0 === "guilds" && guildId && seg2 === "channels") {
+        if (!BOT_TOKEN) return send(res, 503, { error: "Bot token not configured" }, requestId);
+        const discordRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
+          headers: { Authorization: `Bot ${BOT_TOKEN}` },
+          signal: AbortSignal.timeout(5000),
+          cache: "no-store",
+        } as RequestInit);
+        if (!discordRes.ok) return send(res, 502, { error: "Could not fetch channels" }, requestId);
+        const all = (await discordRes.json()) as { id: string; name: string; type: number; position: number }[];
+        const channels = all
+          .filter((c) => c.type === 0 || c.type === 5)
+          .sort((a, b) => a.position - b.position)
+          .map((c) => ({ id: c.id, name: c.name }));
+        return send(res, 200, { channels }, requestId);
+      }
+
+      // PATCH /guilds/:id/welcome
+      if (method === "PATCH" && seg0 === "guilds" && guildId && seg2 === "welcome") {
+        const existingGuild = await prisma.guild.findUnique({
+          where: { id: guildId },
+          select: { id: true, leftAt: true },
+        });
+        if (!existingGuild || existingGuild.leftAt !== null) {
+          return send(res, 404, { error: "Guild not found" }, requestId);
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = (await readJson(req)) as Record<string, unknown>;
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "Bad request";
+          return send(res, 400, { error: msg }, requestId);
+        }
+
+        const welcomeData: { enabled?: boolean; channelId?: string; message?: string } = {};
+
+        if (typeof body.enabled === "boolean") {
+          welcomeData.enabled = body.enabled;
+        }
+        if (typeof body.channelId === "string") {
+          if (body.channelId.length > 100) return send(res, 400, { error: "channelId too long" }, requestId);
+          if (body.channelId !== "" && !/^\d+$/.test(body.channelId)) {
+            return send(res, 400, { error: "channelId must be numeric" }, requestId);
+          }
+          welcomeData.channelId = body.channelId;
+        }
+        if (typeof body.message === "string") {
+          if (body.message.length < 1 || body.message.length > 500) {
+            return send(res, 400, { error: "message must be 1-500 chars" }, requestId);
+          }
+          welcomeData.message = body.message;
+        }
+
+        const actorId   = typeof body.actorId   === "string" ? body.actorId   : undefined;
+        const actorName = typeof body.actorName  === "string" ? body.actorName : "Unknown";
+
+        const prevWelcome = await getWelcomeConfig(guildId);
+        const updated = await upsertWelcomeConfig(guildId, welcomeData);
+
+        if (actorId) {
+          const changes: Record<string, [unknown, unknown]> = {};
+          if (welcomeData.enabled !== undefined && welcomeData.enabled !== (prevWelcome?.enabled ?? false)) {
+            changes.enabled = [prevWelcome?.enabled ?? false, welcomeData.enabled];
+          }
+          if (welcomeData.channelId !== undefined && welcomeData.channelId !== (prevWelcome?.channelId ?? "")) {
+            changes.channelId = [prevWelcome?.channelId ?? "", welcomeData.channelId];
+          }
+          if (welcomeData.message !== undefined && welcomeData.message !== prevWelcome?.message) {
+            changes.message = [prevWelcome?.message ?? "", welcomeData.message];
+          }
+          createAuditLog(guildId, actorId, actorName, "welcome.update", changes).catch((err) =>
+            logger.error("api", "audit log failed", { err: String(err) })
+          );
+        }
+
+        return send(res, 200, { welcomeConfig: updated }, requestId);
+      }
+
+      // GET /guilds/:id/stats
+      if (method === "GET" && seg0 === "guilds" && guildId && seg2 === "stats") {
+        const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+        const usage = await prisma.commandUsage.groupBy({
+          by: ["commandName"],
+          where: { guildId, executedAt: { gte: since } },
+          _count: { commandName: true },
+          orderBy: { _count: { commandName: "desc" } },
+        });
+        const commands = usage.map((u) => ({ name: u.commandName, count: u._count.commandName }));
+        const total = commands.reduce((sum, c) => sum + c.count, 0);
+        return send(res, 200, { stats: { period: "30d", commands, total } }, requestId);
+      }
+
+      // GET /guilds/:id/audit
+      if (method === "GET" && seg0 === "guilds" && guildId && seg2 === "audit") {
+        const logs = await prisma.auditLog.findMany({
+          where: { guildId },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+        });
+        return send(res, 200, { logs }, requestId);
       }
 
       return send(res, 404, { error: "Not found" }, requestId);
