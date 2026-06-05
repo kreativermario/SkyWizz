@@ -1,11 +1,11 @@
 import type { Guild, GuildConfig } from "@prisma/client";
 import { prisma } from "./client.js";
 
-export async function upsertGuild(id: string, name: string): Promise<Guild> {
+export async function upsertGuild(id: string, name: string, iconHash?: string | null): Promise<Guild> {
   return prisma.guild.upsert({
     where: { id },
-    update: { name, leftAt: null },
-    create: { id, name },
+    update: { name, ...(iconHash !== undefined ? { iconHash } : {}), leftAt: null },
+    create: { id, name, iconHash: iconHash ?? null },
   });
 }
 

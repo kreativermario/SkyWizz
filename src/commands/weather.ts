@@ -62,6 +62,13 @@ type CurrentWeather = z.infer<typeof CurrentWeatherSchema>;
 const cooldowns = new Map<string, number>();
 const COOLDOWN_MS = 5_000;
 
+setInterval(() => {
+  const cutoff = Date.now() - COOLDOWN_MS;
+  for (const [id, ts] of cooldowns) {
+    if (ts < cutoff) cooldowns.delete(id);
+  }
+}, COOLDOWN_MS * 12).unref(); // evict every minute
+
 function windDir(deg: number): string {
   return WIND_DIRS[Math.round(deg / 45) % 8];
 }

@@ -1,27 +1,27 @@
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "node:http";
 import { randomUUID } from "node:crypto";
 import { prisma } from "../db/client.js";
+import { logger } from "../logger.js";
 
-const PORT = Number(process.env.BOT_API_PORT ?? 3002);
-const API_SECRET = process.env.BOT_API_SECRET ?? "";
-const MAX_BODY_BYTES = 8_192; // 8 KB — more than enough for config payloads
+const PORT         = Number(process.env.BOT_API_PORT ?? 3002);
+const API_SECRET   = process.env.BOT_API_SECRET ?? "";
+const MAX_BODY_BYTES = 8_192;
 
 // ── Rate limiter (sliding window, in-memory) ─────────────
-const RATE_LIMIT = 120;        // requests per window
-const RATE_WINDOW_MS = 60_000; // 1 minute
-const rateWindows = new Map<string, number[]>();
+const RATE_LIMIT    = 120;
+const RATE_WINDOW_MS = 60_000;
+const rateWindows   = new Map<string, number[]>();
 
 function isRateLimited(ip: string): boolean {
-  const now = Date.now();
+  const now    = Date.now();
   const cutoff = now - RATE_WINDOW_MS;
-  const prev = rateWindows.get(ip) ?? [];
+  const prev   = rateWindows.get(ip) ?? [];
   const window = prev.filter((t) => t > cutoff);
   window.push(now);
   rateWindows.set(ip, window);
   return window.length > RATE_LIMIT;
 }
 
-// Evict stale entries every minute to prevent unbounded growth
 setInterval(() => {
   const cutoff = Date.now() - RATE_WINDOW_MS;
   for (const [ip, ts] of rateWindows) {
@@ -37,7 +37,6 @@ function setSecurityHeaders(res: ServerResponse): void {
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Content-Security-Policy", "default-src 'none'");
   res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
-  // Belt-and-suspenders HSTS — TLS terminates at the reverse proxy
   res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
 }
 
@@ -85,28 +84,52 @@ async function readJson(req: IncomingMessage): Promise<unknown> {
 // ── Server ───────────────────────────────────────────────
 export function startApiServer(): Server {
   if (!API_SECRET) {
-    console.warn("[api] BOT_API_SECRET is not set — all requests will be rejected");
+    logger.warn("api", "BOT_API_SECRET is not set — all authenticated requests will be rejected");
   }
 
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
     const requestId = randomUUID();
-    const ip = getClientIp(req);
+    const ip        = getClientIp(req);
+    const start     = Date.now();
+    const method    = req.method?.toUpperCase() ?? "GET";
+    const url       = new URL(req.url ?? "/", "http://localhost");
+    const parts     = url.pathname.replace(/^\/|\/$/g, "").split("/");
+    const [seg0, guildId, seg2] = parts;
 
-    // Auth
+    res.on("finish", () => {
+      logger.info("api", "request", {
+        method,
+        path: url.pathname,
+        status: res.statusCode,
+        ms: Date.now() - start,
+        ip,
+        requestId,
+      });
+    });
+
+    // ── Health (unauthenticated — used by Docker/Portainer healthchecks) ──
+    if (method === "GET" && seg0 === "health" && !guildId) {
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+        return send(res, 200, { status: "ok", uptime: Math.floor(process.uptime()) }, requestId);
+      } catch (err) {
+        logger.error("api", "health check db failed", { err: String(err) });
+        return send(res, 503, { status: "error", uptime: Math.floor(process.uptime()) }, requestId);
+      }
+    }
+
+    // ── Auth ──────────────────────────────────────────────
     if (req.headers.authorization !== `Bearer ${API_SECRET}` || !API_SECRET) {
+      logger.warn("api", "unauthorized request", { method, path: url.pathname, ip, requestId });
       return send(res, 401, { error: "Unauthorized" }, requestId);
     }
 
-    // Rate limit
+    // ── Rate limit ────────────────────────────────────────
     if (isRateLimited(ip)) {
+      logger.warn("api", "rate limited", { ip, requestId });
       res.setHeader("Retry-After", "60");
       return send(res, 429, { error: "Too many requests" }, requestId);
     }
-
-    const url = new URL(req.url ?? "/", "http://localhost");
-    const parts = url.pathname.replace(/^\/|\/$/g, "").split("/");
-    const [seg0, guildId, seg2] = parts;
-    const method = req.method?.toUpperCase();
 
     try {
       // GET /guilds
@@ -132,6 +155,15 @@ export function startApiServer(): Server {
 
       // PATCH /guilds/:id/config
       if (method === "PATCH" && seg0 === "guilds" && guildId && seg2 === "config") {
+        // Ensure the guild is known and active before touching config
+        const guild = await prisma.guild.findUnique({
+          where: { id: guildId },
+          select: { id: true, leftAt: true },
+        });
+        if (!guild || guild.leftAt !== null) {
+          return send(res, 404, { error: "Guild not found" }, requestId);
+        }
+
         let body: Record<string, unknown>;
         try {
           body = (await readJson(req)) as Record<string, unknown>;
@@ -166,18 +198,17 @@ export function startApiServer(): Server {
 
       return send(res, 404, { error: "Not found" }, requestId);
     } catch (err) {
-      console.error(`[api] ${requestId}`, err);
+      logger.error("api", "unhandled error", { requestId, err: String(err) });
       return send(res, 500, { error: "Internal server error" }, requestId);
     }
   });
 
-  // Connection-level timeouts to harden against slow-read/slow-write attacks
-  server.requestTimeout = 10_000;
-  server.headersTimeout = 15_000;
+  server.requestTimeout  = 10_000;
+  server.headersTimeout  = 15_000;
   server.keepAliveTimeout = 5_000;
 
   server.listen(PORT, () => {
-    console.log(`[api] Listening on port ${PORT}`);
+    logger.info("api", "listening", { port: PORT });
   });
 
   return server;

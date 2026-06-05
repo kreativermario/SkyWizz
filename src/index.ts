@@ -5,30 +5,48 @@ import { commands } from "./commands/index.js";
 import { prisma } from "./db/client.js";
 import { upsertGuild, markGuildLeft, getConfig } from "./db/guild.js";
 import { registerCommands } from "./register-commands.js";
+import { logger } from "./logger.js";
 
 const startedAt = new Date();
 export { startedAt };
 
 async function shutdown(code: number = 0): Promise<never> {
+  logger.info("bot", "shutting down", { code });
   await client.destroy();
   await prisma.$disconnect();
   process.exit(code);
 }
 
 process.on("SIGTERM", () => shutdown(0));
-process.on("SIGINT", () => shutdown(0));
+process.on("SIGINT",  () => shutdown(0));
 
 client.once(Events.ClientReady, async (c) => {
-  await registerCommands().catch(console.error);
-  console.log(`Logged in as ${c.user.username}`);
+  await registerCommands().catch((err) =>
+    logger.error("bot", "registerCommands failed", { err: String(err) })
+  );
+
+  const syncs = c.guilds.cache.map((g) =>
+    upsertGuild(g.id, g.name, g.icon).catch((err) =>
+      logger.error("bot", "guild sync failed", { guildId: g.id, err: String(err) })
+    )
+  );
+  await Promise.all(syncs);
+
+  logger.info("bot", "ready", { username: c.user.username, guilds: c.guilds.cache.size });
 });
 
 client.on(Events.GuildCreate, (guild) => {
-  upsertGuild(guild.id, guild.name).catch(console.error);
+  logger.info("bot", "guild joined", { guildId: guild.id, name: guild.name });
+  upsertGuild(guild.id, guild.name, guild.icon).catch((err) =>
+    logger.error("bot", "upsertGuild failed on join", { guildId: guild.id, err: String(err) })
+  );
 });
 
 client.on(Events.GuildDelete, (guild) => {
-  markGuildLeft(guild.id).catch(console.error);
+  logger.info("bot", "guild left", { guildId: guild.id, name: guild.name });
+  markGuildLeft(guild.id).catch((err) =>
+    logger.error("bot", "markGuildLeft failed", { guildId: guild.id, err: String(err) })
+  );
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -38,8 +56,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!command) return;
 
   if (interaction.guildId) {
-    const config = await getConfig(interaction.guildId).catch(() => null);
-    if (config?.disabledCommands.includes(interaction.commandName)) {
+    const cfg = await getConfig(interaction.guildId).catch((err) => {
+      logger.error("bot", "getConfig failed", { guildId: interaction.guildId, err: String(err) });
+      return null;
+    });
+    if (cfg?.disabledCommands.includes(interaction.commandName)) {
       await interaction.reply({
         content: "This command is disabled on this server.",
         flags: MessageFlags.Ephemeral,
@@ -48,12 +69,27 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 
+  const t = Date.now();
   try {
     await command.execute(interaction);
+    logger.info("cmd", "executed", {
+      command: interaction.commandName,
+      userId: interaction.user.id,
+      guildId: interaction.guildId ?? "dm",
+      ms: Date.now() - t,
+    });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    console.error(`Command error [${interaction.commandName}]: ${msg}`);
-    const options: InteractionReplyOptions = { content: "Something went wrong.", flags: MessageFlags.Ephemeral };
+    logger.error("cmd", "execution failed", {
+      command: interaction.commandName,
+      userId: interaction.user.id,
+      guildId: interaction.guildId ?? "dm",
+      err: String(error),
+      ms: Date.now() - t,
+    });
+    const options: InteractionReplyOptions = {
+      content: "Something went wrong.",
+      flags: MessageFlags.Ephemeral,
+    };
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp(options);
     } else {
@@ -67,7 +103,6 @@ async function main() {
 }
 
 main().catch(async (error) => {
-  const msg = error instanceof Error ? error.message : String(error);
-  console.error(`Fatal: ${msg}`);
+  logger.error("bot", "fatal startup error", { err: String(error) });
   await shutdown(1);
 });
