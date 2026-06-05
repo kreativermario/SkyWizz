@@ -1,4 +1,14 @@
 services:
+  bot-migrate:
+    image: ${API_IMAGE}
+    command: ["dist/db-migrate.js"]
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   bot:
     image: ${BOT_IMAGE}
     environment:
@@ -8,6 +18,24 @@ services:
       NODE_ENV: production
       TIMEZONE: ${TIMEZONE:-UTC}
     depends_on:
+      bot-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  api:
+    image: ${API_IMAGE}
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      BOT_API_SECRET: ${BOT_API_SECRET}
+      BOT_API_PORT: 3002
+      NODE_ENV: production
+    ports:
+      - "${HOST_API_PORT}:3002"
+    depends_on:
+      bot-migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     restart: unless-stopped

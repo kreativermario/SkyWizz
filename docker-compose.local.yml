@@ -1,13 +1,40 @@
 services:
+  bot-migrate:
+    build:
+      context: .
+      target: api
+    command: ["dist/db-migrate.js"]
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   bot:
     build:
       context: .
       target: dev
     env_file: .env
     depends_on:
+      bot-migrate:
+        condition: service_completed_successfully
       postgres:
         condition: service_healthy
     command: node_modules/.bin/tsx src/start.ts
+
+  api:
+    build:
+      context: .
+      target: api
+    env_file: .env
+    ports:
+      - "${BOT_API_PORT:-3002}:3002"
+    depends_on:
+      bot-migrate:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
 
   postgres:
     image: postgres:17-alpine

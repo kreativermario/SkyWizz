@@ -3,7 +3,7 @@ import { Events, MessageFlags, type InteractionReplyOptions } from "discord.js";
 import { client } from "./client.js";
 import { commands } from "./commands/index.js";
 import { prisma } from "./db/client.js";
-import { upsertGuild, markGuildLeft } from "./db/guild.js";
+import { upsertGuild, markGuildLeft, getConfig } from "./db/guild.js";
 import { registerCommands } from "./register-commands.js";
 
 const startedAt = new Date();
@@ -36,6 +36,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   const command = commands.get(interaction.commandName);
   if (!command) return;
+
+  if (interaction.guildId) {
+    const config = await getConfig(interaction.guildId).catch(() => null);
+    if (config?.disabledCommands.includes(interaction.commandName)) {
+      await interaction.reply({
+        content: "This command is disabled on this server.",
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+  }
 
   try {
     await command.execute(interaction);

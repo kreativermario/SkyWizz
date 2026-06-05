@@ -36,7 +36,7 @@ jobs:
             ${{ env.VAULT_PATH }} HARBOR_USERNAME | HARBOR_USERNAME ;
             ${{ env.VAULT_PATH }} HARBOR_PASSWORD | HARBOR_PASSWORD
 
-      - name: Get image tag
+      - name: Get image tags
         id: meta
         env:
           HARBOR_REGISTRY_URL: ${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}
@@ -51,7 +51,8 @@ jobs:
           fi
           TAG=$(git rev-parse --short HEAD)
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "image=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG" >> "$GITHUB_OUTPUT"
+          echo "bot_image=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG" >> "$GITHUB_OUTPUT"
+          echo "api_image=$REGISTRY/guacamoleninja/guacamoleninja-bot-api:$TAG" >> "$GITHUB_OUTPUT"
           echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Harbor
@@ -64,12 +65,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.1.0
 
-      - name: Build and push
+      - name: Build and push bot image
         uses: docker/build-push-action@v7.2.0
         with:
           context: .
           push: true
-          tags: ${{ steps.meta.outputs.image }}
+          target: runner
+          tags: ${{ steps.meta.outputs.bot_image }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push api image
+        uses: docker/build-push-action@v7.2.0
+        with:
+          context: .
+          push: true
+          target: api
+          tags: ${{ steps.meta.outputs.api_image }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -99,9 +111,11 @@ jobs:
             ${{ env.VAULT_PATH }} POSTGRES_USER | POSTGRES_USER ;
             ${{ env.VAULT_PATH }} POSTGRES_PASSWORD | POSTGRES_PASSWORD ;
             ${{ env.VAULT_PATH }} POSTGRES_DB | POSTGRES_DB ;
-            ${{ env.VAULT_PATH }} TIMEZONE | TIMEZONE
+            ${{ env.VAULT_PATH }} TIMEZONE | TIMEZONE ;
+            ${{ env.VAULT_PATH }} BOT_API_SECRET | BOT_API_SECRET ;
+            ${{ env.VAULT_PATH }} HOST_API_PORT | HOST_API_PORT
 
-      - name: Resolve image ref
+      - name: Resolve image refs
         id: image
         env:
           HARBOR_REGISTRY_URL: ${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}
@@ -110,7 +124,9 @@ jobs:
           REGISTRY="${REGISTRY#http://}"
           REGISTRY="${REGISTRY#https://}"
           REGISTRY="${REGISTRY%/}"
-          echo "ref=$REGISTRY/guacamoleninja/guacamoleninja-bot:${{ needs.build-and-push.outputs.tag }}" >> "$GITHUB_OUTPUT"
+          TAG="${{ needs.build-and-push.outputs.tag }}"
+          echo "bot_ref=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG" >> "$GITHUB_OUTPUT"
+          echo "api_ref=$REGISTRY/guacamoleninja/guacamoleninja-bot-api:$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Read docker-compose file content safely
         id: read_compose
@@ -150,13 +166,16 @@ jobs:
           data: |
             {
               "env": [
-                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.ref }}"},
+                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.bot_ref }}"},
+                {"name": "API_IMAGE", "value": "${{ steps.image.outputs.api_ref }}"},
                 {"name": "BOT_TOKEN", "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
                 {"name": "CLIENT_ID", "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
                 {"name": "POSTGRES_USER", "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
                 {"name": "POSTGRES_PASSWORD", "value": "${{ steps.vault.outputs.POSTGRES_PASSWORD }}"},
                 {"name": "POSTGRES_DB", "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
-                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"}
+                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"},
+                {"name": "BOT_API_SECRET", "value": "${{ steps.vault.outputs.BOT_API_SECRET }}"},
+                {"name": "HOST_API_PORT", "value": "${{ steps.vault.outputs.HOST_API_PORT }}"}
               ],
               "stackFileContent": ${{ env.COMPOSE_CONTENT }},
               "prune": true,
@@ -175,13 +194,16 @@ jobs:
           data: |
             {
               "env": [
-                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.ref }}"},
+                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.bot_ref }}"},
+                {"name": "API_IMAGE", "value": "${{ steps.image.outputs.api_ref }}"},
                 {"name": "BOT_TOKEN", "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
                 {"name": "CLIENT_ID", "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
                 {"name": "POSTGRES_USER", "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
                 {"name": "POSTGRES_PASSWORD", "value": "${{ steps.vault.outputs.POSTGRES_PASSWORD }}"},
                 {"name": "POSTGRES_DB", "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
-                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"}
+                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"},
+                {"name": "BOT_API_SECRET", "value": "${{ steps.vault.outputs.BOT_API_SECRET }}"},
+                {"name": "HOST_API_PORT", "value": "${{ steps.vault.outputs.HOST_API_PORT }}"}
               ],
               "name": "${{ env.STACK_NAME }}",
               "fromAppTemplate": false,

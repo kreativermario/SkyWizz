@@ -24,7 +24,7 @@ export async function getConfig(
 
 export async function setConfig(
   guildId: string,
-  data: Partial<Pick<GuildConfig, "prefix" | "timezone">>
+  data: Partial<Pick<GuildConfig, "prefix" | "timezone" | "disabledCommands">>
 ): Promise<GuildConfig> {
   return prisma.guildConfig.upsert({
     where: { guildId },

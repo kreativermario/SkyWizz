@@ -9,16 +9,18 @@ datasource db {
 model Guild {
   id       String      @id
   name     String
+  iconHash String?
   joinedAt DateTime    @default(now())
   leftAt   DateTime?
   config   GuildConfig?
 }
 
 model GuildConfig {
-  guildId   String   @id
-  prefix    String   @default("!")
-  timezone  String   @default("UTC")
-  updatedAt DateTime @updatedAt
+  guildId          String   @id
+  prefix           String   @default("!")
+  timezone         String   @default("UTC")
+  disabledCommands String[] @default([])
+  updatedAt        DateTime @updatedAt
 
   guild Guild @relation(fields: [guildId], references: [id], onDelete: Cascade)
 }
