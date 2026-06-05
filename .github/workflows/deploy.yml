@@ -28,7 +28,7 @@ jobs:
       api_image: ${{ steps.meta.outputs.api_image }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.3
 
       - name: Load Harbor credentials from Vault
         id: vault
@@ -96,7 +96,7 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6.0.3
 
       - name: Load deploy secrets from Vault
         id: vault
