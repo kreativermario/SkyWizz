@@ -2,26 +2,33 @@ name: Deploy
 
 on:
   push:
-    branches: ["dev"]
+    branches: [dev, main]
   workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false   # never cancel an in-progress deploy
 
 permissions:
   contents: read
 
 env:
   STACK_NAME: guacamoleninja-bot
-  VAULT_PATH: automation/data/guacamoleninja-bot
   VAULT_PORTAINER_PATH: automation/data/portainer
 
 jobs:
   build-and-push:
+    name: Build & push images
     runs-on: self-hosted
-    environment: development
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
+    timeout-minutes: 20
     outputs:
-      tag: ${{ steps.meta.outputs.tag }}
+      tag:       ${{ steps.meta.outputs.tag }}
+      bot_image: ${{ steps.meta.outputs.bot_image }}
+      api_image: ${{ steps.meta.outputs.api_image }}
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v4
 
       - name: Load Harbor credentials from Vault
         id: vault
@@ -29,31 +36,27 @@ jobs:
         with:
           url: ${{ secrets.HCP_VAULT_ADDR }}
           method: approle
-          roleId: ${{ secrets.HCP_VAULT_ROLE_ID }}
+          roleId:   ${{ secrets.HCP_VAULT_ROLE_ID }}
           secretId: ${{ secrets.HCP_VAULT_SECRET_ID }}
           secrets: |
-            ${{ env.VAULT_PATH }} HARBOR_REGISTRY_URL | HARBOR_REGISTRY_URL ;
-            ${{ env.VAULT_PATH }} HARBOR_USERNAME | HARBOR_USERNAME ;
-            ${{ env.VAULT_PATH }} HARBOR_PASSWORD | HARBOR_PASSWORD
+            ${{ vars.VAULT_PATH }} HARBOR_REGISTRY_URL | HARBOR_REGISTRY_URL ;
+            ${{ vars.VAULT_PATH }} HARBOR_USERNAME     | HARBOR_USERNAME ;
+            ${{ vars.VAULT_PATH }} HARBOR_PASSWORD     | HARBOR_PASSWORD
 
-      - name: Get image tags
+      - name: Compute image tags
         id: meta
         env:
           HARBOR_REGISTRY_URL: ${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}
         run: |
-          REGISTRY=$(echo "$HARBOR_REGISTRY_URL" | tr -d '\n\r' | xargs)
-          REGISTRY="${REGISTRY#http://}"
-          REGISTRY="${REGISTRY#https://}"
-          REGISTRY="${REGISTRY%/}"
+          REGISTRY=$(echo "$HARBOR_REGISTRY_URL" | tr -d '\n\r' | sed 's|^https\?://||; s|/$||')
           if [ -z "$REGISTRY" ]; then
-            echo "HARBOR_REGISTRY_URL is empty after normalization." >&2
-            exit 1
+            echo "::error::HARBOR_REGISTRY_URL is empty after normalisation" && exit 1
           fi
           TAG=$(git rev-parse --short HEAD)
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "bot_image=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG" >> "$GITHUB_OUTPUT"
-          echo "api_image=$REGISTRY/guacamoleninja/guacamoleninja-bot-api:$TAG" >> "$GITHUB_OUTPUT"
-          echo "registry=$REGISTRY" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG"                                                              >> "$GITHUB_OUTPUT"
+          echo "bot_image=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG"           >> "$GITHUB_OUTPUT"
+          echo "api_image=$REGISTRY/guacamoleninja/guacamoleninja-bot-api:$TAG"       >> "$GITHUB_OUTPUT"
+          echo "registry=$REGISTRY"                                                   >> "$GITHUB_OUTPUT"
 
       - name: Log in to Harbor
         uses: docker/login-action@v4
@@ -65,7 +68,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4.1.0
 
-      - name: Build and push bot image
+      - name: Build & push bot image
         uses: docker/build-push-action@v7.2.0
         with:
           context: .
@@ -73,9 +76,9 @@ jobs:
           target: runner
           tags: ${{ steps.meta.outputs.bot_image }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to:   type=gha,mode=max
 
-      - name: Build and push api image
+      - name: Build & push API image
         uses: docker/build-push-action@v7.2.0
         with:
           context: .
@@ -83,15 +86,17 @@ jobs:
           target: api
           tags: ${{ steps.meta.outputs.api_image }}
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to:   type=gha,mode=max
 
   deploy:
+    name: Deploy to Portainer
     runs-on: self-hosted
-    environment: development
+    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'development' }}
     needs: build-and-push
+    timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v6.0.3
+      - uses: actions/checkout@v4
 
       - name: Load deploy secrets from Vault
         id: vault
@@ -99,40 +104,37 @@ jobs:
         with:
           url: ${{ secrets.HCP_VAULT_ADDR }}
           method: approle
-          roleId: ${{ secrets.HCP_VAULT_ROLE_ID }}
+          roleId:   ${{ secrets.HCP_VAULT_ROLE_ID }}
           secretId: ${{ secrets.HCP_VAULT_SECRET_ID }}
           secrets: |
-            ${{ env.VAULT_PORTAINER_PATH }} api_key | PORTAINER_API_TOKEN ;
-            ${{ env.VAULT_PATH }} PORTAINER_URL | PORTAINER_URL ;
-            ${{ env.VAULT_PATH }} PORTAINER_ENDPOINT_ID | PORTAINER_ENDPOINT_ID ;
-            ${{ env.VAULT_PATH }} HARBOR_REGISTRY_URL | HARBOR_REGISTRY_URL ;
-            ${{ env.VAULT_PATH }} DISCORD_BOT_TOKEN | BOT_TOKEN ;
-            ${{ env.VAULT_PATH }} DISCORD_CLIENT_ID | CLIENT_ID ;
-            ${{ env.VAULT_PATH }} POSTGRES_USER | POSTGRES_USER ;
-            ${{ env.VAULT_PATH }} POSTGRES_PASSWORD | POSTGRES_PASSWORD ;
-            ${{ env.VAULT_PATH }} POSTGRES_DB | POSTGRES_DB ;
-            ${{ env.VAULT_PATH }} TIMEZONE | TIMEZONE ;
-            ${{ env.VAULT_PATH }} BOT_API_SECRET | BOT_API_SECRET ;
-            ${{ env.VAULT_PATH }} HOST_API_PORT | HOST_API_PORT
+            ${{ env.VAULT_PORTAINER_PATH }} api_key                | PORTAINER_API_TOKEN ;
+            ${{ vars.VAULT_PATH }}          PORTAINER_URL          | PORTAINER_URL ;
+            ${{ vars.VAULT_PATH }}          PORTAINER_ENDPOINT_ID  | PORTAINER_ENDPOINT_ID ;
+            ${{ vars.VAULT_PATH }}          HARBOR_REGISTRY_URL    | HARBOR_REGISTRY_URL ;
+            ${{ vars.VAULT_PATH }}          DISCORD_BOT_TOKEN      | BOT_TOKEN ;
+            ${{ vars.VAULT_PATH }}          DISCORD_CLIENT_ID      | CLIENT_ID ;
+            ${{ vars.VAULT_PATH }}          POSTGRES_USER          | POSTGRES_USER ;
+            ${{ vars.VAULT_PATH }}          POSTGRES_PASSWORD      | POSTGRES_PASSWORD ;
+            ${{ vars.VAULT_PATH }}          POSTGRES_DB            | POSTGRES_DB ;
+            ${{ vars.VAULT_PATH }}          TIMEZONE               | TIMEZONE ;
+            ${{ vars.VAULT_PATH }}          BOT_API_SECRET         | BOT_API_SECRET ;
+            ${{ vars.VAULT_PATH }}          HOST_API_PORT          | HOST_API_PORT
 
       - name: Resolve image refs
         id: image
         env:
           HARBOR_REGISTRY_URL: ${{ steps.vault.outputs.HARBOR_REGISTRY_URL }}
+          TAG: ${{ needs.build-and-push.outputs.tag }}
         run: |
-          REGISTRY=$(echo "$HARBOR_REGISTRY_URL" | tr -d '\n\r' | xargs)
-          REGISTRY="${REGISTRY#http://}"
-          REGISTRY="${REGISTRY#https://}"
-          REGISTRY="${REGISTRY%/}"
-          TAG="${{ needs.build-and-push.outputs.tag }}"
-          echo "bot_ref=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG" >> "$GITHUB_OUTPUT"
+          REGISTRY=$(echo "$HARBOR_REGISTRY_URL" | tr -d '\n\r' | sed 's|^https\?://||; s|/$||')
+          echo "bot_ref=$REGISTRY/guacamoleninja/guacamoleninja-bot:$TAG"     >> "$GITHUB_OUTPUT"
           echo "api_ref=$REGISTRY/guacamoleninja/guacamoleninja-bot-api:$TAG" >> "$GITHUB_OUTPUT"
 
-      - name: Read docker-compose file content safely
-        id: read_compose
+      - name: Read compose file
+        id: compose
         run: |
           CONTENT=$(jq -Rs '.' < docker-compose.prod.yml)
-          echo "COMPOSE_CONTENT=$CONTENT" >> $GITHUB_ENV
+          echo "content=$CONTENT" >> "$GITHUB_OUTPUT"
 
       - name: Check if stack exists
         id: check_stack
@@ -142,48 +144,55 @@ jobs:
           method: GET
           contentType: application/json
           customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
-          timeout: 300000
+          timeout: 30000
 
-      - name: Extract stack ID if stack exists
-        id: extract_stack_id
+      - name: Extract stack ID
+        id: stack
+        env:
+          STACK_RESPONSE: ${{ steps.check_stack.outputs.response }}
+          ENDPOINT_ID:    ${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}
         run: |
-          STACK_ID=$(echo '${{ steps.check_stack.outputs.response }}' | jq -r 'first(.[] | select(.Name=="${{ env.STACK_NAME }}" and (.EndpointId|tostring)=="${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}") | .Id) // ""' | tr -d '\r\n')
+          STACK_ID=$(echo "$STACK_RESPONSE" | jq -r \
+            --arg name "${{ env.STACK_NAME }}" \
+            --arg eid  "$ENDPOINT_ID" \
+            'first(.[] | select(.Name==$name and (.EndpointId|tostring)==$eid) | .Id) // ""' \
+            | tr -d '\r\n')
           {
             echo "stack_id<<EOF"
             echo "$STACK_ID"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Update existing stack in Portainer
-        if: steps.extract_stack_id.outputs.stack_id != ''
+      - name: Update existing stack
+        if: steps.stack.outputs.stack_id != ''
         uses: fjogeleit/http-request-action@v2
         with:
-          url: ${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/${{ steps.extract_stack_id.outputs.stack_id }}?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}&method=string
+          url: ${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/${{ steps.stack.outputs.stack_id }}?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}&method=string
           method: PUT
           contentType: application/json
           customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
           timeout: 300000
-          data: |
+          data: >-
             {
               "env": [
-                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.bot_ref }}"},
-                {"name": "API_IMAGE", "value": "${{ steps.image.outputs.api_ref }}"},
-                {"name": "BOT_TOKEN", "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
-                {"name": "CLIENT_ID", "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
-                {"name": "POSTGRES_USER", "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
+                {"name": "BOT_IMAGE",         "value": "${{ steps.image.outputs.bot_ref }}"},
+                {"name": "API_IMAGE",         "value": "${{ steps.image.outputs.api_ref }}"},
+                {"name": "BOT_TOKEN",         "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
+                {"name": "CLIENT_ID",         "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
+                {"name": "POSTGRES_USER",     "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
                 {"name": "POSTGRES_PASSWORD", "value": "${{ steps.vault.outputs.POSTGRES_PASSWORD }}"},
-                {"name": "POSTGRES_DB", "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
-                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"},
-                {"name": "BOT_API_SECRET", "value": "${{ steps.vault.outputs.BOT_API_SECRET }}"},
-                {"name": "HOST_API_PORT", "value": "${{ steps.vault.outputs.HOST_API_PORT }}"}
+                {"name": "POSTGRES_DB",       "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
+                {"name": "TIMEZONE",          "value": "${{ steps.vault.outputs.TIMEZONE }}"},
+                {"name": "BOT_API_SECRET",    "value": "${{ steps.vault.outputs.BOT_API_SECRET }}"},
+                {"name": "HOST_API_PORT",     "value": "${{ steps.vault.outputs.HOST_API_PORT }}"}
               ],
-              "stackFileContent": ${{ env.COMPOSE_CONTENT }},
+              "stackFileContent": ${{ steps.compose.outputs.content }},
               "prune": true,
               "pullImage": true
             }
 
-      - name: Deploy Stack to Portainer (create new)
-        if: steps.extract_stack_id.outputs.stack_id == ''
+      - name: Create new stack
+        if: steps.stack.outputs.stack_id == ''
         uses: fjogeleit/http-request-action@v2
         with:
           url: ${{ steps.vault.outputs.PORTAINER_URL }}/api/stacks/create/standalone/string?endpointId=${{ steps.vault.outputs.PORTAINER_ENDPOINT_ID }}
@@ -191,21 +200,21 @@ jobs:
           contentType: application/json
           customHeaders: '{"X-API-Key": "${{ steps.vault.outputs.PORTAINER_API_TOKEN }}"}'
           timeout: 300000
-          data: |
+          data: >-
             {
               "env": [
-                {"name": "BOT_IMAGE", "value": "${{ steps.image.outputs.bot_ref }}"},
-                {"name": "API_IMAGE", "value": "${{ steps.image.outputs.api_ref }}"},
-                {"name": "BOT_TOKEN", "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
-                {"name": "CLIENT_ID", "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
-                {"name": "POSTGRES_USER", "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
+                {"name": "BOT_IMAGE",         "value": "${{ steps.image.outputs.bot_ref }}"},
+                {"name": "API_IMAGE",         "value": "${{ steps.image.outputs.api_ref }}"},
+                {"name": "BOT_TOKEN",         "value": "${{ steps.vault.outputs.BOT_TOKEN }}"},
+                {"name": "CLIENT_ID",         "value": "${{ steps.vault.outputs.CLIENT_ID }}"},
+                {"name": "POSTGRES_USER",     "value": "${{ steps.vault.outputs.POSTGRES_USER }}"},
                 {"name": "POSTGRES_PASSWORD", "value": "${{ steps.vault.outputs.POSTGRES_PASSWORD }}"},
-                {"name": "POSTGRES_DB", "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
-                {"name": "TIMEZONE", "value": "${{ steps.vault.outputs.TIMEZONE }}"},
-                {"name": "BOT_API_SECRET", "value": "${{ steps.vault.outputs.BOT_API_SECRET }}"},
-                {"name": "HOST_API_PORT", "value": "${{ steps.vault.outputs.HOST_API_PORT }}"}
+                {"name": "POSTGRES_DB",       "value": "${{ steps.vault.outputs.POSTGRES_DB }}"},
+                {"name": "TIMEZONE",          "value": "${{ steps.vault.outputs.TIMEZONE }}"},
+                {"name": "BOT_API_SECRET",    "value": "${{ steps.vault.outputs.BOT_API_SECRET }}"},
+                {"name": "HOST_API_PORT",     "value": "${{ steps.vault.outputs.HOST_API_PORT }}"}
               ],
               "name": "${{ env.STACK_NAME }}",
               "fromAppTemplate": false,
-              "stackFileContent": ${{ env.COMPOSE_CONTENT }}
+              "stackFileContent": ${{ steps.compose.outputs.content }}
             }
