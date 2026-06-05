@@ -13,6 +13,10 @@ FROM base AS prod-deps
 WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile --prod
+# Generate Prisma client so the runtime node_modules has the real PrismaClient
+COPY prisma ./prisma
+COPY prisma.config.ts ./prisma.config.ts
+RUN pnpm db:generate
 
 # ── Dev (watch mode) ──────────────────────────────────────
 FROM base AS dev
