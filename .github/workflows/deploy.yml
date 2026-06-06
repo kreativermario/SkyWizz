@@ -72,6 +72,7 @@ jobs:
         uses: docker/build-push-action@v7.2.0
         with:
           context: .
+          file: docker/Dockerfile
           push: true
           target: runner
           tags: ${{ steps.meta.outputs.bot_image }}
@@ -82,6 +83,7 @@ jobs:
         uses: docker/build-push-action@v7.2.0
         with:
           context: .
+          file: docker/Dockerfile
           push: true
           target: api
           tags: ${{ steps.meta.outputs.api_image }}
@@ -133,7 +135,7 @@ jobs:
       - name: Read compose file
         id: compose
         run: |
-          CONTENT=$(jq -Rs '.' < docker-compose.prod.yml)
+          CONTENT=$(jq -Rs '.' < docker/docker-compose.prod.yml)
           echo "content=$CONTENT" >> "$GITHUB_OUTPUT"
 
       - name: Check if stack exists

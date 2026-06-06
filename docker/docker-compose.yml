@@ -1,6 +1,6 @@
 services:
   bot:
-    build: .
+    build: ..
     env_file: .env
     depends_on:
       postgres:
