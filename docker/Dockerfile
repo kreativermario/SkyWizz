@@ -34,7 +34,7 @@ RUN pnpm db:generate
 RUN pnpm build
 
 # ── Bot (Discord client) ──────────────────────────────────
-FROM gcr.io/distroless/nodejs24-debian12:nonroot AS runner
+FROM gcr.io/distroless/nodejs24-debian13:nonroot AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder   --chown=65532:65532 /app/dist        ./dist
@@ -45,7 +45,7 @@ COPY --from=builder   --chown=65532:65532 /app/prisma.config.ts ./prisma.config.
 CMD ["dist/start.js"]
 
 # ── API (HTTP server + bot-migrate via CMD override) ──────
-FROM gcr.io/distroless/nodejs24-debian12:nonroot AS api
+FROM gcr.io/distroless/nodejs24-debian13:nonroot AS api
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder   --chown=65532:65532 /app/dist        ./dist
